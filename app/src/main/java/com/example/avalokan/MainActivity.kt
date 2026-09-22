@@ -19,9 +19,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AvalokanTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    //App
-                }
+                //App
             }
         }
     }
