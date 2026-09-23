@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Avalokan</string>
+    <string name="home">Home</string>
+    <string name="discover">Discover</string>
+    <string name="events">Events</string>
+    <string name="profile">Profile</string>
+    <string name="event_detail">Event Detail</string>
+    <string name="place_detail">Place Detail</string>
+    <string name="story_detail">Story Detail</string>
 </resources>
