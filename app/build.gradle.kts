@@ -37,6 +37,8 @@ dependencies {
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.runtime.ktx)
+    implementation(libs.androidx.room3.common)
+    implementation(libs.androidx.room3.compiler)
     // Hilt
     implementation(libs.hilt.android)
     annotationProcessor(libs.hilt.compiler)

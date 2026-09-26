@@ -14,6 +14,8 @@ googleServices = "4.5.0"
 navigationRuntimeKtx = "2.10.1"
 navigationCompose = "2.10.1"
 foundation = "1.12.1"
+room3Common = "3.0.3"
+room3Compiler = "3.0.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -37,6 +39,8 @@ firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics
 androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
+androidx-room3-common = { group = "androidx.room3", name = "room3-common", version.ref = "room3Common" }
+androidx-room3-compiler = { group = "androidx.room3", name = "room3-compiler", version.ref = "room3Compiler" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
