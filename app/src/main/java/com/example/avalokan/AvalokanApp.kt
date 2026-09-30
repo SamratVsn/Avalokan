@@ -151,6 +151,8 @@ fun AvalokanBottomNavigation(
 @Composable
 private fun NavBarPreview(){
     AvalokanTheme() {
-        AvalokanBottomNavigation(navController = rememberNavController())
+        AvalokanBottomNavigation(
+            navController = rememberNavController()
+        )
     }
 }
