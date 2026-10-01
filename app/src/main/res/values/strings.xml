@@ -10,4 +10,11 @@
     <string name="namaste">Namaste</string>
     <string name="explore">Explore Nepal</string>
     <string name="notifications">Notifications</string>
+    <string name="storyOfTheDay">Story of the Day</string>
+    <string name="readStory">Read Story</string>
+    <string name="historicalGems">Historical Gems</string>
+    <string name="viewAll">View All</string>
+    <string name="localED">Local Events Discovery</string>
+    <string name="joinEventDesc">Join festivals, workshops, tours and local events happening around you.</string>
+    <string name="exploreEB">Explore Events</string>
 </resources>

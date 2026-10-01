@@ -111,7 +111,7 @@ fun AvalokanBottomNavigation(
                     icon = {
                         Icon(
                             painter = painterResource(item.icon),
-                            contentDescription = item.destination.route,
+                            contentDescription = stringResource(id = item.destination.titleRes),
                             modifier = Modifier.size(24.dp)
                         )
                     },
