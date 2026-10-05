@@ -65,7 +65,8 @@ private fun TopTexts(modifier: Modifier = Modifier) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(
             text = stringResource(R.string.localEvents),
-            style = MaterialTheme.typography.headlineMedium
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.primary
         )
         Text(
             text = stringResource(R.string.discoverEventsDesc),

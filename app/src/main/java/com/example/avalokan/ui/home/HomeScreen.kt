@@ -41,6 +41,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.avalokan.R
 import com.example.avalokan.ui.theme.AccentMarigold
 import com.example.avalokan.ui.theme.AvalokanTheme
@@ -117,7 +118,7 @@ private fun StoryCard(modifier: Modifier = Modifier) {
         shape = EditorialCardShape,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Box(modifier = Modifier.fillMaxWidth().height(280.dp)) {
+        Box(modifier = Modifier.fillMaxWidth().height(400.dp)) {
             // TODO: replace with from Data Layer
             //i.e. Image(painterResource(R.drawable.boudhanath))
             Box(
@@ -126,10 +127,10 @@ private fun StoryCard(modifier: Modifier = Modifier) {
             )
             Box(
                 modifier = Modifier.fillMaxSize()
-                    .background(Brush.verticalGradient(0f to Color.Transparent, 0.5f to Color.Black.copy(0.7f)))
+                    .background(Brush.verticalGradient(0f to Color.Transparent, 0.35f to Color.Black.copy(0.7f)))
             )
             Surface(
-                modifier = Modifier.align(Alignment.TopStart).padding(12.dp),
+                modifier = Modifier.align(Alignment.TopStart).padding(16.dp),
                 shape = BadgeShape, color = AccentMarigold
             ) {
                 Text(
@@ -139,17 +140,17 @@ private fun StoryCard(modifier: Modifier = Modifier) {
                 )
             }
             Column(
-                modifier = Modifier.align(Alignment.BottomStart).padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                modifier = Modifier.align(Alignment.BottomStart).padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(text = "The Sacred Echoes of Boudhanath", style = MaterialTheme.typography.headlineLarge, color = Color.White)
+                Text(text = "The Sacred Echoes of Boudhanath", style = MaterialTheme.typography.headlineLarge.copy(fontSize = 24.sp, lineHeight = 30.sp), color = Color.White)
                 Text(text = "Discover the spiritual significance...", style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(0.85f), maxLines = 2, overflow = TextOverflow.Ellipsis)
                 Spacer(Modifier.height(4.dp))
                 Button(
                     onClick = {},
                     shape = BadgeShape,
                     colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = PrimaryTeal),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
                 ) {
                     Text(text = stringResource(R.string.readStory), style = MaterialTheme.typography.bodyMedium)
                     Spacer(Modifier.width(4.dp))

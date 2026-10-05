@@ -90,7 +90,7 @@ fun AvalokanBottomNavigation(
 ){
     Surface(
         modifier = modifier
-            .padding(horizontal = 16.dp, vertical = 20.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
             .fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         tonalElevation = 8.dp,
