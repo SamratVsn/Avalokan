@@ -18,4 +18,6 @@
     <string name="joinEventDesc">Join festivals, workshops, tours and local events happening around you.</string>
     <string name="exploreEB">Explore Events</string>
     <string name="search">Search places, temples, events…</string>
+    <string name="localEvents">Locality Events</string>
+    <string name="discoverEventsDesc">Discover and join events happening around you.</string>
 </resources>
