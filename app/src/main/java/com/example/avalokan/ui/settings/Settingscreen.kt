@@ -114,6 +114,12 @@ fun SettingsScreen(onBackClick: () -> Unit = {}) {
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
+        Text(
+            text = "Version 1.0.4",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
     }
 }
 

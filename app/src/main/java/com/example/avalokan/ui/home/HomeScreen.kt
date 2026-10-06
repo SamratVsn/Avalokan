@@ -70,6 +70,7 @@ fun AvalokanHome(modifier: Modifier = Modifier) {
         StoryCard(modifier = Modifier.padding(horizontal = Spacing.sidePadding))
         HistoricalGems()
         EventSuggestion(modifier = Modifier.padding(horizontal = Spacing.sidePadding))
+        RecentDiscoveries(modifier = Modifier.padding(horizontal = Spacing.sidePadding))
     }
 }
 
@@ -200,17 +201,42 @@ private fun PlaceCard(
     badge: String,
     imageUrl: String? = null
 ) {
-    Column(modifier = Modifier.width(150.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Card(shape = StandardCardShape) {
-            Box(modifier = Modifier.fillMaxWidth().height(110.dp).background(PrimaryLight), contentAlignment = Alignment.Center) {
-                Icon(Icons.Default.Landscape, null, tint = PrimaryTeal) // placeholder image
-            }
+    com.example.avalokan.ui.components.HeritageCard(
+        title = title,
+        subtitle = subtitle,
+        badge = badge,
+        imageUrl = imageUrl,
+        cardWidth = 150.dp,
+        imageHeight = 110.dp
+    )
+}
+
+@Composable
+private fun RecentDiscoveries(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(Spacing.small)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = "Recent Discoveries", style = MaterialTheme.typography.titleMedium)
+            Text(text = stringResource(R.string.viewAll), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
         }
-        Text(text = title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text(text = subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Surface(shape = BadgeShape, color = MaterialTheme.colorScheme.primaryContainer) {
-            Text(text = badge, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
-        }
+        com.example.avalokan.ui.components.HeritageCard(
+            title = "Boudha Stupa",
+            subtitle = "Boudhanath • Spiritual Site",
+            badge = "NEW",
+            rating = "4.9"
+        )
+        com.example.avalokan.ui.components.HeritageCard(
+            title = "Bhaktapur Pottery Square",
+            subtitle = "Bhaktapur • Craft Quarter",
+            badge = "TRENDING",
+            rating = "4.7"
+        )
     }
 }
 

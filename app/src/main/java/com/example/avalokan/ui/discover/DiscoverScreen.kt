@@ -196,39 +196,17 @@ private fun SearchPlaceCard(
     rating: String,
     desc: String
 ){
-    Card(
-        modifier = Modifier.fillMaxWidth(), shape = StandardCardShape,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
-        Column {
-            Box(
-                modifier = Modifier.fillMaxWidth().height(180.dp).background(PrimaryLight),
-                contentAlignment = Alignment.TopEnd) {
-                Surface(modifier = Modifier.padding(12.dp), shape = CircleShape, color = Color.White.copy(alpha = 0.9f)) {
-                    Icon(Icons.Default.BookmarkBorder, null, tint = PrimaryTeal, modifier = Modifier.padding(6.dp).size(16.dp))
-                }
-            }
-            Column(
-                modifier = Modifier.padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-                    Spacer(Modifier.width(8.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Icon(Icons.Default.Star, null, tint = AccentMarigold, modifier = Modifier.size(14.dp))
-                        Text(text = rating, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = AccentMarigold)
-                    }
-                }
-                Text(text = meta, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(text = desc, style = MaterialTheme.typography.bodyMedium, maxLines = 3, overflow = TextOverflow.Ellipsis)
-            }
-        }
-    }
+    com.example.avalokan.ui.components.HeritageCard(
+        title = title,
+        subtitle = meta,
+        rating = rating,
+        description = desc,
+        imageHeight = 180.dp,
+        showSave = true,
+        isSaved = false,
+        onSaveClick = {},
+        cardContainer = true
+    )
 }
 
 @Preview
