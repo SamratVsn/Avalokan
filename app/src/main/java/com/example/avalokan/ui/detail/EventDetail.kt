@@ -103,7 +103,6 @@ fun EventDetailScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
-                // Immersive hero with transparent top bar (back + share/fav)
                 Box(modifier = Modifier.fillMaxWidth().height(320.dp)) {
                     Box(
                         modifier = Modifier.fillMaxSize()

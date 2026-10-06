@@ -123,7 +123,7 @@ private fun UserSection(modifier: Modifier = Modifier) {
             }
             Spacer(Modifier.height(12.dp))
             Text(
-                text = "Aravind Sharma",
+                text = "Samrat Parajuli",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )

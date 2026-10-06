@@ -55,7 +55,12 @@ import com.example.avalokan.ui.theme.StandardCardShape
 import com.example.avalokan.ui.theme.TextPrimary
 
 @Composable
-fun AvalokanHome(modifier: Modifier = Modifier) {
+fun AvalokanHome(
+    modifier: Modifier = Modifier,
+    onStoryClick: (String) -> Unit = {},
+    onPlaceClick: (String) -> Unit = {},
+    onExploreEventsClick: () -> Unit = {}
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -67,10 +72,19 @@ fun AvalokanHome(modifier: Modifier = Modifier) {
     ) {
         Spacer(Modifier.height(Spacing.small))
         TopIcons()
-        StoryCard(modifier = Modifier.padding(horizontal = Spacing.sidePadding))
-        HistoricalGems()
-        EventSuggestion(modifier = Modifier.padding(horizontal = Spacing.sidePadding))
-        RecentDiscoveries(modifier = Modifier.padding(horizontal = Spacing.sidePadding))
+        StoryCard(
+            modifier = Modifier.padding(horizontal = Spacing.sidePadding),
+            onReadClick = { onStoryClick("boudhanath") }
+        )
+        HistoricalGems(onPlaceClick = onPlaceClick)
+        EventSuggestion(
+            modifier = Modifier.padding(horizontal = Spacing.sidePadding),
+            onExploreClick = onExploreEventsClick
+        )
+        RecentDiscoveries(
+            modifier = Modifier.padding(horizontal = Spacing.sidePadding),
+            onPlaceClick = onPlaceClick
+        )
     }
 }
 
@@ -116,7 +130,8 @@ private fun TopIcons(modifier: Modifier = Modifier) {
 private fun StoryCard(
     modifier: Modifier = Modifier,
     // API-ready: pass remote image URL/model here later; null = placeholder below
-    imageUrl: String? = null
+    imageUrl: String? = null,
+    onReadClick: () -> Unit = {}
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -154,7 +169,7 @@ private fun StoryCard(
                 Text(text = "Discover the spiritual significance...", style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(0.85f), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Spacer(Modifier.height(2.dp))
                 Button(
-                    onClick = {},
+                    onClick = onReadClick,
                     shape = BadgeShape,
                     colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = PrimaryTeal),
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
@@ -169,7 +184,7 @@ private fun StoryCard(
 }
 
 @Composable
-private fun HistoricalGems() {
+private fun HistoricalGems(onPlaceClick: (String) -> Unit = {}) {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.sidePadding),
@@ -184,10 +199,12 @@ private fun HistoricalGems() {
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(4) { index ->
+                val placeId = if (index == 0) "patan-durbar" else "swayambhu"
                 PlaceCard(
                     title = if (index == 0) "Patan Durbar Square" else "Swayambhu",
                     subtitle = if (index == 0) "Artistic heritage of Lalitpur" else "The Ancient Hill",
-                    badge = if (index == 0) "EST. 3D CENTURY" else "2500+ YRS"
+                    badge = if (index == 0) "EST. 3D CENTURY" else "2500+ YRS",
+                    onCardClick = { onPlaceClick(placeId) }
                 )
             }
         }
@@ -199,7 +216,8 @@ private fun PlaceCard(
     title: String,
     subtitle: String,
     badge: String,
-    imageUrl: String? = null
+    imageUrl: String? = null,
+    onCardClick: () -> Unit = {}
 ) {
     com.example.avalokan.ui.components.HeritageCard(
         title = title,
@@ -207,12 +225,16 @@ private fun PlaceCard(
         badge = badge,
         imageUrl = imageUrl,
         cardWidth = 150.dp,
-        imageHeight = 110.dp
+        imageHeight = 110.dp,
+        onCardClick = onCardClick
     )
 }
 
 @Composable
-private fun RecentDiscoveries(modifier: Modifier = Modifier) {
+private fun RecentDiscoveries(
+    modifier: Modifier = Modifier,
+    onPlaceClick: (String) -> Unit = {}
+) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(Spacing.small)
@@ -229,26 +251,31 @@ private fun RecentDiscoveries(modifier: Modifier = Modifier) {
             title = "Boudha Stupa",
             subtitle = "Boudhanath • Spiritual Site",
             badge = "NEW",
-            rating = "4.9"
+            rating = "4.9",
+            onCardClick = { onPlaceClick("boudha-stupa") }
         )
         com.example.avalokan.ui.components.HeritageCard(
             title = "Bhaktapur Pottery Square",
             subtitle = "Bhaktapur • Craft Quarter",
             badge = "TRENDING",
-            rating = "4.7"
+            rating = "4.7",
+            onCardClick = { onPlaceClick("bhaktapur-pottery") }
         )
     }
 }
 
 @Composable
-private fun EventSuggestion(modifier: Modifier = Modifier) {
+private fun EventSuggestion(
+    modifier: Modifier = Modifier,
+    onExploreClick: () -> Unit = {}
+) {
     Card(modifier = modifier.fillMaxWidth(), shape = StandardCardShape, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
         Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(text = stringResource(R.string.localED), style = MaterialTheme.typography.titleMedium)
                 Text(text = stringResource(R.string.joinEventDesc), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 Spacer(Modifier.height(4.dp))
-                Button(onClick = {}, shape = StandardButtonShape, colors = ButtonDefaults.buttonColors(containerColor = PrimaryTeal, contentColor = Color.White)) {
+                Button(onClick = onExploreClick, shape = StandardButtonShape, colors = ButtonDefaults.buttonColors(containerColor = PrimaryTeal, contentColor = Color.White)) {
                     Text(text = stringResource(R.string.exploreEB))
                 }
             }

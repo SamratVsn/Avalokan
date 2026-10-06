@@ -39,11 +39,6 @@ import com.example.avalokan.ui.theme.PrimaryLight
 import com.example.avalokan.ui.theme.PrimaryTeal
 import com.example.avalokan.ui.theme.StandardCardShape
 
-/**
- * Shared heritage card used by Home and Discover.
- * UI-only: [imageUrl] is accepted for the future Data layer (null = placeholder).
- * No networking, no image loading here yet.
- */
 @Composable
 fun HeritageCard(
     title: String,
@@ -59,7 +54,6 @@ fun HeritageCard(
     isSaved: Boolean = false,
     onSaveClick: (() -> Unit)? = null,
     onCardClick: (() -> Unit)? = null,
-    /** Discover-style: wraps everything in a surface Card with full-bleed image. */
     cardContainer: Boolean = false,
     modifier: Modifier = Modifier
 ) {

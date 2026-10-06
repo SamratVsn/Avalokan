@@ -59,7 +59,7 @@ import com.example.avalokan.ui.theme.Spacing
 import com.example.avalokan.ui.theme.StandardCardShape
 
 @Composable
-fun DiscoverScreen() {
+fun DiscoverScreen(onPlaceClick: (String) -> Unit = {}) {
     var query by rememberSaveable { mutableStateOf("") }
     var selectedChip by rememberSaveable { mutableIntStateOf(0) }
     val filters = listOf("All", "Historical", "Cultural", "Nature")
@@ -105,7 +105,8 @@ fun DiscoverScreen() {
             modifier = Modifier.padding(horizontal = Spacing.sidePadding)
         )
         Suggestions(
-            filters = filters, selected = selectedChip, onSelect = { selectedChip = it }
+            filters = filters, selected = selectedChip, onSelect = { selectedChip = it },
+            onPlaceClick = onPlaceClick
         )
     }
 }
@@ -149,6 +150,7 @@ private fun Suggestions(
     filters: List<String>,
     selected: Int,
     onSelect: (Int) -> Unit,
+    onPlaceClick: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ){
     Column(
@@ -179,11 +181,13 @@ private fun Suggestions(
         ) {
             SearchPlaceCard(
                 title = "Kathmandu Durbar Square", meta = "Kathmandu • Historical Site", rating = "4.8",
-                desc = "The heart of old Kathmandu city, once the residence of the Nepalese Royal Family and home to the living goddess, Kumari."
+                desc = "The heart of old Kathmandu city, once the residence of the Nepalese Royal Family and home to the living goddess, Kumari.",
+                onCardClick = { onPlaceClick("kathmandu-durbar") }
             )
             SearchPlaceCard(
                 title = "Lumbini Garden", meta = "Lumbini • Spiritual Site", rating = "4.9",
-                desc = "The sacred birthplace of Lord Buddha, a UNESCO World Heritage site offering profound peace and historical depth."
+                desc = "The sacred birthplace of Lord Buddha, a UNESCO World Heritage site offering profound peace and historical depth.",
+                onCardClick = { onPlaceClick("lumbini-garden") }
             )
         }
     }
@@ -194,7 +198,8 @@ private fun SearchPlaceCard(
     title: String,
     meta: String,
     rating: String,
-    desc: String
+    desc: String,
+    onCardClick: () -> Unit = {}
 ){
     com.example.avalokan.ui.components.HeritageCard(
         title = title,
@@ -205,6 +210,7 @@ private fun SearchPlaceCard(
         showSave = true,
         isSaved = false,
         onSaveClick = {},
+        onCardClick = onCardClick,
         cardContainer = true
     )
 }

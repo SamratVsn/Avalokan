@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -24,10 +25,6 @@ import androidx.compose.ui.unit.dp
 import com.example.avalokan.ui.theme.BadgeShape
 import com.example.avalokan.ui.theme.PrimaryTeal
 
-/**
- * Shared bits for the three detail screens. All content is hardcoded for now;
- * swap the placeholder [Box]es for AsyncImage when the Data layer lands.
- */
 
 @Composable
 fun DetailBadge(
@@ -97,7 +94,6 @@ fun DetailSectionTitle(text: String, modifier: Modifier = Modifier) {
     )
 }
 
-/** Facepile: overlapping avatar circles with initials (placeholder until real photos). */
 @Composable
 fun Facepile(initials: List<String>, modifier: Modifier = Modifier) {
     Row(modifier = modifier) {
@@ -106,7 +102,7 @@ fun Facepile(initials: List<String>, modifier: Modifier = Modifier) {
                 shape = CircleShape,
                 color = if (index % 2 == 0) PrimaryTeal else MaterialTheme.colorScheme.surfaceVariant,
                 shadowElevation = 2.dp,
-                modifier = Modifier.padding(start = if (index == 0) 0.dp else (-8).dp)
+                modifier = Modifier.offset(x = if (index == 0) 0.dp else (-8).dp)
             ) {
                 Box(
                     modifier = Modifier.size(28.dp),

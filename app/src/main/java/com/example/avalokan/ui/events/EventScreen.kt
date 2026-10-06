@@ -47,7 +47,7 @@ import com.example.avalokan.ui.theme.Spacing
 import com.example.avalokan.ui.theme.StandardCardShape
 
 @Composable
-fun EventScreen() {
+fun EventScreen(onEventClick: (String) -> Unit = {}) {
     Column(
         modifier = Modifier.fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
@@ -58,8 +58,14 @@ fun EventScreen() {
     ) {
         Spacer(Modifier.height(Spacing.small))
         TopTexts(modifier = Modifier.padding(horizontal = Spacing.sidePadding))
-        FeaturedEvent(modifier = Modifier.padding(horizontal = Spacing.sidePadding))
-        UpcomingEvents(modifier = Modifier.padding(horizontal = Spacing.sidePadding))
+        FeaturedEvent(
+            modifier = Modifier.padding(horizontal = Spacing.sidePadding),
+            onRemindClick = { onEventClick("indra-jatra-2024") }
+        )
+        UpcomingEvents(
+            modifier = Modifier.padding(horizontal = Spacing.sidePadding),
+            onEventClick = onEventClick
+        )
     }
 }
 
@@ -105,7 +111,8 @@ private fun TopTexts(modifier: Modifier = Modifier) {
 private fun FeaturedEvent(
     modifier: Modifier = Modifier,
     // API-ready: pass remote image URL/model here later; null = placeholder below
-    imageUrl: String? = null
+    imageUrl: String? = null,
+    onRemindClick: () -> Unit = {}
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
@@ -182,7 +189,7 @@ private fun FeaturedEvent(
                     )
                     Spacer(Modifier.height(6.dp))
                     Button(
-                        onClick = {},
+                        onClick = onRemindClick,
                         shape = BadgeShape,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.White,
@@ -203,7 +210,10 @@ private fun FeaturedEvent(
 }
 
 @Composable
-private fun UpcomingEvents(modifier: Modifier = Modifier) {
+private fun UpcomingEvents(
+    modifier: Modifier = Modifier,
+    onEventClick: (String) -> Unit = {}
+) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = "Upcoming in Your Locality",
@@ -213,19 +223,22 @@ private fun UpcomingEvents(modifier: Modifier = Modifier) {
             name = "Bhaktapur Pottery Workshop",
             meta = "Bhaktapur Square • 10:00 AM",
             fee = "FREE ENTRY",
-            action = "Join >"
+            action = "Join >",
+            onCardClick = { onEventClick("bhaktapur-pottery") }
         )
         EventCards(
             name = "Alla & Samay Baji Festival",
             meta = "Patan Square • 5:00 PM",
             fee = "$15 ENTRY",
-            action = "Sign Up >"
+            action = "Sign Up >",
+            onCardClick = { onEventClick("samay-baji") }
         )
         EventCards(
             name = "Live Thangka Art Demo",
             meta = "Boudha • 11:00 AM",
             fee = "DONATION BASED",
-            action = "More Info >"
+            action = "More Info >",
+            onCardClick = { onEventClick("thangka-demo") }
         )
     }
 }
@@ -237,9 +250,11 @@ private fun EventCards(
     fee: String,
     action: String,
     // API-ready: pass remote image URL/model here later; null = placeholder below
-    imageUrl: String? = null
+    imageUrl: String? = null,
+    onCardClick: () -> Unit = {}
 ) {
     Card(
+        onClick = onCardClick,
         modifier = Modifier.fillMaxWidth(),
         shape = StandardCardShape,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
