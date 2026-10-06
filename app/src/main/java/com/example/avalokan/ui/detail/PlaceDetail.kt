@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -138,7 +139,8 @@ fun PlaceDetailScreen(
                     IconButton(
                         onClick = onBackClick,
                         modifier = Modifier.align(Alignment.TopStart)
-                            .padding(top = 48.dp, start = 16.dp)
+                            .statusBarsPadding()
+                            .padding(top = 8.dp, start = 16.dp)
                             .size(40.dp)
                             .background(Color.Black.copy(alpha = 0.35f), CircleShape)
                     ) {
