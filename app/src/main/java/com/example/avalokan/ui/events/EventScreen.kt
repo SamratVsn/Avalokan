@@ -102,7 +102,11 @@ private fun TopTexts(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun FeaturedEvent(modifier: Modifier = Modifier) {
+private fun FeaturedEvent(
+    modifier: Modifier = Modifier,
+    // API-ready: pass remote image URL/model here later; null = placeholder below
+    imageUrl: String? = null
+) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = "Featured Festival",
@@ -114,11 +118,18 @@ private fun FeaturedEvent(modifier: Modifier = Modifier) {
             colors = CardDefaults.cardColors(containerColor = PrimaryTeal)
         ) {
             Column {
+                // Image container (reference aspect); swap for AsyncImage when Data layer lands
                 Box(
-                    modifier = Modifier.fillMaxWidth().height(160.dp)
-                        .background(PrimaryTeal)
+                    modifier = Modifier.fillMaxWidth().height(180.dp)
+                        .background(PrimaryLight),
+                    contentAlignment = Alignment.Center
                 ) {
-                    // TODO: Image(painterResource(R.drawable.indra_jatra), contentScale = Crop)
+                    Icon(
+                        Icons.Default.Landscape,
+                        contentDescription = null,
+                        tint = PrimaryTeal,
+                        modifier = Modifier.size(32.dp)
+                    )
                     Surface(
                         modifier = Modifier.align(Alignment.TopStart).padding(12.dp),
                         shape = BadgeShape,
@@ -133,7 +144,7 @@ private fun FeaturedEvent(modifier: Modifier = Modifier) {
                     }
                 }
                 Column(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Row(
@@ -143,7 +154,7 @@ private fun FeaturedEvent(modifier: Modifier = Modifier) {
                     ) {
                         Text(
                             text = "Indra Jatra 2024",
-                            style = MaterialTheme.typography.headlineMedium,
+                            style = MaterialTheme.typography.titleMedium,
                             color = Color.White,
                             modifier = Modifier.weight(1f)
                         )
@@ -156,7 +167,8 @@ private fun FeaturedEvent(modifier: Modifier = Modifier) {
                             )
                             Text(
                                 text = "17",
-                                style = MaterialTheme.typography.headlineMedium,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
                                 color = Color.White
                             )
                         }
@@ -165,10 +177,10 @@ private fun FeaturedEvent(modifier: Modifier = Modifier) {
                         text = "The biggest religious street festival in Kathmandu, celebrating the end of monsoon with masked dances and chariot processions.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White.copy(alpha = 0.85f),
-                        maxLines = 3,
+                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(6.dp))
                     Button(
                         onClick = {},
                         shape = BadgeShape,
@@ -176,7 +188,7 @@ private fun FeaturedEvent(modifier: Modifier = Modifier) {
                             containerColor = Color.White,
                             contentColor = PrimaryTeal
                         ),
-                        modifier = Modifier.fillMaxWidth().height(44.dp)
+                        modifier = Modifier.fillMaxWidth().height(40.dp)
                     ) {
                         Text(
                             text = "Remind Me & Get Tickets",
@@ -192,7 +204,7 @@ private fun FeaturedEvent(modifier: Modifier = Modifier) {
 
 @Composable
 private fun UpcomingEvents(modifier: Modifier = Modifier) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = "Upcoming in Your Locality",
             style = MaterialTheme.typography.titleMedium
@@ -219,18 +231,25 @@ private fun UpcomingEvents(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun EventCards(name: String, meta: String, fee: String, action: String) {
+private fun EventCards(
+    name: String,
+    meta: String,
+    fee: String,
+    action: String,
+    // API-ready: pass remote image URL/model here later; null = placeholder below
+    imageUrl: String? = null
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = StandardCardShape,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.padding(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Card(shape = StandardCardShape, modifier = Modifier.size(64.dp)) {
+            Card(shape = StandardCardShape, modifier = Modifier.size(56.dp)) {
                 Box(
                     modifier = Modifier.fillMaxSize().background(PrimaryLight),
                     contentAlignment = Alignment.Center
@@ -239,7 +258,7 @@ private fun EventCards(name: String, meta: String, fee: String, action: String) 
                         Icons.Default.Landscape,
                         null,
                         tint = PrimaryTeal,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }

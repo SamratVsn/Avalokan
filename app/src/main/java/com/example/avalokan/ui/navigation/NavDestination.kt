@@ -25,7 +25,7 @@ sealed interface NavDestination {
     }
     data object Settings : NavDestination {
         override val route = "settings"
-        override val titleRes = R.string.setting
+        override val titleRes = R.string.settings
     }
 
     data object EventDetail : NavDestination {

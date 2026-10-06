@@ -75,7 +75,7 @@ fun ProfileScreen(onSettingsClick: () -> Unit = {}) {
             ) {
                 Icon(
                     Icons.Default.Settings,
-                    contentDescription = stringResource(R.string.setting),
+                    contentDescription = stringResource(R.string.settings),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(18.dp)
                 )

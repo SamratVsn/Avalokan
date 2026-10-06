@@ -63,7 +63,7 @@ fun AvalokanHome(modifier: Modifier = Modifier) {
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(bottom = Spacing.large),
-        verticalArrangement = Arrangement.spacedBy(Spacing.sectionVertical)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Spacer(Modifier.height(Spacing.small))
         TopIcons()
@@ -112,25 +112,31 @@ private fun TopIcons(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun StoryCard(modifier: Modifier = Modifier) {
+private fun StoryCard(
+    modifier: Modifier = Modifier,
+    // API-ready: pass remote image URL/model here later; null = placeholder below
+    imageUrl: String? = null
+) {
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = EditorialCardShape,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Box(modifier = Modifier.fillMaxWidth().height(400.dp)) {
-            // TODO: replace with from Data Layer
-            //i.e. Image(painterResource(R.drawable.boudhanath))
+        Box(modifier = Modifier.fillMaxWidth().height(300.dp)) {
+            // Placeholder image container (correct size/shape for future API image).
+            // Later: if (imageUrl != null) AsyncImage(imageUrl, ..., contentScale = Crop)
+            // else placeholder below. No networking added yet.
             Box(
                 modifier = Modifier.fillMaxSize()
                     .background(Brush.verticalGradient(listOf(PrimaryTeal, TextPrimary)))
             )
+            // Dark scrim so badge/title/button stay legible over any future photo
             Box(
                 modifier = Modifier.fillMaxSize()
-                    .background(Brush.verticalGradient(0f to Color.Transparent, 0.35f to Color.Black.copy(0.7f)))
+                    .background(Brush.verticalGradient(0f to Color.Transparent, 0.4f to Color.Black.copy(0.7f)))
             )
             Surface(
-                modifier = Modifier.align(Alignment.TopStart).padding(16.dp),
+                modifier = Modifier.align(Alignment.TopStart).padding(12.dp),
                 shape = BadgeShape, color = AccentMarigold
             ) {
                 Text(
@@ -140,17 +146,17 @@ private fun StoryCard(modifier: Modifier = Modifier) {
                 )
             }
             Column(
-                modifier = Modifier.align(Alignment.BottomStart).padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier.align(Alignment.BottomStart).padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Text(text = "The Sacred Echoes of Boudhanath", style = MaterialTheme.typography.headlineLarge.copy(fontSize = 24.sp, lineHeight = 30.sp), color = Color.White)
-                Text(text = "Discover the spiritual significance...", style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(0.85f), maxLines = 2, overflow = TextOverflow.Ellipsis)
-                Spacer(Modifier.height(4.dp))
+                Text(text = "The Sacred Echoes of Boudhanath", style = MaterialTheme.typography.headlineLarge.copy(fontSize = 24.sp, lineHeight = 30.sp), color = Color.White, maxLines = 3, overflow = TextOverflow.Ellipsis)
+                Text(text = "Discover the spiritual significance...", style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(0.85f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Spacer(Modifier.height(2.dp))
                 Button(
                     onClick = {},
                     shape = BadgeShape,
                     colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = PrimaryTeal),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
                 ) {
                     Text(text = stringResource(R.string.readStory), style = MaterialTheme.typography.bodyMedium)
                     Spacer(Modifier.width(4.dp))
@@ -169,7 +175,7 @@ private fun HistoricalGems() {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = stringResource(R.string.historicalGems), style = MaterialTheme.typography.headlineMedium)
+            Text(text = stringResource(R.string.historicalGems), style = MaterialTheme.typography.titleMedium)
             Text(text = stringResource(R.string.viewAll), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
         }
         LazyRow(
@@ -188,10 +194,15 @@ private fun HistoricalGems() {
 }
 
 @Composable
-private fun PlaceCard(title: String, subtitle: String, badge: String) {
-    Column(modifier = Modifier.width(160.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+private fun PlaceCard(
+    title: String,
+    subtitle: String,
+    badge: String,
+    imageUrl: String? = null
+) {
+    Column(modifier = Modifier.width(150.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Card(shape = StandardCardShape) {
-            Box(modifier = Modifier.fillMaxWidth().height(120.dp).background(PrimaryLight), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.fillMaxWidth().height(110.dp).background(PrimaryLight), contentAlignment = Alignment.Center) {
                 Icon(Icons.Default.Landscape, null, tint = PrimaryTeal) // placeholder image
             }
         }
