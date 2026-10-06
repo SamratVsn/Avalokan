@@ -1,7 +1,5 @@
 package com.example.avalokan.ui.navigation
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -16,6 +14,7 @@ import com.example.avalokan.ui.navigation.NavDestination.Events
 import com.example.avalokan.ui.navigation.NavDestination.Profile
 import com.example.avalokan.ui.navigation.NavDestination.Settings
 import com.example.avalokan.ui.profile.ProfileScreen
+import com.example.avalokan.ui.settings.SettingsScreen
 
 @Composable
 fun AvalokanNavHost(
@@ -46,8 +45,9 @@ fun AvalokanNavHost(
         }
 
         composable(route = Settings.route){
-            // TODO: replace with your SettingsScreen() — you own this screen
-            Box(modifier = Modifier.fillMaxSize())
+            SettingsScreen(
+                onBackClick = { navController.navigateUp() }
+            )
         }
     }
 }
