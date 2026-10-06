@@ -1,115 +1,291 @@
 package com.example.avalokan.ui.profile
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ConfirmationNumber
+import androidx.compose.material.icons.filled.Landscape
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.avalokan.R
 import com.example.avalokan.ui.theme.AvalokanTheme
+import com.example.avalokan.ui.theme.PrimaryLight
+import com.example.avalokan.ui.theme.PrimaryTeal
+import com.example.avalokan.ui.theme.Spacing
+import com.example.avalokan.ui.theme.StandardCardShape
 
 @Composable
-fun ProfileScreen(){
-    Column(){
-        Spacer(modifier = Modifier.padding(16.dp))
-        UserSection()
-        Spacer(modifier = Modifier.padding(32.dp))
+fun ProfileScreen() {
+    Column(
+        modifier = Modifier.fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .statusBarsPadding()
+            .verticalScroll(rememberScrollState())
+            .padding(bottom = Spacing.large),
+        verticalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
+        Spacer(Modifier.height(Spacing.small))
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.sidePadding),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = stringResource(R.string.profile),
+                style = MaterialTheme.typography.headlineMedium
+            )
+            IconButton(
+                onClick = {},
+                modifier = Modifier.size(40.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = CircleShape
+                    )
+            ) {
+                Icon(
+                    Icons.Default.Settings,
+                    contentDescription = stringResource(R.string.setting),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+        UserSection(modifier = Modifier.padding(horizontal = Spacing.sidePadding))
         HeritageCollection()
-        Spacer(modifier = Modifier.padding(16.dp))
-        UpcomingRegistrations()
+        UpcomingRegistrations(modifier = Modifier.padding(horizontal = Spacing.sidePadding))
     }
 }
 
 @Composable
-private fun UserSection(){
-    Column(){
-//        Photo
-        Text(
-            text = "Samrat Parajuli"
-        ) //Username
-        Text(
-            text = "Exploring heritage of Nepal"
-        ) //Short Bio
-        Row(){
-            UserSectionInfo(12, "VISITED")
-            UserSectionInfo(45, "SAVED")
-            UserSectionInfo(3, "EVENTS")
+private fun UserSection(modifier: Modifier = Modifier) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = StandardCardShape,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            Box(contentAlignment = Alignment.BottomEnd) {
+                Surface(shape = CircleShape, color = PrimaryLight, shadowElevation = 2.dp) {
+                    Icon(
+                        Icons.Default.Person,
+                        null,
+                        tint = PrimaryTeal,
+                        modifier = Modifier.padding(16.dp).size(40.dp)
+                    )
+                }
+                Surface(
+                    shape = CircleShape,
+                    color = PrimaryTeal,
+                    modifier = Modifier.padding(bottom = 4.dp, end = 4.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Check,
+                        null,
+                        tint = Color.White,
+                        modifier = Modifier.padding(4.dp).size(12.dp)
+                    )
+                }
+            }
+            Text(
+                text = "Samrat Parajuli",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                text = "Exploring the heritage of Nepal",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                UserSectionInfo(12, "VISITED")
+                UserSectionInfo(45, "SAVED")
+                UserSectionInfo(3, "EVENTS")
+            }
         }
     }
 }
 
 @Composable
-private fun UserSectionInfo(
-    number: Int,
-    text: String,
-){
-    Column(){
+private fun UserSectionInfo(number: Int, text: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-            text = "$number"
+            text = "$number",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
         )
         Text(
-            text = text
+            text = text,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
 
 @Composable
-private fun HeritageCollection(){
-    Column(){
-        Row(){
+private fun HeritageCollection() {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.sidePadding),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(
-                text = stringResource(R.string.myHeritageColl)
+                text = stringResource(R.string.myHeritageColl),
+                style = MaterialTheme.typography.titleMedium
             )
             Text(
-                text = stringResource(R.string.manage)
+                text = stringResource(R.string.manage),
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
             )
         }
-        CollectionCards("Durbar Square", "Kathmandu")
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = Spacing.sidePadding),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            item { CollectionCards("Durbar Square", "Kathmandu") }
+            item { CollectionCards("Boudha Stupa", "Kathmandu") }
+        }
     }
 }
 
 @Composable
-private fun CollectionCards(
-    place: String,
-    loc: String
-){
-    Column(){
-        //Photo
+private fun CollectionCards(place: String, loc: String) {
+    Column(
+        modifier = Modifier.width(160.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        Card(shape = StandardCardShape) {
+            Box(
+                modifier = Modifier.fillMaxWidth().height(120.dp).background(PrimaryLight),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(Icons.Default.Landscape, null, tint = PrimaryTeal)
+            }
+        }
         Text(
-            text = place
+            text = place,
+            style = MaterialTheme.typography.titleMedium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
         Text(
-            text = loc
+            text = loc,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
 
 @Composable
-private fun UpcomingRegistrations(){
-    Column(){
-        Text(text = stringResource(R.string.upcomingReg))
+private fun UpcomingRegistrations(modifier: Modifier = Modifier) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(
+            text = stringResource(R.string.upcomingReg),
+            style = MaterialTheme.typography.titleMedium
+        )
         RegisteredBox()
     }
 }
 
 @Composable
-private fun RegisteredBox(){
-    Row(){
-        Column(){
-            Text("SEPT")
-            Text("17")
-        }
-        Column(){
-            Text("Indra Jatra")
-            Row(){
-                Text("Durbar Square")
-                Text(".")
-                Text("12.00 PM")
+private fun RegisteredBox() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = StandardCardShape,
+        colors = CardDefaults.cardColors(containerColor = PrimaryTeal)
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Surface(shape = StandardCardShape, color = Color.White.copy(alpha = 0.15f)) {
+                Column(
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "SEP",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White
+                    )
+                    Text(
+                        text = "17",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Indra Jatra Festival",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.White,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = "Basantapur Durbar Square • 12:00 PM",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White.copy(alpha = 0.8f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Surface(shape = CircleShape, color = Color.White.copy(alpha = 0.15f)) {
+                Icon(
+                    Icons.Default.ConfirmationNumber,
+                    null,
+                    tint = Color.White,
+                    modifier = Modifier.padding(8.dp).size(20.dp)
+                )
             }
         }
     }
@@ -117,8 +293,8 @@ private fun RegisteredBox(){
 
 @Preview
 @Composable
-private fun ProfilePreview(){
-    AvalokanTheme() {
+private fun ProfilePreview() {
+    AvalokanTheme {
         ProfileScreen()
     }
 }
