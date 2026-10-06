@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,8 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -42,20 +39,21 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.avalokan.R
 import com.example.avalokan.ui.theme.AvalokanTheme
+import com.example.avalokan.ui.theme.EditorialCardShape
 import com.example.avalokan.ui.theme.PrimaryLight
 import com.example.avalokan.ui.theme.PrimaryTeal
 import com.example.avalokan.ui.theme.Spacing
 import com.example.avalokan.ui.theme.StandardCardShape
 
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(onSettingsClick: () -> Unit = {}) {
     Column(
         modifier = Modifier.fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(bottom = Spacing.large),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+            .padding(bottom = Spacing.extraLarge),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         Spacer(Modifier.height(Spacing.small))
         Row(
@@ -68,7 +66,7 @@ fun ProfileScreen() {
                 style = MaterialTheme.typography.headlineMedium
             )
             IconButton(
-                onClick = {},
+                onClick = onSettingsClick,
                 modifier = Modifier.size(40.dp)
                     .background(
                         color = MaterialTheme.colorScheme.surfaceVariant,
@@ -93,11 +91,11 @@ fun ProfileScreen() {
 private fun UserSection(modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = StandardCardShape,
+        shape = EditorialCardShape,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(24.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 28.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
@@ -123,8 +121,9 @@ private fun UserSection(modifier: Modifier = Modifier) {
                     )
                 }
             }
+            Spacer(Modifier.height(12.dp))
             Text(
-                text = "Samrat Parajuli",
+                text = "Aravind Sharma",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
@@ -133,7 +132,7 @@ private fun UserSection(modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(20.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
@@ -182,25 +181,33 @@ private fun HeritageCollection() {
                 color = MaterialTheme.colorScheme.primary
             )
         }
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = Spacing.sidePadding),
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.sidePadding),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            item { CollectionCards("Durbar Square", "Kathmandu") }
-            item { CollectionCards("Boudha Stupa", "Kathmandu") }
+            CollectionCards(
+                "Durbar Square",
+                "Kathmandu",
+                modifier = Modifier.weight(1f)
+            )
+            CollectionCards(
+                "Boudha Stupa",
+                "Kathmandu",
+                modifier = Modifier.weight(1f)
+            )
         }
     }
 }
 
 @Composable
-private fun CollectionCards(place: String, loc: String) {
+private fun CollectionCards(place: String, loc: String, modifier: Modifier = Modifier) {
     Column(
-        modifier = Modifier.width(160.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp)
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Card(shape = StandardCardShape) {
             Box(
-                modifier = Modifier.fillMaxWidth().height(120.dp).background(PrimaryLight),
+                modifier = Modifier.fillMaxWidth().height(150.dp).background(PrimaryLight),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(Icons.Default.Landscape, null, tint = PrimaryTeal)
@@ -241,13 +248,13 @@ private fun RegisteredBox() {
         colors = CardDefaults.cardColors(containerColor = PrimaryTeal)
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Surface(shape = StandardCardShape, color = Color.White.copy(alpha = 0.15f)) {
                 Column(
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(

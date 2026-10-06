@@ -23,6 +23,10 @@ sealed interface NavDestination {
         override val route = "profile"
         override val titleRes = R.string.profile
     }
+    data object Settings : NavDestination {
+        override val route = "settings"
+        override val titleRes = R.string.setting
+    }
 
     data object EventDetail : NavDestination {
         const val ARG = "eventId"
