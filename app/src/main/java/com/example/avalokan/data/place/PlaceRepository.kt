@@ -14,7 +14,7 @@ interface PlaceRepository {
 
 private const val PLACES_COLLECTION = "places"
 
-class FireStorePlaceRepository @Inject constructor(
+class FirestorePlaceRepository @Inject constructor(
     private val firestore: FirebaseFirestore,
     private val placeDao: PlaceDao
 ) : PlaceRepository {

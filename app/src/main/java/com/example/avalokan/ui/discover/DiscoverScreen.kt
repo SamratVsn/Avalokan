@@ -36,11 +36,8 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,7 +46,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
+import com.example.avalokan.data.place.PlaceItem
 import com.example.avalokan.ui.theme.AccentMarigold
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
@@ -59,11 +58,40 @@ import com.example.avalokan.ui.theme.Spacing
 import com.example.avalokan.ui.theme.StandardCardShape
 
 @Composable
-fun DiscoverScreen(onPlaceClick: (String) -> Unit = {}) {
-    var query by rememberSaveable { mutableStateOf("") }
-    var selectedChip by rememberSaveable { mutableIntStateOf(0) }
-    val filters = listOf("All", "Historical", "Cultural", "Nature")
+fun DiscoverScreen(
+    onPlaceClick: (String) -> Unit = {},
+    viewModel: DiscoverViewModel = hiltViewModel()
+) {
+    val query by viewModel.query.collectAsState()
+    val selectedChip by viewModel.selectedCategory.collectAsState()
+    val sites by viewModel.sites.collectAsState()
+    val savedIds by viewModel.savedIds.collectAsState()
 
+    DiscoverContent(
+        query = query,
+        onQuery = viewModel::onQueryChange,
+        filters = DiscoverCategories,
+        selected = selectedChip,
+        onSelect = viewModel::onCategorySelect,
+        sites = sites,
+        savedIds = savedIds,
+        onToggleSave = { viewModel.toggleSave(it) },
+        onPlaceClick = onPlaceClick
+    )
+}
+
+@Composable
+private fun DiscoverContent(
+    query: String,
+    onQuery: (String) -> Unit,
+    filters: List<String>,
+    selected: Int,
+    onSelect: (Int) -> Unit,
+    sites: List<PlaceItem>,
+    savedIds: Set<String>,
+    onToggleSave: (String) -> Unit,
+    onPlaceClick: (String) -> Unit
+) {
     Column(
         modifier = Modifier.fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
@@ -101,11 +129,15 @@ fun DiscoverScreen(onPlaceClick: (String) -> Unit = {}) {
             }
         }
         SearchField(
-            query = query, onQuery = { query = it },
+            query = query, onQuery = onQuery,
             modifier = Modifier.padding(horizontal = Spacing.sidePadding)
         )
         Suggestions(
-            filters = filters, selected = selectedChip, onSelect = { selectedChip = it },
+            filters = filters, selected = selected,
+            onSelect = onSelect,
+            sites = sites,
+            savedIds = savedIds,
+            onToggleSave = onToggleSave,
             onPlaceClick = onPlaceClick
         )
     }
@@ -150,7 +182,10 @@ private fun Suggestions(
     filters: List<String>,
     selected: Int,
     onSelect: (Int) -> Unit,
-    onPlaceClick: (String) -> Unit = {},
+    sites: List<PlaceItem>,
+    savedIds: Set<String>,
+    onToggleSave: (String) -> Unit,
+    onPlaceClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ){
     Column(
@@ -179,16 +214,17 @@ private fun Suggestions(
             modifier = Modifier.padding(horizontal = Spacing.sidePadding),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            SearchPlaceCard(
-                title = "Kathmandu Durbar Square", meta = "Kathmandu • Historical Site", rating = "4.8",
-                desc = "The heart of old Kathmandu city, once the residence of the Nepalese Royal Family and home to the living goddess, Kumari.",
-                onCardClick = { onPlaceClick("kathmandu-durbar") }
-            )
-            SearchPlaceCard(
-                title = "Lumbini Garden", meta = "Lumbini • Spiritual Site", rating = "4.9",
-                desc = "The sacred birthplace of Lord Buddha, a UNESCO World Heritage site offering profound peace and historical depth.",
-                onCardClick = { onPlaceClick("lumbini-garden") }
-            )
+            sites.forEach { site ->
+                SearchPlaceCard(
+                    title = site.name,
+                    meta = site.meta,
+                    rating = site.rating,
+                    desc = site.description,
+                    isSaved = savedIds.contains(site.id),
+                    onSaveClick = { onToggleSave(site.id) },
+                    onCardClick = { onPlaceClick(site.id) }
+                )
+            }
         }
     }
 }
@@ -199,6 +235,8 @@ private fun SearchPlaceCard(
     meta: String,
     rating: String,
     desc: String,
+    isSaved: Boolean = false,
+    onSaveClick: () -> Unit = {},
     onCardClick: () -> Unit = {}
 ){
     com.example.avalokan.ui.components.HeritageCard(
@@ -208,8 +246,8 @@ private fun SearchPlaceCard(
         description = desc,
         imageHeight = 180.dp,
         showSave = true,
-        isSaved = false,
-        onSaveClick = {},
+        isSaved = isSaved,
+        onSaveClick = onSaveClick,
         onCardClick = onCardClick,
         cardContainer = true
     )
@@ -219,6 +257,33 @@ private fun SearchPlaceCard(
 @Composable
 private fun DiscoverPreview(){
     AvalokanTheme(){
-        DiscoverScreen()
+        DiscoverContent(
+            query = "",
+            onQuery = {},
+            filters = DiscoverCategories,
+            selected = 0,
+            onSelect = {},
+            sites = listOf(
+                PlaceItem(
+                    id = "kathmandu-durbar",
+                    name = "Kathmandu Durbar Square",
+                    description = "The heart of old Kathmandu city.",
+                    meta = "Kathmandu • Historical Site",
+                    category = "Historical",
+                    rating = "4.8"
+                ),
+                PlaceItem(
+                    id = "lumbini-garden",
+                    name = "Lumbini Garden",
+                    description = "The sacred birthplace of Lord Buddha.",
+                    meta = "Lumbini • Spiritual Site",
+                    category = "Cultural",
+                    rating = "4.9"
+                )
+            ),
+            savedIds = emptySet(),
+            onToggleSave = {},
+            onPlaceClick = {}
+        )
     }
 }
