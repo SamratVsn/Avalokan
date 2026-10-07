@@ -9,15 +9,14 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="338013c5-ac57-40a5-8a36-a85c84675d67" name="Changes" comment="ReadMe">
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/data/di/AppModule.kt" afterDir="false" />
+    <list default="true" id="338013c5-ac57-40a5-8a36-a85c84675d67" name="Changes" comment="ViewModels &amp; Screens">
+      <change afterPath="$PROJECT_DIR$/.idea/deviceManager.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/AvalokanApplication.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/AvalokanApplication.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/MainActivity.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/data/AppContainer.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/data/place/PlaceRepository.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/data/place/PlaceRepository.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/discover/DiscoverScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/discover/DiscoverScreen.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/discover/DiscoverViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/discover/DiscoverViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/events/EventsViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/events/EventsViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/home/HomeScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/home/HomeScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/home/HomeScreenViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/home/HomeScreenViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/profile/ProfileScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/profile/ProfileScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/profile/ProfileViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/profile/ProfileViewModel.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -464,8 +463,6 @@
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Finalized Pages&#10;Drawables for Navigation" />
-    <MESSAGE value="Strings, Fonts &amp; NavDestinations" />
     <MESSAGE value="Setting up Navigation &amp; NavHost" />
     <MESSAGE value="Working on DataLayer" />
     <MESSAGE value="Change" />
@@ -489,7 +486,9 @@
     <MESSAGE value="Dao's &amp; Database" />
     <MESSAGE value="Repositories" />
     <MESSAGE value="ReadMe" />
-    <option name="LAST_COMMIT_MESSAGE" value="ReadMe" />
+    <MESSAGE value="Hilt &amp; Repositories" />
+    <MESSAGE value="ViewModels &amp; Screens" />
+    <option name="LAST_COMMIT_MESSAGE" value="ViewModels &amp; Screens" />
   </component>
   <component name="play_dynamic_filters_status">
     <option name="appIdToCheckInfo">

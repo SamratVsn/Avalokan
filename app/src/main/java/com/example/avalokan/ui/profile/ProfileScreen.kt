@@ -29,6 +29,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.EditorialCardShape
@@ -46,7 +49,29 @@ import com.example.avalokan.ui.theme.Spacing
 import com.example.avalokan.ui.theme.StandardCardShape
 
 @Composable
-fun ProfileScreen(onSettingsClick: () -> Unit = {}) {
+fun ProfileScreen(
+    onSettingsClick: () -> Unit = {},
+    viewModel: ProfileViewModel = hiltViewModel()
+) {
+    val userName by viewModel.userName.collectAsState()
+    val bio by viewModel.bio.collectAsState()
+    val stats by viewModel.stats.collectAsState()
+
+    ProfileContent(
+        userName = userName,
+        bio = bio,
+        stats = stats,
+        onSettingsClick = onSettingsClick
+    )
+}
+
+@Composable
+private fun ProfileContent(
+    userName: String,
+    bio: String,
+    stats: ProfileStats,
+    onSettingsClick: () -> Unit
+) {
     Column(
         modifier = Modifier.fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
@@ -81,14 +106,24 @@ fun ProfileScreen(onSettingsClick: () -> Unit = {}) {
                 )
             }
         }
-        UserSection(modifier = Modifier.padding(horizontal = Spacing.sidePadding))
+        UserSection(
+            userName = userName,
+            bio = bio,
+            stats = stats,
+            modifier = Modifier.padding(horizontal = Spacing.sidePadding)
+        )
         HeritageCollection()
         UpcomingRegistrations(modifier = Modifier.padding(horizontal = Spacing.sidePadding))
     }
 }
 
 @Composable
-private fun UserSection(modifier: Modifier = Modifier) {
+private fun UserSection(
+    userName: String,
+    bio: String,
+    stats: ProfileStats,
+    modifier: Modifier = Modifier
+) {
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = EditorialCardShape,
@@ -123,12 +158,12 @@ private fun UserSection(modifier: Modifier = Modifier) {
             }
             Spacer(Modifier.height(12.dp))
             Text(
-                text = "Samrat Parajuli",
+                text = userName,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
             Text(
-                text = "Exploring the heritage of Nepal",
+                text = bio,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -137,9 +172,9 @@ private fun UserSection(modifier: Modifier = Modifier) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                UserSectionInfo(12, "VISITED")
-                UserSectionInfo(45, "SAVED")
-                UserSectionInfo(3, "EVENTS")
+                UserSectionInfo(stats.visited, "VISITED")
+                UserSectionInfo(stats.saved, "SAVED")
+                UserSectionInfo(stats.events, "EVENTS")
             }
         }
     }
@@ -302,6 +337,11 @@ private fun RegisteredBox() {
 @Composable
 private fun ProfilePreview() {
     AvalokanTheme {
-        ProfileScreen()
+        ProfileContent(
+            userName = "Samrat Parajuli",
+            bio = "Exploring the heritage of Nepal",
+            stats = ProfileStats(),
+            onSettingsClick = {}
+        )
     }
 }

@@ -33,6 +33,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -42,7 +44,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
+import com.example.avalokan.data.place.PlaceItem
 import com.example.avalokan.ui.theme.AccentMarigold
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
@@ -59,7 +63,29 @@ fun AvalokanHome(
     modifier: Modifier = Modifier,
     onStoryClick: (String) -> Unit = {},
     onPlaceClick: (String) -> Unit = {},
-    onExploreEventsClick: () -> Unit = {}
+    onExploreEventsClick: () -> Unit = {},
+    viewModel: HomeScreenViewModel = hiltViewModel()
+) {
+    val places by viewModel.places.collectAsState()
+
+    HomeContent(
+        modifier = modifier,
+        heroStoryId = viewModel.heroStoryId,
+        places = places,
+        onStoryClick = onStoryClick,
+        onPlaceClick = onPlaceClick,
+        onExploreEventsClick = onExploreEventsClick
+    )
+}
+
+@Composable
+private fun HomeContent(
+    heroStoryId: String,
+    places: List<PlaceItem>,
+    onStoryClick: (String) -> Unit,
+    onPlaceClick: (String) -> Unit,
+    onExploreEventsClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
@@ -74,15 +100,16 @@ fun AvalokanHome(
         TopIcons()
         StoryCard(
             modifier = Modifier.padding(horizontal = Spacing.sidePadding),
-            onReadClick = { onStoryClick("boudhanath") }
+            onReadClick = { onStoryClick(heroStoryId) }
         )
-        HistoricalGems(onPlaceClick = onPlaceClick)
+        HistoricalGems(places = places, onPlaceClick = onPlaceClick)
         EventSuggestion(
             modifier = Modifier.padding(horizontal = Spacing.sidePadding),
             onExploreClick = onExploreEventsClick
         )
         RecentDiscoveries(
             modifier = Modifier.padding(horizontal = Spacing.sidePadding),
+            places = places,
             onPlaceClick = onPlaceClick
         )
     }
@@ -184,7 +211,10 @@ private fun StoryCard(
 }
 
 @Composable
-private fun HistoricalGems(onPlaceClick: (String) -> Unit = {}) {
+private fun HistoricalGems(
+    places: List<PlaceItem>,
+    onPlaceClick: (String) -> Unit = {}
+) {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.sidePadding),
@@ -198,13 +228,16 @@ private fun HistoricalGems(onPlaceClick: (String) -> Unit = {}) {
             contentPadding = PaddingValues(horizontal = Spacing.sidePadding),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(4) { index ->
-                val placeId = if (index == 0) "patan-durbar" else "swayambhu"
+            items(
+                count = places.size,
+                key = { index -> places[index].id }
+            ) { index ->
+                val place = places[index]
                 PlaceCard(
-                    title = if (index == 0) "Patan Durbar Square" else "Swayambhu",
-                    subtitle = if (index == 0) "Artistic heritage of Lalitpur" else "The Ancient Hill",
+                    title = place.name,
+                    subtitle = place.description,
                     badge = if (index == 0) "EST. 3D CENTURY" else "2500+ YRS",
-                    onCardClick = { onPlaceClick(placeId) }
+                    onCardClick = { onPlaceClick(place.id) }
                 )
             }
         }
@@ -233,6 +266,7 @@ private fun PlaceCard(
 @Composable
 private fun RecentDiscoveries(
     modifier: Modifier = Modifier,
+    places: List<PlaceItem> = emptyList(),
     onPlaceClick: (String) -> Unit = {}
 ) {
     Column(
@@ -247,20 +281,16 @@ private fun RecentDiscoveries(
             Text(text = "Recent Discoveries", style = MaterialTheme.typography.titleMedium)
             Text(text = stringResource(R.string.viewAll), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
         }
-        com.example.avalokan.ui.components.HeritageCard(
-            title = "Boudha Stupa",
-            subtitle = "Boudhanath • Spiritual Site",
-            badge = "NEW",
-            rating = "4.9",
-            onCardClick = { onPlaceClick("boudha-stupa") }
-        )
-        com.example.avalokan.ui.components.HeritageCard(
-            title = "Bhaktapur Pottery Square",
-            subtitle = "Bhaktapur • Craft Quarter",
-            badge = "TRENDING",
-            rating = "4.7",
-            onCardClick = { onPlaceClick("bhaktapur-pottery") }
-        )
+        places.filter { it.id == "boudha-stupa" || it.id == "bhaktapur-pottery" }
+            .forEach { place ->
+                com.example.avalokan.ui.components.HeritageCard(
+                    title = place.name,
+                    subtitle = place.meta,
+                    badge = if (place.id == "boudha-stupa") "NEW" else "TRENDING",
+                    rating = place.rating,
+                    onCardClick = { onPlaceClick(place.id) }
+                )
+            }
     }
 }
 
@@ -290,6 +320,17 @@ private fun EventSuggestion(
 @Composable
 private fun HomeScreenPreview(){
     AvalokanTheme() {
-        AvalokanHome()
+        HomeContent(
+            heroStoryId = "boudhanath",
+            places = listOf(
+                PlaceItem("patan-durbar", "Patan Durbar Square", "Artistic heritage of Lalitpur.", "Lalitpur • Historical Site", "Historical", "4.8"),
+                PlaceItem("swayambhu", "Swayambhu", "The Ancient Hill.", "Kathmandu • Spiritual Site", "Historical", "4.7"),
+                PlaceItem("boudha-stupa", "Boudha Stupa", "Boudhanath • Spiritual Site.", "Boudhanath • Spiritual Site", "Cultural", "4.9"),
+                PlaceItem("bhaktapur-pottery", "Bhaktapur Pottery Square", "Bhaktapur • Craft Quarter.", "Bhaktapur • Craft Quarter", "Cultural", "4.7")
+            ),
+            onStoryClick = {},
+            onPlaceClick = {},
+            onExploreEventsClick = {}
+        )
     }
 }
