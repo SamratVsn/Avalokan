@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "964901244379",
+    "project_id": "avalokan-1fa3a",
+    "storage_bucket": "avalokan-1fa3a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:964901244379:android:1e58932f89bc81eb782bfe",
+        "android_client_info": {
+          "package_name": "com.example.avalokan"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDSYklD7UQcmH3qT4ZjArb9Iczxd2OxA1Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
