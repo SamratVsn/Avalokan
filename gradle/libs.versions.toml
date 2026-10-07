@@ -20,6 +20,7 @@ room3Common = "3.0.3"
 room3Compiler = "3.0.3"
 material3 = "1.4.0"
 foundationLayout = "1.12.1"
+coilCompose = "2.6.0"
 room3Runtime = "3.0.3"
 
 [libraries]
@@ -51,6 +52,7 @@ androidx-room3-common = { group = "androidx.room3", name = "room3-common", versi
 androidx-room3-compiler = { group = "androidx.room3", name = "room3-compiler", version.ref = "room3Compiler" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version.ref = "foundationLayout" }
+coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coilCompose" }
 androidx-room3-runtime = { group = "androidx.room3", name = "room3-runtime", version.ref = "room3Runtime" }
 
 [plugins]

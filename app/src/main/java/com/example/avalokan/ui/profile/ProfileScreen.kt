@@ -1,6 +1,10 @@
 package com.example.avalokan.ui.profile
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,13 +37,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.example.avalokan.R
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.EditorialCardShape
@@ -56,11 +63,21 @@ fun ProfileScreen(
     val userName by viewModel.userName.collectAsState()
     val bio by viewModel.bio.collectAsState()
     val stats by viewModel.stats.collectAsState()
+    val avatarUri by viewModel.avatarUri.collectAsState()
+    val photoPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri -> uri?.toString()?.let(viewModel::setAvatarUri) }
 
     ProfileContent(
         userName = userName,
         bio = bio,
         stats = stats,
+        avatarUri = avatarUri,
+        onAvatarClick = {
+            photoPicker.launch(
+                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+            )
+        },
         onSettingsClick = onSettingsClick
     )
 }
@@ -70,6 +87,8 @@ private fun ProfileContent(
     userName: String,
     bio: String,
     stats: ProfileStats,
+    avatarUri: String?,
+    onAvatarClick: () -> Unit,
     onSettingsClick: () -> Unit
 ) {
     Column(
@@ -110,6 +129,8 @@ private fun ProfileContent(
             userName = userName,
             bio = bio,
             stats = stats,
+            avatarUri = avatarUri,
+            onAvatarClick = onAvatarClick,
             modifier = Modifier.padding(horizontal = Spacing.sidePadding)
         )
         HeritageCollection()
@@ -122,6 +143,8 @@ private fun UserSection(
     userName: String,
     bio: String,
     stats: ProfileStats,
+    avatarUri: String?,
+    onAvatarClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -135,13 +158,27 @@ private fun UserSection(
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             Box(contentAlignment = Alignment.BottomEnd) {
-                Surface(shape = CircleShape, color = PrimaryLight, shadowElevation = 2.dp) {
-                    Icon(
-                        Icons.Default.Person,
-                        null,
-                        tint = PrimaryTeal,
-                        modifier = Modifier.padding(16.dp).size(40.dp)
-                    )
+                Surface(
+                    shape = CircleShape,
+                    color = PrimaryLight,
+                    shadowElevation = 2.dp,
+                    modifier = Modifier.clickable(onClick = onAvatarClick)
+                ) {
+                    if (avatarUri != null) {
+                        AsyncImage(
+                            model = avatarUri,
+                            contentDescription = "Profile photo",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.size(72.dp).clip(CircleShape)
+                        )
+                    } else {
+                        Icon(
+                            Icons.Default.Person,
+                            contentDescription = "Default profile photo",
+                            tint = PrimaryTeal,
+                            modifier = Modifier.padding(16.dp).size(40.dp)
+                        )
+                    }
                 }
                 Surface(
                     shape = CircleShape,
@@ -341,6 +378,8 @@ private fun ProfilePreview() {
             userName = "Samrat Parajuli",
             bio = "Exploring the heritage of Nepal",
             stats = ProfileStats(),
+            avatarUri = null,
+            onAvatarClick = {},
             onSettingsClick = {}
         )
     }

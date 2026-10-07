@@ -29,6 +29,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,7 +39,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
+import com.example.avalokan.data.event.EventItem
 import com.example.avalokan.ui.theme.AccentMarigold
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
@@ -47,7 +51,23 @@ import com.example.avalokan.ui.theme.Spacing
 import com.example.avalokan.ui.theme.StandardCardShape
 
 @Composable
-fun EventScreen(onEventClick: (String) -> Unit = {}) {
+fun EventScreen(
+    onEventClick: (String) -> Unit = {},
+    viewModel: EventsViewModel = hiltViewModel()
+) {
+    val events by viewModel.events.collectAsState()
+
+    EventContent(
+        events = events,
+        onEventClick = onEventClick
+    )
+}
+
+@Composable
+private fun EventContent(
+    events: List<EventItem>,
+    onEventClick: (String) -> Unit
+) {
     Column(
         modifier = Modifier.fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
@@ -63,6 +83,7 @@ fun EventScreen(onEventClick: (String) -> Unit = {}) {
             onRemindClick = { onEventClick("indra-jatra-2024") }
         )
         UpcomingEvents(
+            events = events,
             modifier = Modifier.padding(horizontal = Spacing.sidePadding),
             onEventClick = onEventClick
         )
@@ -211,6 +232,7 @@ private fun FeaturedEvent(
 
 @Composable
 private fun UpcomingEvents(
+    events: List<EventItem>,
     modifier: Modifier = Modifier,
     onEventClick: (String) -> Unit = {}
 ) {
@@ -219,27 +241,15 @@ private fun UpcomingEvents(
             text = "Upcoming in Your Locality",
             style = MaterialTheme.typography.titleMedium
         )
-        EventCards(
-            name = "Bhaktapur Pottery Workshop",
-            meta = "Bhaktapur Square • 10:00 AM",
-            fee = "FREE ENTRY",
-            action = "Join >",
-            onCardClick = { onEventClick("bhaktapur-pottery") }
-        )
-        EventCards(
-            name = "Alla & Samay Baji Festival",
-            meta = "Patan Square • 5:00 PM",
-            fee = "$15 ENTRY",
-            action = "Sign Up >",
-            onCardClick = { onEventClick("samay-baji") }
-        )
-        EventCards(
-            name = "Live Thangka Art Demo",
-            meta = "Boudha • 11:00 AM",
-            fee = "DONATION BASED",
-            action = "More Info >",
-            onCardClick = { onEventClick("thangka-demo") }
-        )
+        events.forEach { event ->
+            EventCards(
+                name = event.title,
+                meta = event.meta,
+                fee = event.fee,
+                action = event.action,
+                onCardClick = { onEventClick(event.id) }
+            )
+        }
     }
 }
 
@@ -315,6 +325,13 @@ private fun EventCards(
 @Composable
 private fun EventsPreview() {
     AvalokanTheme {
-        EventScreen()
+        EventContent(
+            events = listOf(
+                EventItem("bhaktapur-pottery", "Bhaktapur Pottery Workshop", "", "Bhaktapur Square • 10:00 AM", "FREE ENTRY", "Join >"),
+                EventItem("samay-baji", "Alla & Samay Baji Festival", "", "Patan Square • 5:00 PM", "$15 ENTRY", "Sign Up >"),
+                EventItem("thangka-demo", "Live Thangka Art Demo", "", "Boudha • 11:00 AM", "DONATION BASED", "More Info >")
+            ),
+            onEventClick = {}
+        )
     }
 }
