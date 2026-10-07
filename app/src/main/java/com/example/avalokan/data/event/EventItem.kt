@@ -3,11 +3,12 @@ package com.example.avalokan.data.event
 import androidx.room3.Entity
 import androidx.room3.PrimaryKey
 
-@Entity(tableName = "Events")
+@Entity(tableName = "events")
 data class EventItem(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    @PrimaryKey val id: String,
     val title: String,
     val description: String,
-    val category: String = "Personal",
+    val meta: String = "",
+    val fee: String = "",
+    val action: String = ""
 )
