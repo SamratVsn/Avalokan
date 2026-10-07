@@ -9,16 +9,8 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="338013c5-ac57-40a5-8a36-a85c84675d67" name="Changes" comment="Dao's &amp; Database">
-      <change afterPath="$PROJECT_DIR$/.idea/appInsightsSettings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/data/event/EventRepository.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/data/place/PlaceRepository.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/deploymentTargetSelector.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deploymentTargetSelector.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
+    <list default="true" id="338013c5-ac57-40a5-8a36-a85c84675d67" name="Changes" comment="Repositories">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -465,7 +457,6 @@
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Initial Structure" />
     <MESSAGE value="Added Hilt &amp; Firebase dependencies&#10;Setup project structure" />
     <MESSAGE value="Finalized Pages&#10;Drawables for Navigation" />
     <MESSAGE value="Strings, Fonts &amp; NavDestinations" />
@@ -490,7 +481,8 @@
     <MESSAGE value="Backend Work Starts" />
     <MESSAGE value="Adding Hilt" />
     <MESSAGE value="Dao's &amp; Database" />
-    <option name="LAST_COMMIT_MESSAGE" value="Dao's &amp; Database" />
+    <MESSAGE value="Repositories" />
+    <option name="LAST_COMMIT_MESSAGE" value="Repositories" />
   </component>
   <component name="play_dynamic_filters_status">
     <option name="appIdToCheckInfo">
