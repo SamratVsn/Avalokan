@@ -1,8 +1,10 @@
 package com.example.avalokan.ui.profile
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.avalokan.data.local.UserPreferences
+import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -36,6 +38,19 @@ class ProfileViewModel @Inject constructor(
 
     fun setAvatarUri(uri: String?) {
         viewModelScope.launch { userPreferences.setAvatarUri(uri) }
+    }
+
+    /** Uploads to Firebase Storage, then persists the download URL. */
+    fun uploadAvatar(localUri: String) {
+        setAvatarUri(localUri) // instant preview while the upload runs
+        FirebaseStorage.getInstance().reference
+            .child("avatars/${System.currentTimeMillis()}.jpg")
+            .putFile(Uri.parse(localUri))
+            .continueWithTask { task ->
+                if (!task.isSuccessful) throw task.exception ?: Exception("Upload failed")
+                task.result.storage.downloadUrl
+            }
+            .addOnSuccessListener { url -> setAvatarUri(url.toString()) }
     }
 
     fun updateName(name: String) {

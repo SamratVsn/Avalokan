@@ -64,7 +64,7 @@ fun EditProfileScreen(
     var bioDraft by rememberSaveable(bio) { mutableStateOf(bio) }
     val photoPicker = rememberLauncherForActivityResult(
         ActivityResultContracts.PickVisualMedia()
-    ) { uri -> uri?.toString()?.let(viewModel::setAvatarUri) }
+    ) { uri -> uri?.toString()?.let(viewModel::uploadAvatar) }
 
     EditProfileContent(
         userName = nameDraft,
