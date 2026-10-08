@@ -1,10 +1,6 @@
 package com.example.avalokan.ui.profile
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,7 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material.icons.filled.Landscape
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -64,20 +59,12 @@ fun ProfileScreen(
     val bio by viewModel.bio.collectAsState()
     val stats by viewModel.stats.collectAsState()
     val avatarUri by viewModel.avatarUri.collectAsState()
-    val photoPicker = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickVisualMedia()
-    ) { uri -> uri?.toString()?.let(viewModel::setAvatarUri) }
 
     ProfileContent(
         userName = userName,
         bio = bio,
         stats = stats,
         avatarUri = avatarUri,
-        onAvatarClick = {
-            photoPicker.launch(
-                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-            )
-        },
         onSettingsClick = onSettingsClick
     )
 }
@@ -88,7 +75,6 @@ private fun ProfileContent(
     bio: String,
     stats: ProfileStats,
     avatarUri: String?,
-    onAvatarClick: () -> Unit,
     onSettingsClick: () -> Unit
 ) {
     Column(
@@ -130,7 +116,6 @@ private fun ProfileContent(
             bio = bio,
             stats = stats,
             avatarUri = avatarUri,
-            onAvatarClick = onAvatarClick,
             modifier = Modifier.padding(horizontal = Spacing.sidePadding)
         )
         HeritageCollection()
@@ -144,7 +129,6 @@ private fun UserSection(
     bio: String,
     stats: ProfileStats,
     avatarUri: String?,
-    onAvatarClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -161,8 +145,7 @@ private fun UserSection(
                 Surface(
                     shape = CircleShape,
                     color = PrimaryLight,
-                    shadowElevation = 2.dp,
-                    modifier = Modifier.clickable(onClick = onAvatarClick)
+                    shadowElevation = 2.dp
                 ) {
                     if (avatarUri != null) {
                         AsyncImage(
@@ -172,12 +155,16 @@ private fun UserSection(
                             modifier = Modifier.size(72.dp).clip(CircleShape)
                         )
                     } else {
-                        Icon(
-                            Icons.Default.Person,
-                            contentDescription = "Default profile photo",
-                            tint = PrimaryTeal,
-                            modifier = Modifier.padding(16.dp).size(40.dp)
-                        )
+                        Box(
+                            modifier = Modifier.size(72.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = userName.firstOrNull()?.uppercase() ?: "G",
+                                style = MaterialTheme.typography.headlineMedium,
+                                color = PrimaryTeal
+                            )
+                        }
                     }
                 }
                 Surface(
@@ -375,11 +362,10 @@ private fun RegisteredBox() {
 private fun ProfilePreview() {
     AvalokanTheme {
         ProfileContent(
-            userName = "Samrat Parajuli",
+            userName = "Guest",
             bio = "Exploring the heritage of Nepal",
             stats = ProfileStats(),
             avatarUri = null,
-            onAvatarClick = {},
             onSettingsClick = {}
         )
     }

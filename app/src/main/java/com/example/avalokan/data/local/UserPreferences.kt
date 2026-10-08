@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.map
 import java.io.IOException
 
 private const val PREFS_NAME = "user_prefs"
+private val AVATAR_URI = stringPreferencesKey("avatar_uri")
 
 private val Context.userPrefsStore by preferencesDataStore(
     name = PREFS_NAME,
@@ -45,5 +46,15 @@ class UserPreferences(private val context: Context) {
 
     suspend fun setThemeChoice(choice: String) {
         context.userPrefsStore.edit { prefs -> prefs[THEME_CHOICE] = choice }
+    }
+
+    val avatarUri: Flow<String?> = context.userPrefsStore.data
+        .catch { e -> if (e is IOException) emit(emptyPreferences()) else throw e }
+        .map { prefs -> prefs[AVATAR_URI] }
+
+    suspend fun setAvatarUri(uri: String?) {
+        context.userPrefsStore.edit { prefs ->
+            if (uri == null) prefs.remove(AVATAR_URI) else prefs[AVATAR_URI] = uri
+        }
     }
 }
