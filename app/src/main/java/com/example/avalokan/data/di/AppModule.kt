@@ -6,6 +6,7 @@ import com.example.avalokan.data.AvalokanDatabase
 import com.example.avalokan.data.event.EventDao
 import com.example.avalokan.data.event.EventRepository
 import com.example.avalokan.data.event.FirestoreEventRepository
+import com.example.avalokan.data.local.UserPreferences
 import com.example.avalokan.data.place.PlaceDao
 import com.example.avalokan.data.place.PlaceRepository
 import com.example.avalokan.data.place.FirestorePlaceRepository
@@ -32,6 +33,11 @@ object AppModule {
         Room.databaseBuilder(context, AvalokanDatabase::class.java, "avalokan.db")
             .fallbackToDestructiveMigration()
             .build()
+
+    @Provides
+    @Singleton
+    fun provideUserPreferences(@ApplicationContext context: Context): UserPreferences =
+        UserPreferences(context)
 
     @Provides
     fun providePlaceDao(database: AvalokanDatabase): PlaceDao = database.placeDao()

@@ -1,5 +1,10 @@
 package com.example.avalokan.ui.settings
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,6 +29,7 @@ import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Card
@@ -32,17 +38,24 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
+import com.example.avalokan.data.local.UserPreferences
 import com.example.avalokan.ui.theme.AccentMarigold
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.PrimaryLight
@@ -56,7 +69,54 @@ private val WarmBg = Color(0xFFFFF3E0)
 private val NeutralBg = Color(0xFFF5F5F5)
 
 @Composable
-fun SettingsScreen(onBackClick: () -> Unit = {}) {
+fun SettingsScreen(
+    onBackClick: () -> Unit = {},
+    onEditProfileClick: () -> Unit = {},
+    viewModel: SettingsViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted -> viewModel.onNotificationsToggle(granted) }
+
+    fun hasNotificationPermission(): Boolean =
+        Build.VERSION.SDK_INT < 33 || ContextCompat.checkSelfPermission(
+            context, Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED
+
+    SettingsContent(
+        uiState = uiState,
+        notificationsGranted = hasNotificationPermission(),
+        onNotificationsChange = { wantOn ->
+            if (!wantOn || hasNotificationPermission()) {
+                viewModel.onNotificationsToggle(wantOn)
+            } else {
+                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        },
+        onThemeCycle = {
+            val next = when (uiState.themeChoice) {
+                UserPreferences.THEME_SYSTEM -> UserPreferences.THEME_LIGHT
+                UserPreferences.THEME_LIGHT -> UserPreferences.THEME_DARK
+                else -> UserPreferences.THEME_SYSTEM
+            }
+            viewModel.onThemeChoice(next)
+        },
+        onBackClick = onBackClick,
+        onEditProfileClick = onEditProfileClick
+    )
+}
+
+@Composable
+private fun SettingsContent(
+    uiState: SettingsUiState,
+    notificationsGranted: Boolean,
+    onNotificationsChange: (Boolean) -> Unit,
+    onThemeCycle: () -> Unit,
+    onBackClick: () -> Unit,
+    onEditProfileClick: () -> Unit
+) {
     Column(
         modifier = Modifier.fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
@@ -96,7 +156,17 @@ fun SettingsScreen(onBackClick: () -> Unit = {}) {
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            AccountSetting(modifier = Modifier.padding(horizontal = Spacing.sidePadding))
+            AccountSetting(
+                notificationsChecked = uiState.notificationsEnabled && notificationsGranted,
+                onNotificationsChange = onNotificationsChange,
+                onEditProfileClick = onEditProfileClick,
+                modifier = Modifier.padding(horizontal = Spacing.sidePadding)
+            )
+            AppearanceSection(
+                themeChoice = uiState.themeChoice,
+                onThemeCycle = onThemeCycle,
+                modifier = Modifier.padding(horizontal = Spacing.sidePadding)
+            )
             SuppNFeed(modifier = Modifier.padding(horizontal = Spacing.sidePadding))
             SettingCard(
                 icon = Icons.AutoMirrored.Filled.Logout,
@@ -124,7 +194,12 @@ fun SettingsScreen(onBackClick: () -> Unit = {}) {
 }
 
 @Composable
-private fun AccountSetting(modifier: Modifier = Modifier) {
+private fun AccountSetting(
+    notificationsChecked: Boolean,
+    onNotificationsChange: (Boolean) -> Unit,
+    onEditProfileClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = stringResource(R.string.account).uppercase(),
@@ -140,7 +215,8 @@ private fun AccountSetting(modifier: Modifier = Modifier) {
                     icon = Icons.Default.Person,
                     iconBg = PrimaryLight,
                     iconTint = PrimaryTeal,
-                    name = stringResource(R.string.editProfile)
+                    name = stringResource(R.string.editProfile),
+                    onClick = onEditProfileClick
                 )
                 HorizontalDivider(
                     modifier = Modifier.padding(horizontal = 16.dp),
@@ -156,11 +232,95 @@ private fun AccountSetting(modifier: Modifier = Modifier) {
                     modifier = Modifier.padding(horizontal = 16.dp),
                     color = MaterialTheme.colorScheme.surfaceVariant
                 )
-                SettingRow(
-                    icon = Icons.Default.Notifications,
-                    iconBg = PrimaryLight,
-                    iconTint = PrimaryTeal,
-                    name = stringResource(R.string.notifications)
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Box(
+                        modifier = Modifier.size(32.dp)
+                            .background(color = PrimaryLight, shape = RoundedCornerShape(8.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Default.Notifications,
+                            contentDescription = null,
+                            tint = PrimaryTeal,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                    Text(
+                        text = stringResource(R.string.notifications),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Switch(
+                        checked = notificationsChecked,
+                        onCheckedChange = onNotificationsChange
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AppearanceSection(
+    themeChoice: String,
+    onThemeCycle: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val label = when (themeChoice) {
+        UserPreferences.THEME_LIGHT -> "Light"
+        UserPreferences.THEME_DARK -> "Dark"
+        else -> "System"
+    }
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = "Appearance".uppercase(),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Card(
+            shape = StandardCardShape,
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .clickable(onClick = onThemeCycle)
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Box(
+                    modifier = Modifier.size(32.dp)
+                        .background(color = PrimaryLight, shape = RoundedCornerShape(8.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Default.Palette,
+                        contentDescription = null,
+                        tint = PrimaryTeal,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+                Text(
+                    text = "Theme",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Icon(
+                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                 )
             }
         }
@@ -250,11 +410,12 @@ private fun SettingRow(
     iconBg: Color,
     iconTint: Color,
     name: String,
-    trailing: String? = null
+    trailing: String? = null,
+    onClick: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier.fillMaxWidth()
-            .clickable { }
+            .clickable(onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -291,6 +452,13 @@ private fun SettingRow(
 @Composable
 private fun SettingsPreview() {
     AvalokanTheme {
-        SettingsScreen()
+        SettingsContent(
+            uiState = SettingsUiState(),
+            notificationsGranted = true,
+            onNotificationsChange = {},
+            onThemeCycle = {},
+            onBackClick = {},
+            onEditProfileClick = {}
+        )
     }
 }
