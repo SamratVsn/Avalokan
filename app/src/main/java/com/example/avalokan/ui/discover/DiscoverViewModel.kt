@@ -2,6 +2,7 @@ package com.example.avalokan.ui.discover
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.avalokan.data.local.UserPreferences
 import com.example.avalokan.data.place.PlaceItem
 import com.example.avalokan.data.place.PlaceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 val DiscoverCategories = listOf("All", "Historical", "Cultural", "Nature")
@@ -37,7 +39,8 @@ private val FallbackSites = listOf(
 
 @HiltViewModel
 class DiscoverViewModel @Inject constructor(
-    placeRepository: PlaceRepository
+    placeRepository: PlaceRepository,
+    private val userPreferences: UserPreferences
 ) : ViewModel() {
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query.asStateFlow()
@@ -45,8 +48,8 @@ class DiscoverViewModel @Inject constructor(
     private val _selectedCategory = MutableStateFlow(0)
     val selectedCategory: StateFlow<Int> = _selectedCategory.asStateFlow()
 
-    private val _savedIds = MutableStateFlow<Set<String>>(emptySet())
-    val savedIds: StateFlow<Set<String>> = _savedIds.asStateFlow()
+    val savedIds: StateFlow<Set<String>> = userPreferences.savedPlaceIds
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
     val sites: StateFlow<List<PlaceItem>> = combine(
         placeRepository.observePlaces(),
@@ -66,12 +69,12 @@ class DiscoverViewModel @Inject constructor(
     fun onCategorySelect(index: Int) { _selectedCategory.value = index }
 
     fun toggleSave(siteId: String): Boolean {
-        val current = _savedIds.value.toMutableSet()
+        val current = savedIds.value.toMutableSet()
         val nowSaved = if (!current.add(siteId)) {
             current.remove(siteId)
             false
         } else true
-        _savedIds.value = current
+        viewModelScope.launch { userPreferences.setSavedPlaceIds(current) }
         return nowSaved
     }
 }

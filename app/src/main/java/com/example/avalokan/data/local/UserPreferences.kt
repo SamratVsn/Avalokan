@@ -15,6 +15,7 @@ import java.io.IOException
 
 private const val PREFS_NAME = "user_prefs"
 private val AVATAR_URI = stringPreferencesKey("avatar_uri")
+private val SAVED_PLACE_IDS = stringPreferencesKey("saved_place_ids")
 
 private val Context.userPrefsStore by preferencesDataStore(
     name = PREFS_NAME,
@@ -51,6 +52,23 @@ class UserPreferences(private val context: Context) {
     val avatarUri: Flow<String?> = context.userPrefsStore.data
         .catch { e -> if (e is IOException) emit(emptyPreferences()) else throw e }
         .map { prefs -> prefs[AVATAR_URI] }
+
+    val savedPlaceIds: Flow<Set<String>> = context.userPrefsStore.data
+        .catch { e -> if (e is IOException) emit(emptyPreferences()) else throw e }
+        .map { prefs ->
+            prefs[SAVED_PLACE_IDS]
+                ?.split(",")
+                ?.map { it.trim() }
+                ?.filter { it.isNotEmpty() }
+                ?.toSet()
+                .orEmpty()
+        }
+
+    suspend fun setSavedPlaceIds(ids: Set<String>) {
+        context.userPrefsStore.edit { prefs ->
+            prefs[SAVED_PLACE_IDS] = ids.joinToString(",")
+        }
+    }
 
     suspend fun setAvatarUri(uri: String?) {
         context.userPrefsStore.edit { prefs ->
