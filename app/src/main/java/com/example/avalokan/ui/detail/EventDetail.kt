@@ -38,6 +38,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -53,7 +56,24 @@ private val ExperienceCardBg = Color(0xFFF9F9F9)
 @Composable
 fun EventDetailScreen(
     eventId: String = "preview",
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    viewModel: EventDetailViewModel = hiltViewModel()
+) {
+    val event by viewModel.event.collectAsState()
+    EventDetailContent(
+        title = event?.title ?: "Indra Jatra 2024: The Chariot Procession",
+        location = event?.meta?.substringBefore("•")?.trim()
+            ?.ifBlank { "Basantapur Durbar Square" }
+            ?: "Basantapur Durbar Square",
+        onBackClick = onBackClick
+    )
+}
+
+@Composable
+private fun EventDetailContent(
+    title: String,
+    location: String,
+    onBackClick: () -> Unit
 ) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -170,7 +190,7 @@ fun EventDetailScreen(
                 ) {
                     DetailBadge(text = "Sept 17 • Festival")
                     Text(
-                        text = "Indra Jatra 2024: The Chariot Procession",
+                        text = title,
                         style = MaterialTheme.typography.headlineMedium
                     )
                 }
@@ -194,7 +214,7 @@ fun EventDetailScreen(
                     MetaRow(
                         icon = Icons.Default.LocationOn,
                         label = "Location",
-                        value = "Basantapur Durbar Square"
+                        value = location
                     )
                 }
             }
@@ -259,6 +279,10 @@ fun EventDetailScreen(
 @Composable
 private fun EventDetailPreview() {
     AvalokanTheme {
-        EventDetailScreen()
+        EventDetailContent(
+            title = "Indra Jatra 2024: The Chariot Procession",
+            location = "Basantapur Durbar Square",
+            onBackClick = {}
+        )
     }
 }

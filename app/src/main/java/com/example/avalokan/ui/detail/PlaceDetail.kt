@@ -44,10 +44,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -76,7 +78,24 @@ private val PlaceStats = listOf(
 @Composable
 fun PlaceDetailScreen(
     placeId: String = "preview",
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    viewModel: PlaceDetailViewModel = hiltViewModel()
+) {
+    val place by viewModel.place.collectAsState()
+    PlaceDetailContent(
+        title = place?.name ?: "Kathmandu Durbar Square",
+        rating = place?.rating?.ifBlank { "4.8" } ?: "4.8",
+        description = place?.description ?: "Once the royal palace of the Malla kings, Kathmandu Durbar Square packs centuries of Newari art, temples, and courtyards into one plaza. Don't miss the Kumari Ghar, Taleju Temple, and the morning pigeon-dotted courtyards before the crowds arrive.",
+        onBackClick = onBackClick
+    )
+}
+
+@Composable
+private fun PlaceDetailContent(
+    title: String,
+    rating: String,
+    description: String,
+    onBackClick: () -> Unit
 ) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -175,11 +194,11 @@ fun PlaceDetailScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = "Kathmandu Durbar Square",
+                            text = title,
                             style = MaterialTheme.typography.headlineMedium,
                             modifier = Modifier.weight(1f)
                         )
-                        DetailBadge(text = "4.8 ★")
+                        DetailBadge(text = "$rating ★")
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         DetailBadge(text = "UNESCO Site")
@@ -209,6 +228,7 @@ fun PlaceDetailScreen(
             }
             item {
                 ExpandableDescription(
+                    description = description,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
@@ -295,12 +315,12 @@ private fun StatCard(stat: StatUi) {
 }
 
 @Composable
-private fun ExpandableDescription(modifier: Modifier = Modifier) {
+private fun ExpandableDescription(description: String, modifier: Modifier = Modifier) {
     var expanded by rememberSaveable { mutableStateOf(false) }
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
         DetailSectionTitle(text = "About this Place")
         Text(
-            text = "Once the royal palace of the Malla kings, Kathmandu Durbar Square packs centuries of Newari art, temples, and courtyards into one plaza. Don't miss the Kumari Ghar, Taleju Temple, and the morning pigeon-dotted courtyards before the crowds arrive.",
+            text = description,
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
             maxLines = if (expanded) Int.MAX_VALUE else 3,
@@ -320,6 +340,11 @@ private fun ExpandableDescription(modifier: Modifier = Modifier) {
 @Composable
 private fun PlaceDetailPreview() {
     AvalokanTheme {
-        PlaceDetailScreen()
+        PlaceDetailContent(
+            title = "Kathmandu Durbar Square",
+            rating = "4.8",
+            description = "Once the royal palace of the Malla kings.",
+            onBackClick = {}
+        )
     }
 }

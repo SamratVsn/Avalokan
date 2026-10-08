@@ -10,6 +10,9 @@ interface PlaceDao {
     @Query("SELECT * FROM places")
     fun observeAll(): Flow<List<PlaceItem>>
 
+    @Query("SELECT * FROM places WHERE id = :id")
+    fun observeById(id: String): Flow<PlaceItem?>
+
     @Upsert
     suspend fun upsertAll(item: List<PlaceItem>)
 

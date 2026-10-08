@@ -97,9 +97,8 @@ fun AvalokanNavHost(
         composable(
             route = PlaceDetail.route,
             arguments = listOf(navArgument(PlaceDetail.ARG) { type = NavType.StringType })
-        ) { entry ->
+        ) {
             PlaceDetailScreen(
-                placeId = entry.arguments?.getString(PlaceDetail.ARG).orEmpty(),
                 onBackClick = { navController.navigateUp() }
             )
         }
@@ -107,9 +106,8 @@ fun AvalokanNavHost(
         composable(
             route = EventDetail.route,
             arguments = listOf(navArgument(EventDetail.ARG) { type = NavType.StringType })
-        ) { entry ->
+        ) {
             EventDetailScreen(
-                eventId = entry.arguments?.getString(EventDetail.ARG).orEmpty(),
                 onBackClick = { navController.navigateUp() }
             )
         }

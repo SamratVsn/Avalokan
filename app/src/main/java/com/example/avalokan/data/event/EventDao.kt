@@ -10,6 +10,9 @@ interface EventDao {
     @Query("SELECT * FROM events")
     fun observeAll(): Flow<List<EventItem>>
 
+    @Query("SELECT * FROM events WHERE id = :id")
+    fun observeById(id: String): Flow<EventItem?>
+
     @Upsert //Upsert = Update or insert
     suspend fun upsertAll(items: List<EventItem>)
 

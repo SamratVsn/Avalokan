@@ -10,6 +10,7 @@ import javax.inject.Inject
 
 interface EventRepository {
     fun observeEvents(): Flow<List<EventItem>>
+    fun observeEvent(id: String): Flow<EventItem?>
 }
 
 private const val EVENTS_COLLECTION = "events"
@@ -35,6 +36,30 @@ class FirestoreEventRepository @Inject constructor(
                 }
                 launch { eventDao.upsertAll(items) }
                 trySend(items)
+            }
+        awaitClose { registration.remove() }
+    }
+
+    override fun observeEvent(id: String): Flow<EventItem?> = callbackFlow {
+        send(eventDao.observeById(id).first())
+        val registration = firestore.collection(EVENTS_COLLECTION).document(id)
+            .addSnapshotListener { snapshot, _ ->
+                val item = snapshot?.let { doc ->
+                    EventItem(
+                        id = doc.id,
+                        title = doc.getString("title").orEmpty(),
+                        description = doc.getString("description").orEmpty(),
+                        meta = doc.getString("meta").orEmpty(),
+                        fee = doc.getString("fee").orEmpty(),
+                        action = doc.getString("action").orEmpty()
+                    )
+                }
+                if (item != null) {
+                    launch { eventDao.upsertAll(listOf(item)) }
+                    trySend(item)
+                } else {
+                    trySend(null)
+                }
             }
         awaitClose { registration.remove() }
     }
