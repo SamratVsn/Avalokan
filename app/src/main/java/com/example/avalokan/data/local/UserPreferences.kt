@@ -75,4 +75,8 @@ class UserPreferences(private val context: Context) {
             if (uri == null) prefs.remove(AVATAR_URI) else prefs[AVATAR_URI] = uri
         }
     }
+
+    suspend fun clearAll() {
+        context.userPrefsStore.edit { it.clear() }
+    }
 }

@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 interface PlaceRepository {
     fun observePlaces(): Flow<List<PlaceItem>>
     fun observePlace(id: String): Flow<PlaceItem?>
+    suspend fun clearCache()
 }
 
 private const val PLACES_COLLECTION = "places"
@@ -62,5 +63,9 @@ class FirestorePlaceRepository @Inject constructor(
                 }
             }
         awaitClose { registration.remove() }
+    }
+
+    override suspend fun clearCache() {
+        placeDao.clearAll()
     }
 }

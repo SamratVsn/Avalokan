@@ -28,10 +28,13 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -40,9 +43,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -103,6 +110,8 @@ fun SettingsScreen(
             }
             viewModel.onThemeChoice(next)
         },
+        onClearCache = viewModel::clearCachedData,
+        onResetSettings = viewModel::resetSettings,
         onBackClick = onBackClick,
         onEditProfileClick = onEditProfileClick
     )
@@ -115,8 +124,12 @@ private fun SettingsContent(
     onNotificationsChange: (Boolean) -> Unit,
     onThemeCycle: () -> Unit,
     onBackClick: () -> Unit,
-    onEditProfileClick: () -> Unit
+    onEditProfileClick: () -> Unit,
+    onClearCache: () -> Unit,
+    onResetSettings: () -> Unit
 ) {
+    var showClearDialog by rememberSaveable { mutableStateOf(false) }
+    var showResetDialog by rememberSaveable { mutableStateOf(false) }
     Column(
         modifier = Modifier.fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
@@ -168,6 +181,11 @@ private fun SettingsContent(
                 modifier = Modifier.padding(horizontal = Spacing.sidePadding)
             )
             SuppNFeed(modifier = Modifier.padding(horizontal = Spacing.sidePadding))
+            StorageSection(
+                onClearCache = { showClearDialog = true },
+                onResetSettings = { showResetDialog = true },
+                modifier = Modifier.padding(horizontal = Spacing.sidePadding)
+            )
             SettingCard(
                 icon = Icons.AutoMirrored.Filled.Logout,
                 iconBg = DangerBg,
@@ -190,6 +208,78 @@ private fun SettingsContent(
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
+        if (showClearDialog) {
+            AlertDialog(
+                onDismissRequest = { showClearDialog = false },
+                title = { Text(text = "Clear cached data?") },
+                text = { Text(text = "Downloaded places and events will be removed and re-fetched from the server.") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showClearDialog = false
+                        onClearCache()
+                    }) { Text(text = "Clear") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showClearDialog = false }) { Text(text = "Cancel") }
+                }
+            )
+        }
+        if (showResetDialog) {
+            AlertDialog(
+                onDismissRequest = { showResetDialog = false },
+                title = { Text(text = "Reset all settings?") },
+                text = { Text(text = "Theme, notifications, avatar and saved places return to defaults.") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showResetDialog = false
+                        onResetSettings()
+                    }) { Text(text = "Reset") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showResetDialog = false }) { Text(text = "Cancel") }
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun StorageSection(
+    onClearCache: () -> Unit,
+    onResetSettings: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = "Storage & Data".uppercase(),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Card(
+            shape = StandardCardShape,
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Column {
+                SettingRow(
+                    icon = Icons.Default.Delete,
+                    iconBg = DangerBg,
+                    iconTint = DangerRed,
+                    name = "Clear cached data",
+                    onClick = onClearCache
+                )
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant
+                )
+                SettingRow(
+                    icon = Icons.Default.Refresh,
+                    iconBg = DangerBg,
+                    iconTint = DangerRed,
+                    name = "Reset all settings",
+                    onClick = onResetSettings
+                )
+            }
+        }
     }
 }
 
@@ -458,7 +548,9 @@ private fun SettingsPreview() {
             onNotificationsChange = {},
             onThemeCycle = {},
             onBackClick = {},
-            onEditProfileClick = {}
+            onEditProfileClick = {},
+            onClearCache = {},
+            onResetSettings = {}
         )
     }
 }

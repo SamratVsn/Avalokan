@@ -2,7 +2,9 @@ package com.example.avalokan.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.avalokan.data.event.EventRepository
 import com.example.avalokan.data.local.UserPreferences
+import com.example.avalokan.data.place.PlaceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -18,7 +20,9 @@ data class SettingsUiState(
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val userPreferences: UserPreferences
+    private val userPreferences: UserPreferences,
+    private val placeRepository: PlaceRepository,
+    private val eventRepository: EventRepository
 ) : ViewModel() {
 
     val uiState: StateFlow<SettingsUiState> = combine(
@@ -40,6 +44,19 @@ class SettingsViewModel @Inject constructor(
     fun onThemeChoice(choice: String) {
         viewModelScope.launch {
             userPreferences.setThemeChoice(choice)
+        }
+    }
+
+    fun clearCachedData() {
+        viewModelScope.launch {
+            placeRepository.clearCache()
+            eventRepository.clearCache()
+        }
+    }
+
+    fun resetSettings() {
+        viewModelScope.launch {
+            userPreferences.clearAll()
         }
     }
 }

@@ -11,6 +11,7 @@ import javax.inject.Inject
 interface EventRepository {
     fun observeEvents(): Flow<List<EventItem>>
     fun observeEvent(id: String): Flow<EventItem?>
+    suspend fun clearCache()
 }
 
 private const val EVENTS_COLLECTION = "events"
@@ -62,5 +63,9 @@ class FirestoreEventRepository @Inject constructor(
                 }
             }
         awaitClose { registration.remove() }
+    }
+
+    override suspend fun clearCache() {
+        eventDao.clearAll()
     }
 }
