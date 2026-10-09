@@ -1,7 +1,9 @@
 package com.example.avalokan.ui.settings
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -86,6 +88,12 @@ fun SettingsScreen(
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted -> viewModel.onNotificationsToggle(granted) }
+    val onSendSuggestions = {
+        val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:")).apply {
+            putExtra(Intent.EXTRA_SUBJECT, "App Suggestion: Nepal Heritage Explorer")
+        }
+        context.startActivity(Intent.createChooser(intent, "Send suggestion"))
+    }
 
     fun hasNotificationPermission(): Boolean =
         Build.VERSION.SDK_INT < 33 || ContextCompat.checkSelfPermission(
@@ -112,6 +120,7 @@ fun SettingsScreen(
         },
         onClearCache = viewModel::clearCachedData,
         onResetSettings = viewModel::resetSettings,
+        onSendSuggestions = onSendSuggestions,
         onBackClick = onBackClick,
         onEditProfileClick = onEditProfileClick
     )
@@ -126,10 +135,12 @@ private fun SettingsContent(
     onBackClick: () -> Unit,
     onEditProfileClick: () -> Unit,
     onClearCache: () -> Unit,
-    onResetSettings: () -> Unit
+    onResetSettings: () -> Unit,
+    onSendSuggestions: () -> Unit
 ) {
     var showClearDialog by rememberSaveable { mutableStateOf(false) }
     var showResetDialog by rememberSaveable { mutableStateOf(false) }
+    var showLogoutDialog by rememberSaveable { mutableStateOf(false) }
     Column(
         modifier = Modifier.fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
@@ -180,7 +191,10 @@ private fun SettingsContent(
                 onThemeCycle = onThemeCycle,
                 modifier = Modifier.padding(horizontal = Spacing.sidePadding)
             )
-            SuppNFeed(modifier = Modifier.padding(horizontal = Spacing.sidePadding))
+            SuppNFeed(
+                onSendSuggestions = onSendSuggestions,
+                modifier = Modifier.padding(horizontal = Spacing.sidePadding)
+            )
             StorageSection(
                 onClearCache = { showClearDialog = true },
                 onResetSettings = { showResetDialog = true },
@@ -192,6 +206,7 @@ private fun SettingsContent(
                 iconTint = DangerRed,
                 settingName = stringResource(R.string.logOut),
                 nameColor = DangerRed,
+                onClick = { showLogoutDialog = true },
                 modifier = Modifier.padding(horizontal = Spacing.sidePadding)
             )
         }
@@ -237,6 +252,22 @@ private fun SettingsContent(
                 },
                 dismissButton = {
                     TextButton(onClick = { showResetDialog = false }) { Text(text = "Cancel") }
+                }
+            )
+        }
+        if (showLogoutDialog) {
+            AlertDialog(
+                onDismissRequest = { showLogoutDialog = false },
+                title = { Text(text = "Log out?") },
+                text = { Text(text = "You will be signed out on this device.") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showLogoutDialog = false
+                        // TODO(auth): clear session + navigate to login
+                    }) { Text(text = "Log out") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showLogoutDialog = false }) { Text(text = "Cancel") }
                 }
             )
         }
@@ -418,7 +449,10 @@ private fun AppearanceSection(
 }
 
 @Composable
-private fun SuppNFeed(modifier: Modifier = Modifier) {
+private fun SuppNFeed(
+    onSendSuggestions: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = stringResource(R.string.suppNFe).uppercase(),
@@ -434,7 +468,8 @@ private fun SuppNFeed(modifier: Modifier = Modifier) {
                     icon = Icons.Default.Lightbulb,
                     iconBg = WarmBg,
                     iconTint = AccentMarigold,
-                    name = stringResource(R.string.sendSugRep)
+                    name = stringResource(R.string.sendSugRep),
+                    onClick = onSendSuggestions
                 )
                 HorizontalDivider(
                     modifier = Modifier.padding(horizontal = 16.dp),
@@ -459,9 +494,11 @@ private fun SettingCard(
     modifier: Modifier = Modifier,
     iconBg: Color = DangerBg,
     iconTint: Color = DangerRed,
-    nameColor: Color = DangerRed
+    nameColor: Color = DangerRed,
+    onClick: () -> Unit = {}
 ) {
     Card(
+        onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = StandardCardShape,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -550,7 +587,8 @@ private fun SettingsPreview() {
             onBackClick = {},
             onEditProfileClick = {},
             onClearCache = {},
-            onResetSettings = {}
+            onResetSettings = {},
+            onSendSuggestions = {}
         )
     }
 }
