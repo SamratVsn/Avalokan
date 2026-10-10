@@ -1,5 +1,7 @@
 package com.example.avalokan.ui.detail
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,6 +26,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.ConfirmationNumber
@@ -54,6 +57,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -82,11 +86,33 @@ fun PlaceDetailScreen(
     viewModel: PlaceDetailViewModel = hiltViewModel()
 ) {
     val place by viewModel.place.collectAsState()
+    val context = LocalContext.current
+    val placeTitle = place?.name ?: "Kathmandu Durbar Square"
+    // Location comes from the place itself ("Lalitpur • Historical Site"),
+    // never a hardcoded city — places can be anywhere in Nepal.
+    val placeLocation = place?.meta?.substringBefore("•")?.trim()
+        ?.ifBlank { "Nepal" } ?: "Nepal"
+    val onShareClick = {
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(
+                Intent.EXTRA_TEXT,
+                "Check out this heritage site: $placeTitle on Nepal Heritage Explorer!"
+            )
+        }
+        context.startActivity(Intent.createChooser(intent, "Share place"))
+    }
+    val onDirectionsClick = {
+        val query = Uri.encode("$placeTitle, $placeLocation, Nepal")
+        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=$query")))
+    }
     PlaceDetailContent(
-        title = place?.name ?: "Kathmandu Durbar Square",
+        title = placeTitle,
         rating = place?.rating?.ifBlank { "4.8" } ?: "4.8",
         description = place?.description ?: "Once the royal palace of the Malla kings, Kathmandu Durbar Square packs centuries of Newari art, temples, and courtyards into one plaza. Don't miss the Kumari Ghar, Taleju Temple, and the morning pigeon-dotted courtyards before the crowds arrive.",
-        onBackClick = onBackClick
+        onBackClick = onBackClick,
+        onShareClick = onShareClick,
+        onDirectionsClick = onDirectionsClick
     )
 }
 
@@ -95,7 +121,9 @@ private fun PlaceDetailContent(
     title: String,
     rating: String,
     description: String,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onShareClick: () -> Unit,
+    onDirectionsClick: () -> Unit
 ) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -110,7 +138,7 @@ private fun PlaceDetailContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(
-                        onClick = {},
+                        onClick = onDirectionsClick,
                         modifier = Modifier.size(48.dp)
                             .background(
                                 MaterialTheme.colorScheme.surfaceVariant,
@@ -120,6 +148,20 @@ private fun PlaceDetailContent(
                         Icon(
                             Icons.Default.Directions,
                             contentDescription = "Get directions",
+                            tint = PrimaryTeal
+                        )
+                    }
+                    IconButton(
+                        onClick = onShareClick,
+                        modifier = Modifier.size(48.dp)
+                            .background(
+                                MaterialTheme.colorScheme.surfaceVariant,
+                                StandardCardShape
+                            )
+                    ) {
+                        Icon(
+                            Icons.Default.Share,
+                            contentDescription = "Share this place",
                             tint = PrimaryTeal
                         )
                     }
@@ -344,7 +386,9 @@ private fun PlaceDetailPreview() {
             title = "Kathmandu Durbar Square",
             rating = "4.8",
             description = "Once the royal palace of the Malla kings.",
-            onBackClick = {}
+            onBackClick = {},
+            onShareClick = {},
+            onDirectionsClick = {}
         )
     }
 }
