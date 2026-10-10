@@ -50,6 +50,18 @@ import androidx.compose.ui.unit.dp
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.PrimaryTeal
 import com.example.avalokan.ui.theme.StandardCardShape
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.launch
 
 private val ExperienceCardBg = Color(0xFFF9F9F9)
 
@@ -60,11 +72,28 @@ fun EventDetailScreen(
     viewModel: EventDetailViewModel = hiltViewModel()
 ) {
     val event by viewModel.event.collectAsState()
+    val context = LocalContext.current
+    val snackbarHost = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    var isFavorite by rememberSaveable { mutableStateOf(false) }
+    val eventTitle = event?.title ?: "Indra Jatra 2024: The Chariot Procession"
+    val onShareClick = {
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, "Check out this heritage event: $eventTitle on Avalokan, a Nepal Heritage Explorer!")
+        }
+        context.startActivity(Intent.createChooser(intent, "Share event"))
+    }
     EventDetailContent(
         title = event?.title ?: "Indra Jatra 2024: The Chariot Procession",
         location = event?.meta?.substringBefore("•")?.trim()
             ?.ifBlank { "Basantapur Durbar Square" }
             ?: "Basantapur Durbar Square",
+        isFavorite = isFavorite,
+        onFavoriteClick = { isFavorite = !isFavorite },
+        onShareClick = onShareClick,
+        onBookClick = { scope.launch { snackbarHost.showSnackbar("Booked! See you there.") } },
+        snackbarHost = snackbarHost,
         onBackClick = onBackClick
     )
 }
@@ -73,11 +102,17 @@ fun EventDetailScreen(
 private fun EventDetailContent(
     title: String,
     location: String,
+    isFavorite: Boolean,
+    onFavoriteClick: () -> Unit,
+    onShareClick: () -> Unit,
+    onBookClick: () -> Unit,
+    snackbarHost: SnackbarHostState,
     onBackClick: () -> Unit
 ) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        snackbarHost = { SnackbarHost(hostState = snackbarHost) },
         bottomBar = {
             // Sticky footer: price + Book Now with shadow
             Surface(shadowElevation = 12.dp, color = MaterialTheme.colorScheme.surface) {
@@ -99,7 +134,7 @@ private fun EventDetailContent(
                         )
                     }
                     Button(
-                        onClick = {},
+                        onClick = onBookClick,
                         modifier = Modifier.height(52.dp),
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = PrimaryTeal),
@@ -156,7 +191,7 @@ private fun EventDetailContent(
                         }
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             IconButton(
-                                onClick = {},
+                                onClick = onShareClick,
                                 modifier = Modifier.size(40.dp)
                                     .background(Color.Black.copy(alpha = 0.35f), CircleShape)
                             ) {
@@ -168,13 +203,13 @@ private fun EventDetailContent(
                                 )
                             }
                             IconButton(
-                                onClick = {},
+                                onClick = onFavoriteClick,
                                 modifier = Modifier.size(40.dp)
                                     .background(Color.Black.copy(alpha = 0.35f), CircleShape)
                             ) {
                                 Icon(
-                                    Icons.Default.FavoriteBorder,
-                                    contentDescription = "Save",
+                                    if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                    contentDescription = if (isFavorite) "Remove from favorites" else "Save to favorites",
                                     tint = Color.White,
                                     modifier = Modifier.size(18.dp)
                                 )
@@ -256,18 +291,6 @@ private fun EventDetailContent(
                             }
                         }
                         Spacer(Modifier.height(4.dp))
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Facepile(initials = listOf("A", "R", "S", "+9"))
-                            Text(
-                                text = "128 attending",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
                     }
                 }
             }
@@ -282,6 +305,11 @@ private fun EventDetailPreview() {
         EventDetailContent(
             title = "Indra Jatra 2024: The Chariot Procession",
             location = "Basantapur Durbar Square",
+            isFavorite = false,
+            onFavoriteClick = {},
+            onShareClick = {},
+            onBookClick = {},
+            snackbarHost = SnackbarHostState(),
             onBackClick = {}
         )
     }
