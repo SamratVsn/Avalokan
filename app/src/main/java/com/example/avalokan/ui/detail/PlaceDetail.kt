@@ -44,12 +44,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -58,6 +62,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.launch
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -88,6 +93,9 @@ fun PlaceDetailScreen(
 ) {
     val place by viewModel.place.collectAsState()
     val context = LocalContext.current
+    val snackbarHost = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    var isSaved by rememberSaveable { mutableStateOf(false) }
     val placeTitle = place?.name ?: "Kathmandu Durbar Square"
     // Location comes from the place itself ("Lalitpur • Historical Site"),
     // never a hardcoded city — places can be anywhere in Nepal.
@@ -111,9 +119,16 @@ fun PlaceDetailScreen(
         title = placeTitle,
         rating = place?.rating?.ifBlank { "4.8" } ?: "4.8",
         description = place?.description ?: "Once the royal palace of the Malla kings, Kathmandu Durbar Square packs centuries of Newari art, temples, and courtyards into one plaza. Don't miss the Kumari Ghar, Taleju Temple, and the morning pigeon-dotted courtyards before the crowds arrive.",
+        isSaved = isSaved,
+        onSaveClick = {
+            val willSave = !isSaved
+            isSaved = willSave
+            if (willSave) scope.launch { snackbarHost.showSnackbar("Saved to Collection") }
+        },
         onBackClick = onBackClick,
         onShareClick = onShareClick,
-        onDirectionsClick = onDirectionsClick
+        onDirectionsClick = onDirectionsClick,
+        snackbarHost = snackbarHost
     )
 }
 
@@ -122,13 +137,17 @@ private fun PlaceDetailContent(
     title: String,
     rating: String,
     description: String,
+    isSaved: Boolean,
+    onSaveClick: () -> Unit,
     onBackClick: () -> Unit,
     onShareClick: () -> Unit,
-    onDirectionsClick: () -> Unit
+    onDirectionsClick: () -> Unit,
+    snackbarHost: SnackbarHostState
 ) {
     Scaffold(
         containerColor = Color.White,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        snackbarHost = { SnackbarHost(hostState = snackbarHost) },
         bottomBar = {
             // Sticky footer: directions + save
             Surface(shadowElevation = 8.dp, color = MaterialTheme.colorScheme.surface) {
@@ -167,13 +186,16 @@ private fun PlaceDetailContent(
                         )
                     }
                     Button(
-                        onClick = {},
+                        onClick = onSaveClick,
                         modifier = Modifier.weight(1f).height(48.dp),
                         shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryTeal)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (isSaved) MaterialTheme.colorScheme.surfaceVariant else PrimaryTeal,
+                            contentColor = if (isSaved) PrimaryTeal else Color.White
+                        )
                     ) {
                         Text(
-                            text = "Save to Collection",
+                            text = if (isSaved) "Saved ✓" else "Save to Collection",
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -398,9 +420,12 @@ private fun PlaceDetailPreview() {
             title = "Kathmandu Durbar Square",
             rating = "4.8",
             description = "Once the royal palace of the Malla kings.",
+            isSaved = false,
+            onSaveClick = {},
             onBackClick = {},
             onShareClick = {},
-            onDirectionsClick = {}
+            onDirectionsClick = {},
+            snackbarHost = SnackbarHostState()
         )
     }
 }
