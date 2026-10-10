@@ -9,9 +9,14 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="338013c5-ac57-40a5-8a36-a85c84675d67" name="Changes" comment="Fixing Dead Setting Rows">
+    <list default="true" id="338013c5-ac57-40a5-8a36-a85c84675d67" name="Changes" comment="Modifying event detail dead buttons">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/detail/PlaceDetail.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/detail/PlaceDetail.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/data/AvalokanDatabase.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/data/AvalokanDatabase.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/data/event/EventItem.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/data/event/EventItem.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/data/event/EventRepository.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/data/event/EventRepository.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/detail/DetailComponents.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/detail/DetailComponents.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/detail/EventDetail.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/detail/EventDetail.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/events/EventsViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/events/EventsViewModel.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -458,8 +463,6 @@
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="UI Error Fixes" />
-    <MESSAGE value="NavBars &amp; More" />
     <MESSAGE value="Profile Screen Completed" />
     <MESSAGE value="UI Fix on Profile Screen" />
     <MESSAGE value="UI Improvements" />
@@ -483,7 +486,9 @@
     <MESSAGE value="Saving Profile Pic to Firebase" />
     <MESSAGE value="Setting Screen Customization" />
     <MESSAGE value="Fixing Dead Setting Rows" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixing Dead Setting Rows" />
+    <MESSAGE value="Modifying detail screensz" />
+    <MESSAGE value="Modifying event detail dead buttons" />
+    <option name="LAST_COMMIT_MESSAGE" value="Modifying event detail dead buttons" />
   </component>
   <component name="play_dynamic_filters_status">
     <option name="appIdToCheckInfo">

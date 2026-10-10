@@ -32,7 +32,8 @@ class FirestoreEventRepository @Inject constructor(
                         description = doc.getString("description").orEmpty(),
                         meta = doc.getString("meta").orEmpty(),
                         fee = doc.getString("fee").orEmpty(),
-                        action = doc.getString("action").orEmpty()
+                        action = doc.getString("action").orEmpty(),
+                        type = doc.getString("type").orEmpty().ifBlank { "CULTURAL" }
                     )
                 }
                 launch { eventDao.upsertAll(items) }
@@ -52,7 +53,8 @@ class FirestoreEventRepository @Inject constructor(
                         description = doc.getString("description").orEmpty(),
                         meta = doc.getString("meta").orEmpty(),
                         fee = doc.getString("fee").orEmpty(),
-                        action = doc.getString("action").orEmpty()
+                        action = doc.getString("action").orEmpty(),
+                        type = doc.getString("type").orEmpty().ifBlank { "CULTURAL" }
                     )
                 }
                 if (item != null) {

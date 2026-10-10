@@ -1,5 +1,6 @@
 package com.example.avalokan.ui.detail
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -20,6 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -43,6 +46,7 @@ import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -77,6 +81,7 @@ fun EventDetailScreen(
     val scope = rememberCoroutineScope()
     var isFavorite by rememberSaveable { mutableStateOf(false) }
     val eventTitle = event?.title ?: "Indra Jatra 2024: The Chariot Procession"
+    val eventType = EventType.from(event?.type)
     val onShareClick = {
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
@@ -89,6 +94,7 @@ fun EventDetailScreen(
         location = event?.meta?.substringBefore("•")?.trim()
             ?.ifBlank { "Basantapur Durbar Square" }
             ?: "Basantapur Durbar Square",
+        eventType = eventType,
         isFavorite = isFavorite,
         onFavoriteClick = { isFavorite = !isFavorite },
         onShareClick = onShareClick,
@@ -102,6 +108,7 @@ fun EventDetailScreen(
 private fun EventDetailContent(
     title: String,
     location: String,
+    eventType: EventType,
     isFavorite: Boolean,
     onFavoriteClick: () -> Unit,
     onShareClick: () -> Unit,
@@ -109,8 +116,10 @@ private fun EventDetailContent(
     snackbarHost: SnackbarHostState,
     onBackClick: () -> Unit
 ) {
+    val accent = eventType.accent
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        // Matches the white sheet so no color gap appears at the bottom.
+        containerColor = MaterialTheme.colorScheme.surface,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = { SnackbarHost(hostState = snackbarHost) },
         bottomBar = {
@@ -137,14 +146,14 @@ private fun EventDetailContent(
                         onClick = onBookClick,
                         modifier = Modifier.height(52.dp),
                         shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryTeal),
+                        colors = ButtonDefaults.buttonColors(containerColor = accent),
                         elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
                     ) {
                         Text(text = "Book Now")
                         Spacer(Modifier.width(8.dp))
                         Icon(
-                            Icons.Default.Person,
-                            null,
+                            Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -154,11 +163,11 @@ private fun EventDetailContent(
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(innerPadding),
-            contentPadding = PaddingValues(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            contentPadding = PaddingValues(bottom = 24.dp)
         ) {
             item {
-                Box(modifier = Modifier.fillMaxWidth().height(320.dp)) {
+                // 350dp hero; the white sheet below slides 30dp over it.
+                Box(modifier = Modifier.fillMaxWidth().height(350.dp)) {
                     Box(
                         modifier = Modifier.fillMaxSize()
                             .background(MaterialTheme.colorScheme.surfaceVariant),
@@ -219,78 +228,101 @@ private fun EventDetailContent(
                 }
             }
             item {
-                Column(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    DetailBadge(text = "Sept 17 • Festival")
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.headlineMedium
-                    )
-                }
-            }
-            item {
-                // Date / Time / Location metadata list
-                Column(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    MetaRow(
-                        icon = Icons.Default.CalendarMonth,
-                        label = "Date",
-                        value = "Sept 17, 2024"
-                    )
-                    MetaRow(
-                        icon = Icons.Default.Schedule,
-                        label = "Time",
-                        value = "10:00 AM onwards"
-                    )
-                    MetaRow(
-                        icon = Icons.Default.LocationOn,
-                        label = "Location",
-                        value = location
-                    )
-                }
-            }
-            item {
-                // Experience card: neutral #F9F9F9, checklist + facepile
-                Card(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                    shape = StandardCardShape,
-                    colors = CardDefaults.cardColors(containerColor = ExperienceCardBg)
+                // Layered sheet overlapping the hero by 30dp, 40dp top rounding.
+                Surface(
+                    modifier = Modifier.fillMaxWidth()
+                        .offset(y = (-30).dp)
+                        .clip(RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp)),
+                    color = MaterialTheme.colorScheme.surface
                 ) {
                     Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        modifier = Modifier.padding(horizontal = 24.dp)
+                            .padding(top = 24.dp, bottom = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        Text(
-                            text = "Exclusive Heritage Tour",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        listOf(
-                            "Guided old-city walk at dawn",
-                            "Traditional Samay Baji tasting",
-                            "Masked-dance viewing terrace"
-                        ).forEach { point ->
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            DetailBadge(
+                                text = "Sept 17 • Festival",
+                                containerColor = accent.copy(alpha = 0.12f),
+                                contentColor = accent,
+                                icon = eventBadgeIcon(eventType)
+                            )
+                            Text(
+                                text = title,
+                                style = MaterialTheme.typography.headlineLarge,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        // Date / Time / Location metadata list
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            MetaRow(
+                                icon = Icons.Default.CalendarMonth,
+                                label = "Date",
+                                value = "Sept 17, 2024"
+                            )
+                            MetaRow(
+                                icon = Icons.Default.Schedule,
+                                label = "Time",
+                                value = "10:00 AM onwards"
+                            )
+                            MetaRow(
+                                icon = Icons.Default.LocationOn,
+                                label = "Location",
+                                value = location
+                            )
+                        }
+                        // Experience card: #F9F9F9, 1dp border, 24dp padding, facepile.
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = StandardCardShape,
+                            border = BorderStroke(1.dp, Color(0xFFEEEEEE)),
+                            colors = CardDefaults.cardColors(containerColor = ExperienceCardBg)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(24.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Icon(
-                                    Icons.Default.Check,
-                                    contentDescription = null,
-                                    tint = PrimaryTeal,
-                                    modifier = Modifier.size(18.dp)
-                                )
                                 Text(
-                                    text = point,
-                                    style = MaterialTheme.typography.bodyMedium
+                                    text = "Exclusive Heritage Tour",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold
                                 )
+                                listOf(
+                                    "Guided old-city walk at dawn",
+                                    "Traditional Samay Baji tasting",
+                                    "Masked-dance viewing terrace"
+                                ).forEach { point ->
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Check,
+                                            contentDescription = null,
+                                            tint = accent,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                        Text(
+                                            text = point,
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                    }
+                                }
+                                Spacer(Modifier.height(8.dp))
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Facepile(initials = listOf("A", "R", "S", "+12"))
+                                    Text(
+                                        text = "128 attending",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
                         }
-                        Spacer(Modifier.height(4.dp))
                     }
                 }
             }
@@ -305,6 +337,7 @@ private fun EventDetailPreview() {
         EventDetailContent(
             title = "Indra Jatra 2024: The Chariot Procession",
             location = "Basantapur Durbar Square",
+            eventType = EventType.RELIGIOUS,
             isFavorite = false,
             onFavoriteClick = {},
             onShareClick = {},

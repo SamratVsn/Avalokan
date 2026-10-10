@@ -19,7 +19,8 @@ private val FallbackEvents = listOf(
         description = "Hands-on clay workshop in the old pottery square.",
         meta = "Bhaktapur Square • 10:00 AM",
         fee = "FREE ENTRY",
-        action = "Join >"
+        action = "Join >",
+        type = "CULTURAL"
     ),
     EventItem(
         id = "samay-baji",
@@ -27,7 +28,8 @@ private val FallbackEvents = listOf(
         description = "Newari feast and street celebration in Patan.",
         meta = "Patan Square • 5:00 PM",
         fee = "$15 ENTRY",
-        action = "Sign Up >"
+        action = "Sign Up >",
+        type = "RELIGIOUS"
     ),
     EventItem(
         id = "thangka-demo",
@@ -35,7 +37,8 @@ private val FallbackEvents = listOf(
         description = "Watch master painters at work in Boudha.",
         meta = "Boudha • 11:00 AM",
         fee = "DONATION BASED",
-        action = "More Info >"
+        action = "More Info >",
+        type = "CULTURAL"
     )
 )
 
