@@ -63,7 +63,7 @@ fun StoryDetailScreen(
 ) {
     val story = StoryUi()
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = Color.White,
         contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0)
     ) { innerPadding ->
         LazyColumn(
@@ -91,7 +91,7 @@ fun StoryDetailScreen(
                             .statusBarsPadding()
                             .padding(top = 8.dp, start = 16.dp)
                             .size(40.dp)
-                            .background(Color.Black.copy(alpha = 0.35f), CircleShape)
+                            .background(Color.Black.copy(alpha = 0.2f), CircleShape)
                     ) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
@@ -103,16 +103,16 @@ fun StoryDetailScreen(
                 }
             }
             item {
-                // White sheet overlapping hero by -30dp, 32dp top rounding
+                // White sheet overlapping hero by -30dp, 40dp top rounding
                 Surface(
                     modifier = Modifier.fillMaxWidth()
                         .offset(y = (-30).dp)
-                        .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)),
+                        .clip(RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp)),
                     color = MaterialTheme.colorScheme.surface
                 ) {
                     StoryBody(
                         story = story,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        modifier = Modifier.padding(horizontal = 24.dp)
                             .padding(top = 24.dp)
                     )
                 }
@@ -158,7 +158,22 @@ private fun StoryBody(story: StoryUi, modifier: Modifier = Modifier) {
                 modifier = Modifier.weight(1f, fill = false)
             )
             Text(
-                text = "•  ${story.date}  •  ${story.readTime}",
+                text = "•",
+                style = MaterialTheme.typography.bodyMedium,
+                color = PrimaryTeal
+            )
+            Text(
+                text = story.date,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = "•",
+                style = MaterialTheme.typography.bodyMedium,
+                color = PrimaryTeal
+            )
+            Text(
+                text = story.readTime,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -166,8 +181,8 @@ private fun StoryBody(story: StoryUi, modifier: Modifier = Modifier) {
         story.body.forEach { paragraph ->
             Text(
                 text = paragraph,
-                style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
+                style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 24.sp),
+                color = Color(0xFF444444)
             )
         }
         // Interesting-fact callout, light teal

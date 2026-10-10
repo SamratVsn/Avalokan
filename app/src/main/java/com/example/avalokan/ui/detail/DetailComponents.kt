@@ -105,6 +105,7 @@ fun DetailSectionTitle(text: String, modifier: Modifier = Modifier) {
     Text(
         text = text,
         style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold,
         modifier = modifier
     )
 }

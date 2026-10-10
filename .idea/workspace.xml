@@ -9,9 +9,11 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="338013c5-ac57-40a5-8a36-a85c84675d67" name="Changes" comment="Enhancing Event Detail Screen">
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/components/HeritageCard.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/components/HeritageCard.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/home/HomeScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/home/HomeScreen.kt" afterDir="false" />
+    <list default="true" id="338013c5-ac57-40a5-8a36-a85c84675d67" name="Changes" comment="Update Place &amp; Story Details">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/detail/DetailComponents.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/detail/DetailComponents.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/detail/PlaceDetail.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/detail/PlaceDetail.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/detail/StoryDetail.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/detail/StoryDetail.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -84,25 +86,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;Android App.app.executor&quot;: &quot;Run&quot;,
-    &quot;CidrDebugProfileConversion&quot;: &quot;true&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/samratvsn/AndroidStudioProjects/Avalokan&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Android App.app.executor": "Run",
+    "CidrDebugProfileConversion": "true",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "android.gradle.sync.needed": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "git-widget-placeholder": "master",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/home/samratvsn/AndroidStudioProjects/Avalokan",
+    "settings.editor.selected.configurable": "preferences.pluginManager"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/app" />
@@ -458,7 +461,6 @@
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="UI Fix on Profile Screen" />
     <MESSAGE value="UI Improvements" />
     <MESSAGE value="Setting Screen" />
     <MESSAGE value="New Screens" />
@@ -483,7 +485,8 @@
     <MESSAGE value="Modifying detail screensz" />
     <MESSAGE value="Modifying event detail dead buttons" />
     <MESSAGE value="Enhancing Event Detail Screen" />
-    <option name="LAST_COMMIT_MESSAGE" value="Enhancing Event Detail Screen" />
+    <MESSAGE value="Premium Home Screen Look" />
+    <option name="LAST_COMMIT_MESSAGE" value="Premium Home Screen Look" />
   </component>
   <component name="play_dynamic_filters_status">
     <option name="appIdToCheckInfo">

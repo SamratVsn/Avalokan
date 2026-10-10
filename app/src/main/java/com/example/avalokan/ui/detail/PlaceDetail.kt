@@ -62,6 +62,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.avalokan.ui.theme.AccentMarigold
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
@@ -126,14 +127,14 @@ private fun PlaceDetailContent(
     onDirectionsClick: () -> Unit
 ) {
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = Color.White,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             // Sticky footer: directions + save
             Surface(shadowElevation = 8.dp, color = MaterialTheme.colorScheme.surface) {
                 Row(
                     modifier = Modifier.fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                        .padding(horizontal = 24.dp, vertical = 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -141,7 +142,7 @@ private fun PlaceDetailContent(
                         onClick = onDirectionsClick,
                         modifier = Modifier.size(48.dp)
                             .background(
-                                MaterialTheme.colorScheme.surfaceVariant,
+                                PrimaryLight,
                                 StandardCardShape
                             )
                     ) {
@@ -155,7 +156,7 @@ private fun PlaceDetailContent(
                         onClick = onShareClick,
                         modifier = Modifier.size(48.dp)
                             .background(
-                                MaterialTheme.colorScheme.surfaceVariant,
+                                PrimaryLight,
                                 StandardCardShape
                             )
                     ) {
@@ -171,7 +172,10 @@ private fun PlaceDetailContent(
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = PrimaryTeal)
                     ) {
-                        Text(text = "Save to Collection")
+                        Text(
+                            text = "Save to Collection",
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
             }
@@ -203,7 +207,7 @@ private fun PlaceDetailContent(
                             .statusBarsPadding()
                             .padding(top = 8.dp, start = 16.dp)
                             .size(40.dp)
-                            .background(Color.Black.copy(alpha = 0.35f), CircleShape)
+                            .background(Color.Black.copy(alpha = 0.2f), CircleShape)
                     ) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
@@ -228,7 +232,7 @@ private fun PlaceDetailContent(
             }
             item {
                 Column(
-                    modifier = Modifier.padding(horizontal = 16.dp),
+                    modifier = Modifier.padding(horizontal = 24.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Row(
@@ -258,7 +262,7 @@ private fun PlaceDetailContent(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier.fillMaxWidth()
                         .height(220.dp)
-                        .padding(horizontal = 16.dp),
+                        .padding(horizontal = 24.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     userScrollEnabled = false
@@ -271,18 +275,22 @@ private fun PlaceDetailContent(
             item {
                 ExpandableDescription(
                     description = description,
-                    modifier = Modifier.padding(horizontal = 16.dp)
+                    modifier = Modifier.padding(horizontal = 24.dp)
                 )
+            }
+            // Breathing room between About and Guide sections.
+            item {
+                Spacer(Modifier.height(16.dp))
             }
             item {
                 // Book-a-guide teal card with availability status
                 Card(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
                     shape = StandardCardShape,
                     colors = CardDefaults.cardColors(containerColor = PrimaryTeal)
                 ) {
                     Row(
-                        modifier = Modifier.padding(16.dp),
+                        modifier = Modifier.padding(24.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -333,7 +341,8 @@ private fun PlaceDetailContent(
 private fun StatCard(stat: StatUi) {
     Card(
         shape = StandardCardShape,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEEEEEE)),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF9F9F9))
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -341,8 +350,11 @@ private fun StatCard(stat: StatUi) {
         ) {
             Icon(stat.icon, null, tint = PrimaryTeal, modifier = Modifier.size(22.dp))
             Text(
-                text = stat.label,
-                style = MaterialTheme.typography.labelSmall,
+                text = stat.label.uppercase(),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 10.sp,
+                    letterSpacing = 1.sp
+                ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
