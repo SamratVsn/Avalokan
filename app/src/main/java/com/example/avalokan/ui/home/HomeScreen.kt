@@ -295,7 +295,7 @@ private fun RecentDiscoveries(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Recent Discoveries",
+                text = "Featured Suggestions",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )

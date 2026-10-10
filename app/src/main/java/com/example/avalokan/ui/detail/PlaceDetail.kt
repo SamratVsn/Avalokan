@@ -95,7 +95,8 @@ fun PlaceDetailScreen(
     val context = LocalContext.current
     val snackbarHost = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    var isSaved by rememberSaveable { mutableStateOf(false) }
+    val savedIds by viewModel.savedIds.collectAsState()
+    val isSaved = savedIds.contains(place?.id)
     val placeTitle = place?.name ?: "Kathmandu Durbar Square"
     // Location comes from the place itself ("Lalitpur • Historical Site"),
     // never a hardcoded city — places can be anywhere in Nepal.
@@ -121,9 +122,9 @@ fun PlaceDetailScreen(
         description = place?.description ?: "Once the royal palace of the Malla kings, Kathmandu Durbar Square packs centuries of Newari art, temples, and courtyards into one plaza. Don't miss the Kumari Ghar, Taleju Temple, and the morning pigeon-dotted courtyards before the crowds arrive.",
         isSaved = isSaved,
         onSaveClick = {
-            val willSave = !isSaved
-            isSaved = willSave
-            if (willSave) scope.launch { snackbarHost.showSnackbar("Saved to Collection") }
+            if (viewModel.toggleSave()) {
+                scope.launch { snackbarHost.showSnackbar("Saved to Collection") }
+            }
         },
         onBackClick = onBackClick,
         onShareClick = onShareClick,

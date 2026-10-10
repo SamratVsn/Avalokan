@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.avalokan.R
+import com.example.avalokan.data.place.PlaceItem
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.PrimaryLight
 import com.example.avalokan.ui.theme.PrimaryTeal
@@ -61,12 +62,14 @@ fun ProfileScreen(
     val bio by viewModel.bio.collectAsState()
     val stats by viewModel.stats.collectAsState()
     val avatarUri by viewModel.avatarUri.collectAsState()
+    val savedPlaces by viewModel.savedPlaces.collectAsState()
 
     ProfileContent(
         userName = userName,
         bio = bio,
         stats = stats,
         avatarUri = avatarUri,
+        savedPlaces = savedPlaces,
         onSettingsClick = onSettingsClick
     )
 }
@@ -77,6 +80,7 @@ private fun ProfileContent(
     bio: String,
     stats: ProfileStats,
     avatarUri: String?,
+    savedPlaces: List<PlaceItem>,
     onSettingsClick: () -> Unit
 ) {
     Column(
@@ -121,7 +125,7 @@ private fun ProfileContent(
             avatarUri = avatarUri,
             modifier = Modifier.padding(horizontal = 24.dp)
         )
-        HeritageCollection()
+        HeritageCollection(savedPlaces = savedPlaces)
         UpcomingRegistrations(modifier = Modifier.padding(horizontal = 24.dp))
     }
 }
@@ -229,7 +233,7 @@ private fun UserSectionInfo(number: Int, text: String) {
 }
 
 @Composable
-private fun HeritageCollection() {
+private fun HeritageCollection(savedPlaces: List<PlaceItem>) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
@@ -237,7 +241,7 @@ private fun HeritageCollection() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = stringResource(R.string.myHeritageColl),
+                text = stringResource(R.string.savedPlaces),
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
@@ -247,20 +251,29 @@ private fun HeritageCollection() {
                 color = MaterialTheme.colorScheme.primary
             )
         }
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            CollectionCards(
-                "Durbar Square",
-                "Kathmandu",
-                modifier = Modifier.weight(1f)
+        if (savedPlaces.isEmpty()) {
+            Text(
+                text = "No saved places yet — tap the bookmark on any site.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 24.dp)
             )
-            CollectionCards(
-                "Boudha Stupa",
-                "Kathmandu",
-                modifier = Modifier.weight(1f)
-            )
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                savedPlaces.take(2).forEach { place ->
+                    CollectionCards(
+                        place.name,
+                        place.meta.substringBefore("•").trim().ifBlank { "Nepal" },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                if (savedPlaces.size == 1) {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+            }
         }
     }
 }
@@ -377,6 +390,7 @@ private fun ProfilePreview() {
             bio = "Exploring the heritage of Nepal",
             stats = ProfileStats(),
             avatarUri = null,
+            savedPlaces = emptyList(),
             onSettingsClick = {}
         )
     }
