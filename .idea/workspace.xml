@@ -9,14 +9,9 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="338013c5-ac57-40a5-8a36-a85c84675d67" name="Changes" comment="Modifying event detail dead buttons">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/data/AvalokanDatabase.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/data/AvalokanDatabase.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/data/event/EventItem.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/data/event/EventItem.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/data/event/EventRepository.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/data/event/EventRepository.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/detail/DetailComponents.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/detail/DetailComponents.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/detail/EventDetail.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/detail/EventDetail.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/events/EventsViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/events/EventsViewModel.kt" afterDir="false" />
+    <list default="true" id="338013c5-ac57-40a5-8a36-a85c84675d67" name="Changes" comment="Enhancing Event Detail Screen">
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/components/HeritageCard.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/components/HeritageCard.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/home/HomeScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/home/HomeScreen.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -463,7 +458,6 @@
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Profile Screen Completed" />
     <MESSAGE value="UI Fix on Profile Screen" />
     <MESSAGE value="UI Improvements" />
     <MESSAGE value="Setting Screen" />
@@ -488,7 +482,8 @@
     <MESSAGE value="Fixing Dead Setting Rows" />
     <MESSAGE value="Modifying detail screensz" />
     <MESSAGE value="Modifying event detail dead buttons" />
-    <option name="LAST_COMMIT_MESSAGE" value="Modifying event detail dead buttons" />
+    <MESSAGE value="Enhancing Event Detail Screen" />
+    <option name="LAST_COMMIT_MESSAGE" value="Enhancing Event Detail Screen" />
   </component>
   <component name="play_dynamic_filters_status">
     <option name="appIdToCheckInfo">

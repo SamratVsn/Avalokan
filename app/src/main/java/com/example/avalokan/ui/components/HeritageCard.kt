@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
@@ -37,7 +38,6 @@ import com.example.avalokan.ui.theme.AccentMarigold
 import com.example.avalokan.ui.theme.BadgeShape
 import com.example.avalokan.ui.theme.PrimaryLight
 import com.example.avalokan.ui.theme.PrimaryTeal
-import com.example.avalokan.ui.theme.StandardCardShape
 
 @Composable
 fun HeritageCard(
@@ -50,6 +50,7 @@ fun HeritageCard(
     imageUrl: String? = null,
     cardWidth: Dp? = null,
     imageHeight: Dp = 110.dp,
+    imageCorner: Dp = 20.dp,
     showSave: Boolean = false,
     isSaved: Boolean = false,
     onSaveClick: (() -> Unit)? = null,
@@ -62,7 +63,7 @@ fun HeritageCard(
     if (cardContainer) {
         Card(
             modifier = modifier.fillMaxWidth().then(clickMod),
-            shape = StandardCardShape,
+            shape = RoundedCornerShape(imageCorner),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
             )
@@ -95,7 +96,7 @@ fun HeritageCard(
             modifier = modifier.then(widthMod).then(clickMod),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            Card(shape = StandardCardShape) {
+            Card(shape = RoundedCornerShape(imageCorner)) {
                 HeritageImage(
                     imageHeight = imageHeight,
                     title = title,
@@ -199,7 +200,7 @@ private fun HeritageTexts(
                         text = badge,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
                     )
                 }
             }

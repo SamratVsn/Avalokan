@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -37,9 +38,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -50,7 +53,7 @@ import com.example.avalokan.data.place.PlaceItem
 import com.example.avalokan.ui.theme.AccentMarigold
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
-import com.example.avalokan.ui.theme.EditorialCardShape
+import com.example.avalokan.ui.theme.EditorialLargeCardShape
 import com.example.avalokan.ui.theme.PrimaryLight
 import com.example.avalokan.ui.theme.PrimaryTeal
 import com.example.avalokan.ui.theme.Spacing
@@ -96,19 +99,19 @@ private fun HomeContent(
             .padding(bottom = Spacing.large),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Spacer(Modifier.height(Spacing.small))
+        Spacer(Modifier.height(Spacing.medium))
         TopIcons()
         StoryCard(
-            modifier = Modifier.padding(horizontal = Spacing.sidePadding),
+            modifier = Modifier.padding(horizontal = 24.dp),
             onReadClick = { onStoryClick(heroStoryId) }
         )
         HistoricalGems(places = places, onPlaceClick = onPlaceClick)
         EventSuggestion(
-            modifier = Modifier.padding(horizontal = Spacing.sidePadding),
+            modifier = Modifier.padding(horizontal = 24.dp),
             onExploreClick = onExploreEventsClick
         )
         RecentDiscoveries(
-            modifier = Modifier.padding(horizontal = Spacing.sidePadding),
+            modifier = Modifier.padding(horizontal = 24.dp),
             places = places,
             onPlaceClick = onPlaceClick
         )
@@ -118,14 +121,17 @@ private fun HomeContent(
 @Composable
 private fun TopIcons(modifier: Modifier = Modifier) {
     Row(
-        modifier = modifier.fillMaxWidth().padding(horizontal = Spacing.sidePadding),
+        modifier = modifier.fillMaxWidth().padding(horizontal = 24.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column {
             Text(
                 text = stringResource(R.string.namaste).uppercase(),
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 9.sp,
+                    letterSpacing = 1.sp
+                ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
@@ -137,7 +143,8 @@ private fun TopIcons(modifier: Modifier = Modifier) {
         IconButton(
             onClick = { /* TODO: notifications */ },
             modifier = Modifier
-                .size(40.dp)
+                .size(36.dp)
+                .shadow(4.dp, CircleShape)
                 .background(
                     color = MaterialTheme.colorScheme.primaryContainer,
                     shape = CircleShape
@@ -147,7 +154,7 @@ private fun TopIcons(modifier: Modifier = Modifier) {
                 imageVector = Icons.Default.Notifications,
                 contentDescription = stringResource(R.string.notifications),
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(18.dp)
+                modifier = Modifier.size(16.dp)
             )
         }
     }
@@ -162,7 +169,7 @@ private fun StoryCard(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = EditorialCardShape,
+        shape = EditorialLargeCardShape,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Box(modifier = Modifier.fillMaxWidth().height(300.dp)) {
@@ -197,13 +204,17 @@ private fun StoryCard(
                 Spacer(Modifier.height(2.dp))
                 Button(
                     onClick = onReadClick,
-                    shape = BadgeShape,
+                    shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = PrimaryTeal),
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
                 ) {
-                    Text(text = stringResource(R.string.readStory), style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        text = stringResource(R.string.readStory),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
                     Spacer(Modifier.width(4.dp))
-                    Icon(Icons.AutoMirrored.Filled.ArrowForward, null, Modifier.size(14.dp))
+                    Icon(Icons.AutoMirrored.Filled.ArrowForward, null, Modifier.size(12.dp))
                 }
             }
         }
@@ -217,16 +228,20 @@ private fun HistoricalGems(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.sidePadding),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = stringResource(R.string.historicalGems), style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = stringResource(R.string.historicalGems),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
             Text(text = stringResource(R.string.viewAll), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
         }
         LazyRow(
-            contentPadding = PaddingValues(horizontal = Spacing.sidePadding),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            contentPadding = PaddingValues(horizontal = 24.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(
                 count = places.size,
@@ -259,6 +274,7 @@ private fun PlaceCard(
         imageUrl = imageUrl,
         cardWidth = 150.dp,
         imageHeight = 110.dp,
+        imageCorner = 24.dp,
         onCardClick = onCardClick
     )
 }
@@ -278,7 +294,11 @@ private fun RecentDiscoveries(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "Recent Discoveries", style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = "Recent Discoveries",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
             Text(text = stringResource(R.string.viewAll), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
         }
         places.filter { it.id == "boudha-stupa" || it.id == "bhaktapur-pottery" }
@@ -299,17 +319,32 @@ private fun EventSuggestion(
     modifier: Modifier = Modifier,
     onExploreClick: () -> Unit = {}
 ) {
-    Card(modifier = modifier.fillMaxWidth(), shape = StandardCardShape, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = StandardCardShape,
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF0F9F8))
+    ) {
         Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(text = stringResource(R.string.localED), style = MaterialTheme.typography.titleMedium)
                 Text(text = stringResource(R.string.joinEventDesc), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 Spacer(Modifier.height(4.dp))
-                Button(onClick = onExploreClick, shape = StandardButtonShape, colors = ButtonDefaults.buttonColors(containerColor = PrimaryTeal, contentColor = Color.White)) {
-                    Text(text = stringResource(R.string.exploreEB))
+                Button(
+                    onClick = onExploreClick,
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = PrimaryTeal),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.exploreEB),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Icon(Icons.AutoMirrored.Filled.ArrowForward, null, Modifier.size(12.dp))
                 }
             }
-            Surface(shape = StandardCardShape, color = Color.White, shadowElevation = 4.dp) {
+            Surface(shape = StandardCardShape, color = Color.White, shadowElevation = 8.dp) {
                 Icon(Icons.Default.CalendarMonth, null, tint = PrimaryTeal, modifier = Modifier.padding(12.dp).size(28.dp))
             }
         }
