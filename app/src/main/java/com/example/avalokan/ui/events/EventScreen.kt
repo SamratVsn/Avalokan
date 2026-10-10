@@ -1,5 +1,6 @@
 package com.example.avalokan.ui.events
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -33,12 +35,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
 import com.example.avalokan.data.event.EventItem
@@ -77,14 +82,14 @@ private fun EventContent(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Spacer(Modifier.height(Spacing.small))
-        TopTexts(modifier = Modifier.padding(horizontal = Spacing.sidePadding))
+        TopTexts(modifier = Modifier.padding(horizontal = 24.dp))
         FeaturedEvent(
-            modifier = Modifier.padding(horizontal = Spacing.sidePadding),
+            modifier = Modifier.padding(horizontal = 24.dp),
             onRemindClick = { onEventClick("indra-jatra-2024") }
         )
         UpcomingEvents(
             events = events,
-            modifier = Modifier.padding(horizontal = Spacing.sidePadding),
+            modifier = Modifier.padding(horizontal = 24.dp).padding(top = 20.dp),
             onEventClick = onEventClick
         )
     }
@@ -105,7 +110,7 @@ private fun TopTexts(modifier: Modifier = Modifier) {
             )
             Text(
                 text = stringResource(R.string.kathmanduValley),
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -138,18 +143,20 @@ private fun FeaturedEvent(
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = "Featured Festival",
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
         )
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = StandardCardShape,
-            colors = CardDefaults.cardColors(containerColor = PrimaryTeal)
+            shape = RoundedCornerShape(32.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.Transparent)
         ) {
             Column {
                 // Image container (reference aspect); swap for AsyncImage when Data layer lands
                 Box(
                     modifier = Modifier.fillMaxWidth().height(180.dp)
-                        .background(PrimaryLight),
+                        .background(PrimaryLight)
+                        .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -172,7 +179,14 @@ private fun FeaturedEvent(
                     }
                 }
                 Column(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp))
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(PrimaryTeal, Color(0xFF00564B))
+                            )
+                        )
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Row(
@@ -221,7 +235,7 @@ private fun FeaturedEvent(
                         Text(
                             text = "Remind Me & Get Tickets",
                             style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
                 }
@@ -239,7 +253,8 @@ private fun UpcomingEvents(
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = "Upcoming in Your Locality",
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
         )
         events.forEach { event ->
             EventCards(
@@ -267,6 +282,7 @@ private fun EventCards(
         onClick = onCardClick,
         modifier = Modifier.fillMaxWidth(),
         shape = StandardCardShape,
+        border = BorderStroke(1.dp, Color(0xFFEEEEEE)),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(

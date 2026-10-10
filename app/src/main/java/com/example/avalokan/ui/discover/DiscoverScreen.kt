@@ -40,12 +40,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
 import com.example.avalokan.data.place.PlaceItem
@@ -102,7 +104,7 @@ private fun DiscoverContent(
     ) {
         Spacer(Modifier.height(Spacing.small))
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.sidePadding),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -130,7 +132,7 @@ private fun DiscoverContent(
         }
         SearchField(
             query = query, onQuery = onQuery,
-            modifier = Modifier.padding(horizontal = Spacing.sidePadding)
+            modifier = Modifier.padding(horizontal = 24.dp)
         )
         Suggestions(
             filters = filters, selected = selected,
@@ -168,11 +170,11 @@ private fun SearchField(
             )
         },
         singleLine = true,
-        shape = StandardCardShape,
+        shape = CircleShape,
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = Color.Transparent, unfocusedBorderColor = Color.Transparent,
-            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
+            focusedContainerColor = Color(0xFFF5F5F5),
+            unfocusedContainerColor = Color(0xFFF5F5F5)
         )
     )
 }
@@ -193,7 +195,7 @@ private fun Suggestions(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ){
         LazyRow(
-            contentPadding = PaddingValues(horizontal = Spacing.sidePadding),
+            contentPadding = PaddingValues(horizontal = 24.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ){
             itemsIndexed(filters) { index, label ->
@@ -203,15 +205,26 @@ private fun Suggestions(
                     onClick = { onSelect(index) },
                     label = { Text(text = label, style = MaterialTheme.typography.bodyMedium, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium) },
                     shape = BadgeShape,
+                    modifier = Modifier.then(
+                        if (isSelected) Modifier.shadow(4.dp, BadgeShape)
+                        else Modifier
+                    ),
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = PrimaryTeal, selectedLabelColor = Color.White,
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant, labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        containerColor = Color.Transparent, labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    ),
+                    border = FilterChipDefaults.filterChipBorder(
+                        enabled = true,
+                        selected = isSelected,
+                        borderColor = Color(0xFFEEEEEE),
+                        selectedBorderColor = Color.Transparent,
+                        borderWidth = 1.dp
                     )
                 )
             }
         }
         Column(
-            modifier = Modifier.padding(horizontal = Spacing.sidePadding),
+            modifier = Modifier.padding(horizontal = 24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             sites.forEach { site ->
@@ -241,10 +254,12 @@ private fun SearchPlaceCard(
 ){
     com.example.avalokan.ui.components.HeritageCard(
         title = title,
-        subtitle = meta,
+        subtitle = meta.uppercase(),
+        subtitleStyle = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
         rating = rating,
         description = desc,
         imageHeight = 180.dp,
+        imageCorner = 28.dp,
         showSave = true,
         isSaved = isSaved,
         onSaveClick = onSaveClick,

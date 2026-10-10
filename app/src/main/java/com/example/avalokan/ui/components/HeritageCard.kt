@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -47,6 +48,7 @@ fun HeritageCard(
     rating: String? = null,
     description: String? = null,
     descriptionLines: Int = 3,
+    subtitleStyle: TextStyle? = null,
     imageUrl: String? = null,
     cardWidth: Dp? = null,
     imageHeight: Dp = 110.dp,
@@ -83,6 +85,7 @@ fun HeritageCard(
                     HeritageTexts(
                         title = title,
                         subtitle = subtitle,
+                        subtitleStyle = subtitleStyle,
                         badge = badge,
                         rating = rating,
                         description = description,
@@ -108,6 +111,7 @@ fun HeritageCard(
             HeritageTexts(
                 title = title,
                 subtitle = subtitle,
+                subtitleStyle = subtitleStyle,
                 badge = badge,
                 rating = rating,
                 description = description,
@@ -160,6 +164,7 @@ private fun HeritageImage(
 private fun HeritageTexts(
     title: String,
     subtitle: String,
+    subtitleStyle: TextStyle?,
     badge: String?,
     rating: String?,
     description: String?,
@@ -173,7 +178,7 @@ private fun HeritageTexts(
     )
     Text(
         text = subtitle,
-        style = MaterialTheme.typography.bodyMedium,
+        style = subtitleStyle ?: MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis

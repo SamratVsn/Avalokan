@@ -11,9 +11,9 @@
   <component name="ChangeListManager">
     <list default="true" id="338013c5-ac57-40a5-8a36-a85c84675d67" name="Changes" comment="Update Place &amp; Story Details">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/detail/DetailComponents.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/detail/DetailComponents.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/detail/PlaceDetail.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/detail/PlaceDetail.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/detail/StoryDetail.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/detail/StoryDetail.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/components/HeritageCard.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/components/HeritageCard.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/discover/DiscoverScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/discover/DiscoverScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/events/EventScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/avalokan/ui/events/EventScreen.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -97,7 +97,6 @@
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.readMode.enableVisualFormatting": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "android.gradle.sync.needed": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "git-widget-placeholder": "master",
@@ -461,7 +460,6 @@
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="UI Improvements" />
     <MESSAGE value="Setting Screen" />
     <MESSAGE value="New Screens" />
     <MESSAGE value="UI Fixes" />
@@ -486,7 +484,8 @@
     <MESSAGE value="Modifying event detail dead buttons" />
     <MESSAGE value="Enhancing Event Detail Screen" />
     <MESSAGE value="Premium Home Screen Look" />
-    <option name="LAST_COMMIT_MESSAGE" value="Premium Home Screen Look" />
+    <MESSAGE value="Update Place &amp; Story Details" />
+    <option name="LAST_COMMIT_MESSAGE" value="Update Place &amp; Story Details" />
   </component>
   <component name="play_dynamic_filters_status">
     <option name="appIdToCheckInfo">
