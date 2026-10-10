@@ -1,5 +1,6 @@
 package com.example.avalokan.ui.profile
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -40,11 +42,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.avalokan.R
 import com.example.avalokan.ui.theme.AvalokanTheme
-import com.example.avalokan.ui.theme.EditorialCardShape
 import com.example.avalokan.ui.theme.PrimaryLight
 import com.example.avalokan.ui.theme.PrimaryTeal
 import com.example.avalokan.ui.theme.Spacing
@@ -79,7 +81,7 @@ private fun ProfileContent(
 ) {
     Column(
         modifier = Modifier.fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(Color.White)
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(bottom = Spacing.extraLarge),
@@ -87,19 +89,20 @@ private fun ProfileContent(
     ) {
         Spacer(Modifier.height(Spacing.small))
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.sidePadding),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
                 text = stringResource(R.string.profile),
-                style = MaterialTheme.typography.headlineMedium
+                style = MaterialTheme.typography.headlineMedium.copy(fontSize = 24.sp),
+                fontWeight = FontWeight.Bold
             )
             IconButton(
                 onClick = onSettingsClick,
                 modifier = Modifier.size(40.dp)
                     .background(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        color = Color(0xFFF5F5F5),
                         shape = CircleShape
                     )
             ) {
@@ -116,10 +119,10 @@ private fun ProfileContent(
             bio = bio,
             stats = stats,
             avatarUri = avatarUri,
-            modifier = Modifier.padding(horizontal = Spacing.sidePadding)
+            modifier = Modifier.padding(horizontal = 24.dp)
         )
         HeritageCollection()
-        UpcomingRegistrations(modifier = Modifier.padding(horizontal = Spacing.sidePadding))
+        UpcomingRegistrations(modifier = Modifier.padding(horizontal = 24.dp))
     }
 }
 
@@ -133,8 +136,8 @@ private fun UserSection(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = EditorialCardShape,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        shape = RoundedCornerShape(40.dp),
+        colors = CardDefaults.cardColors(containerColor = PrimaryLight.copy(alpha = 0.3f))
     ) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 28.dp),
@@ -145,7 +148,8 @@ private fun UserSection(
                 Surface(
                     shape = CircleShape,
                     color = PrimaryLight,
-                    shadowElevation = 2.dp
+                    shadowElevation = 4.dp,
+                    border = BorderStroke(2.dp, Color.White)
                 ) {
                     if (avatarUri != null) {
                         AsyncImage(
@@ -215,7 +219,10 @@ private fun UserSectionInfo(number: Int, text: String) {
         )
         Text(
             text = text,
-            style = MaterialTheme.typography.labelSmall,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontSize = 10.sp,
+                letterSpacing = 1.sp
+            ),
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
@@ -225,7 +232,7 @@ private fun UserSectionInfo(number: Int, text: String) {
 private fun HeritageCollection() {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.sidePadding),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -241,8 +248,8 @@ private fun HeritageCollection() {
             )
         }
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.sidePadding),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             CollectionCards(
                 "Durbar Square",
@@ -264,7 +271,7 @@ private fun CollectionCards(place: String, loc: String, modifier: Modifier = Mod
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        Card(shape = StandardCardShape) {
+        Card(shape = RoundedCornerShape(28.dp)) {
             Box(
                 modifier = Modifier.fillMaxWidth().height(150.dp).background(PrimaryLight),
                 contentAlignment = Alignment.Center
@@ -274,13 +281,17 @@ private fun CollectionCards(place: String, loc: String, modifier: Modifier = Mod
         }
         Text(
             text = place,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleMedium.copy(fontSize = 14.sp),
+            fontWeight = FontWeight.Bold,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
         Text(
             text = loc,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Normal
+            ),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
@@ -311,7 +322,7 @@ private fun RegisteredBox() {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Surface(shape = StandardCardShape, color = Color.White.copy(alpha = 0.15f)) {
+            Surface(shape = StandardCardShape, color = Color.White.copy(alpha = 0.2f)) {
                 Column(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -345,7 +356,7 @@ private fun RegisteredBox() {
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            Surface(shape = CircleShape, color = Color.White.copy(alpha = 0.15f)) {
+            Surface(shape = CircleShape, color = Color.White.copy(alpha = 0.2f)) {
                 Icon(
                     Icons.Default.ConfirmationNumber,
                     null,
