@@ -64,7 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
-import com.example.avalokan.data.local.UserPreferences
+import com.example.avalokan.data.local.PreferencesStore
 import com.example.avalokan.ui.theme.AccentMarigold
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.DangerBg
@@ -111,9 +111,9 @@ fun SettingsScreen(
         },
         onThemeCycle = {
             val next = when (uiState.themeChoice) {
-                UserPreferences.THEME_SYSTEM -> UserPreferences.THEME_LIGHT
-                UserPreferences.THEME_LIGHT -> UserPreferences.THEME_DARK
-                else -> UserPreferences.THEME_SYSTEM
+                PreferencesStore.THEME_SYSTEM -> PreferencesStore.THEME_LIGHT
+                PreferencesStore.THEME_LIGHT -> PreferencesStore.THEME_DARK
+                else -> PreferencesStore.THEME_SYSTEM
             }
             viewModel.onThemeChoice(next)
         },
@@ -393,8 +393,8 @@ private fun AppearanceSection(
     modifier: Modifier = Modifier
 ) {
     val label = when (themeChoice) {
-        UserPreferences.THEME_LIGHT -> "Light"
-        UserPreferences.THEME_DARK -> "Dark"
+        PreferencesStore.THEME_LIGHT -> "Light"
+        PreferencesStore.THEME_DARK -> "Dark"
         else -> "System"
     }
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {

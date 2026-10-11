@@ -8,7 +8,7 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import com.example.avalokan.data.local.UserPreferences
+import com.example.avalokan.data.local.PreferencesStore
 import com.example.avalokan.ui.settings.SettingsViewModel
 import com.example.avalokan.ui.theme.AvalokanTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -25,8 +25,8 @@ class MainActivity : ComponentActivity() {
             val systemDark = isSystemInDarkTheme()
             AvalokanTheme(
                 darkTheme = when (uiState.themeChoice) {
-                    UserPreferences.THEME_LIGHT -> false
-                    UserPreferences.THEME_DARK -> true
+                    PreferencesStore.THEME_LIGHT -> false
+                    PreferencesStore.THEME_DARK -> true
                     else -> systemDark
                 }
             ) {

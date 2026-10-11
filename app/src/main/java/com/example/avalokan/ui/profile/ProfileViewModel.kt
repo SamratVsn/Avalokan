@@ -3,7 +3,7 @@ package com.example.avalokan.ui.profile
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.avalokan.data.local.UserPreferences
+import com.example.avalokan.data.local.PreferencesStore
 import com.example.avalokan.data.place.PlaceItem
 import com.example.avalokan.data.place.PlaceRepository
 import com.google.firebase.storage.FirebaseStorage
@@ -35,7 +35,7 @@ data class ProfileStats(
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val userPreferences: UserPreferences,
+    private val userPreferences: PreferencesStore,
     placeRepository: PlaceRepository
 ) : ViewModel() {
     private val _userName = MutableStateFlow("Guest")

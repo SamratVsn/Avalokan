@@ -2,7 +2,7 @@ package com.example.avalokan.ui.discover
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.avalokan.data.local.UserPreferences
+import com.example.avalokan.data.local.PreferencesStore
 import com.example.avalokan.data.place.PlaceItem
 import com.example.avalokan.data.place.PlaceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -40,7 +40,7 @@ private val FallbackSites = listOf(
 @HiltViewModel
 class DiscoverViewModel @Inject constructor(
     placeRepository: PlaceRepository,
-    private val userPreferences: UserPreferences
+    private val userPreferences: PreferencesStore
 ) : ViewModel() {
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query.asStateFlow()

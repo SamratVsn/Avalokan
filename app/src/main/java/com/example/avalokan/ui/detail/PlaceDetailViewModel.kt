@@ -3,7 +3,7 @@ package com.example.avalokan.ui.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.avalokan.data.local.UserPreferences
+import com.example.avalokan.data.local.PreferencesStore
 import com.example.avalokan.data.place.PlaceItem
 import com.example.avalokan.data.place.PlaceRepository
 import com.example.avalokan.ui.navigation.NavDestination
@@ -17,7 +17,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PlaceDetailViewModel @Inject constructor(
     placeRepository: PlaceRepository,
-    private val userPreferences: UserPreferences,
+    private val userPreferences: PreferencesStore,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val placeId: String =

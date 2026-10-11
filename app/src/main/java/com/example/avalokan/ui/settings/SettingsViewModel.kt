@@ -3,7 +3,7 @@ package com.example.avalokan.ui.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.avalokan.data.event.EventRepository
-import com.example.avalokan.data.local.UserPreferences
+import com.example.avalokan.data.local.PreferencesStore
 import com.example.avalokan.data.place.PlaceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,12 +15,12 @@ import javax.inject.Inject
 
 data class SettingsUiState(
     val notificationsEnabled: Boolean = true,
-    val themeChoice: String = UserPreferences.THEME_SYSTEM
+    val themeChoice: String = PreferencesStore.THEME_SYSTEM
 )
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val userPreferences: UserPreferences,
+    private val userPreferences: PreferencesStore,
     private val placeRepository: PlaceRepository,
     private val eventRepository: EventRepository
 ) : ViewModel() {
