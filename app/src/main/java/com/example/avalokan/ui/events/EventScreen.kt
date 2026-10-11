@@ -50,10 +50,12 @@ import com.example.avalokan.data.event.EventItem
 import com.example.avalokan.ui.theme.AccentMarigold
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
+import com.example.avalokan.ui.theme.GreyBorder
 import com.example.avalokan.ui.theme.PrimaryLight
 import com.example.avalokan.ui.theme.PrimaryTeal
 import com.example.avalokan.ui.theme.Spacing
 import com.example.avalokan.ui.theme.StandardCardShape
+import com.example.avalokan.ui.theme.TealDark
 
 @Composable
 fun EventScreen(
@@ -183,7 +185,7 @@ private fun FeaturedEvent(
                         .clip(RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp))
                         .background(
                             Brush.verticalGradient(
-                                listOf(PrimaryTeal, Color(0xFF00564B))
+                                listOf(PrimaryTeal, TealDark)
                             )
                         )
                         .padding(horizontal = 16.dp, vertical = 14.dp),
@@ -282,7 +284,7 @@ private fun EventCards(
         onClick = onCardClick,
         modifier = Modifier.fillMaxWidth(),
         shape = StandardCardShape,
-        border = BorderStroke(1.dp, Color(0xFFEEEEEE)),
+        border = BorderStroke(1.dp, GreyBorder),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(

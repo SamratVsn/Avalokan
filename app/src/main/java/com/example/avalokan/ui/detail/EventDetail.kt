@@ -52,8 +52,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.avalokan.ui.theme.AvalokanTheme
+import com.example.avalokan.ui.theme.GreyBorder
+import com.example.avalokan.ui.theme.HeroScrim
 import com.example.avalokan.ui.theme.PrimaryTeal
 import com.example.avalokan.ui.theme.StandardCardShape
+import com.example.avalokan.ui.theme.SurfaceMuted
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.material.icons.filled.Favorite
@@ -67,7 +70,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.launch
 
-private val ExperienceCardBg = Color(0xFFF9F9F9)
+private val ExperienceCardBg = SurfaceMuted
 
 @Composable
 fun EventDetailScreen(
@@ -189,7 +192,7 @@ private fun EventDetailContent(
                         IconButton(
                             onClick = onBackClick,
                             modifier = Modifier.size(40.dp)
-                                .background(Color.Black.copy(alpha = 0.35f), CircleShape)
+                                .background(HeroScrim, CircleShape)
                         ) {
                             Icon(
                                 Icons.AutoMirrored.Filled.ArrowBack,
@@ -202,7 +205,7 @@ private fun EventDetailContent(
                             IconButton(
                                 onClick = onShareClick,
                                 modifier = Modifier.size(40.dp)
-                                    .background(Color.Black.copy(alpha = 0.35f), CircleShape)
+                                    .background(HeroScrim, CircleShape)
                             ) {
                                 Icon(
                                     Icons.Default.Share,
@@ -214,7 +217,7 @@ private fun EventDetailContent(
                             IconButton(
                                 onClick = onFavoriteClick,
                                 modifier = Modifier.size(40.dp)
-                                    .background(Color.Black.copy(alpha = 0.35f), CircleShape)
+                                    .background(HeroScrim, CircleShape)
                             ) {
                                 Icon(
                                     if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
@@ -275,7 +278,7 @@ private fun EventDetailContent(
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = StandardCardShape,
-                            border = BorderStroke(1.dp, Color(0xFFEEEEEE)),
+                            border = BorderStroke(1.dp, GreyBorder),
                             colors = CardDefaults.cardColors(containerColor = ExperienceCardBg)
                         ) {
                             Column(

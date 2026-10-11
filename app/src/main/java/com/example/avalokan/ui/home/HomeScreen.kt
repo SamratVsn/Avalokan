@@ -54,6 +54,7 @@ import com.example.avalokan.ui.theme.AccentMarigold
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
 import com.example.avalokan.ui.theme.EditorialLargeCardShape
+import com.example.avalokan.ui.theme.MintSoft
 import com.example.avalokan.ui.theme.PrimaryLight
 import com.example.avalokan.ui.theme.PrimaryTeal
 import com.example.avalokan.ui.theme.Spacing
@@ -322,7 +323,7 @@ private fun EventSuggestion(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = StandardCardShape,
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF0F9F8))
+        colors = CardDefaults.cardColors(containerColor = MintSoft)
     ) {
         Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {

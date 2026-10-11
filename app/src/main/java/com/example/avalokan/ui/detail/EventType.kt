@@ -8,9 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.avalokan.ui.theme.PrimaryTeal
-
-/** Deep blue accent reserved for tech events. */
-val TechBlue = Color(0xFF1D4ED8)
+import com.example.avalokan.ui.theme.TechBlue
 
 enum class EventType(val accent: Color) {
     CULTURAL(PrimaryTeal),

@@ -67,15 +67,14 @@ import com.example.avalokan.R
 import com.example.avalokan.data.local.UserPreferences
 import com.example.avalokan.ui.theme.AccentMarigold
 import com.example.avalokan.ui.theme.AvalokanTheme
+import com.example.avalokan.ui.theme.DangerBg
+import com.example.avalokan.ui.theme.DangerRed
+import com.example.avalokan.ui.theme.NeutralBg
 import com.example.avalokan.ui.theme.PrimaryLight
 import com.example.avalokan.ui.theme.PrimaryTeal
 import com.example.avalokan.ui.theme.Spacing
 import com.example.avalokan.ui.theme.StandardCardShape
-
-private val DangerRed = Color(0xFFE53935)
-private val DangerBg = Color(0xFFFFEBEE)
-private val WarmBg = Color(0xFFFFF3E0)
-private val NeutralBg = Color(0xFFF5F5F5)
+import com.example.avalokan.ui.theme.WarmBg
 
 @Composable
 fun SettingsScreen(

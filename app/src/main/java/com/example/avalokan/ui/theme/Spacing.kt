@@ -10,7 +10,7 @@ data class AvalokanSpacing(
     val large: Dp = 24.dp,
     val extraLarge: Dp = 32.dp,
     // Semantic aliases from spec
-    val sidePadding: Dp = 16.dp,
+    val sidePadding: Dp = 24.dp,
     val sectionVertical: Dp = 24.dp,
     val grid: Dp = 8.dp
 )

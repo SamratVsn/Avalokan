@@ -54,6 +54,8 @@ import com.example.avalokan.data.place.PlaceItem
 import com.example.avalokan.ui.theme.AccentMarigold
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
+import com.example.avalokan.ui.theme.GreyBorder
+import com.example.avalokan.ui.theme.GreyLight
 import com.example.avalokan.ui.theme.PrimaryLight
 import com.example.avalokan.ui.theme.PrimaryTeal
 import com.example.avalokan.ui.theme.Spacing
@@ -173,8 +175,8 @@ private fun SearchField(
         shape = CircleShape,
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = Color.Transparent, unfocusedBorderColor = Color.Transparent,
-            focusedContainerColor = Color(0xFFF5F5F5),
-            unfocusedContainerColor = Color(0xFFF5F5F5)
+            focusedContainerColor = GreyLight,
+            unfocusedContainerColor = GreyLight
         )
     )
 }
@@ -216,7 +218,7 @@ private fun Suggestions(
                     border = FilterChipDefaults.filterChipBorder(
                         enabled = true,
                         selected = isSelected,
-                        borderColor = Color(0xFFEEEEEE),
+                        borderColor = GreyBorder,
                         selectedBorderColor = Color.Transparent,
                         borderWidth = 1.dp
                     )

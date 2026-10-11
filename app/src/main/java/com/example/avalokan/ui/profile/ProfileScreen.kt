@@ -48,6 +48,7 @@ import coil.compose.AsyncImage
 import com.example.avalokan.R
 import com.example.avalokan.data.place.PlaceItem
 import com.example.avalokan.ui.theme.AvalokanTheme
+import com.example.avalokan.ui.theme.GreyLight
 import com.example.avalokan.ui.theme.PrimaryLight
 import com.example.avalokan.ui.theme.PrimaryTeal
 import com.example.avalokan.ui.theme.Spacing
@@ -106,7 +107,7 @@ private fun ProfileContent(
                 onClick = onSettingsClick,
                 modifier = Modifier.size(40.dp)
                     .background(
-                        color = Color(0xFFF5F5F5),
+                        color = GreyLight,
                         shape = CircleShape
                     )
             ) {
