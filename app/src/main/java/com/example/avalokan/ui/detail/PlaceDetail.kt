@@ -80,13 +80,6 @@ import com.example.avalokan.ui.theme.SurfaceMuted
 
 private data class StatUi(val icon: ImageVector, val label: String, val value: String)
 
-private val PlaceStats = listOf(
-    StatUi(Icons.Default.ConfirmationNumber, "Entry Fee", "Rs. 100"),
-    StatUi(Icons.Default.CalendarMonth, "Best Time", "Oct – Mar"),
-    StatUi(Icons.Default.Schedule, "Hours", "9 AM – 5 PM"),
-    StatUi(Icons.Default.Star, "Rating", "4.8")
-)
-
 @Composable
 fun PlaceDetailScreen(
     placeId: String = "preview",
@@ -122,6 +115,10 @@ fun PlaceDetailScreen(
         title = placeTitle,
         rating = place?.rating?.ifBlank { "4.8" } ?: "4.8",
         description = place?.description ?: "Once the royal palace of the Malla kings, Kathmandu Durbar Square packs centuries of Newari art, temples, and courtyards into one plaza. Don't miss the Kumari Ghar, Taleju Temple, and the morning pigeon-dotted courtyards before the crowds arrive.",
+        entryFee = place?.entryFee?.ifBlank { "Rs. 100" } ?: "Rs. 100",
+        bestTime = place?.bestTime?.ifBlank { "Oct – Mar" } ?: "Oct – Mar",
+        hours = place?.hours?.ifBlank { "9 AM – 5 PM" } ?: "9 AM – 5 PM",
+        imageUrl = place?.imageUrl,
         isSaved = isSaved,
         onSaveClick = {
             if (viewModel.toggleSave()) {
@@ -140,6 +137,10 @@ private fun PlaceDetailContent(
     title: String,
     rating: String,
     description: String,
+    entryFee: String = "Rs. 100",
+    bestTime: String = "Oct – Mar",
+    hours: String = "9 AM – 5 PM",
+    imageUrl: String? = null,
     isSaved: Boolean,
     onSaveClick: () -> Unit,
     onBackClick: () -> Unit,
@@ -212,19 +213,28 @@ private fun PlaceDetailContent(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
-                // Gallery header with back + View Gallery (placeholder until Data image)
+                // Gallery header (AsyncImage fills it when the Data layer has a URL)
                 Box(modifier = Modifier.fillMaxWidth().height(300.dp)) {
                     Box(
                         modifier = Modifier.fillMaxSize()
                             .background(PrimaryLight),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            Icons.Default.Landscape,
-                            contentDescription = null,
-                            tint = PrimaryTeal,
-                            modifier = Modifier.size(48.dp)
-                        )
+                        if (imageUrl != null) {
+                            coil.compose.AsyncImage(
+                                model = imageUrl,
+                                contentDescription = title,
+                                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        } else {
+                            Icon(
+                                Icons.Default.Landscape,
+                                contentDescription = null,
+                                tint = PrimaryTeal,
+                                modifier = Modifier.size(48.dp)
+                            )
+                        }
                     }
                     IconButton(
                         onClick = onBackClick,
@@ -282,7 +292,13 @@ private fun PlaceDetailContent(
                 }
             }
             item {
-                // 2x2 quick-stats grid (fixed height inside LazyColumn)
+                // 2x2 quick-stats grid (values from data, spec defaults as fallback)
+                val stats = listOf(
+                    StatUi(Icons.Default.ConfirmationNumber, "Entry Fee", entryFee),
+                    StatUi(Icons.Default.CalendarMonth, "Best Time", bestTime),
+                    StatUi(Icons.Default.Schedule, "Hours", hours),
+                    StatUi(Icons.Default.Star, "Rating", rating)
+                )
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier.fillMaxWidth()
@@ -292,7 +308,7 @@ private fun PlaceDetailContent(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     userScrollEnabled = false
                 ) {
-                    items(PlaceStats) { stat ->
+                    items(stats) { stat ->
                         StatCard(stat)
                     }
                 }

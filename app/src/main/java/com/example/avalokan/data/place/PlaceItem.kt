@@ -10,5 +10,10 @@ data class PlaceItem(
     val description: String,
     val meta: String = "",
     val category: String = "",
-    val rating: String = ""
+    val rating: String = "",
+    val entryFee: String = "",
+    val bestTime: String = "",
+    val hours: String = "",
+    val badge: String = "",
+    val imageUrl: String? = null
 )

@@ -235,6 +235,7 @@ private fun Suggestions(
                     meta = site.meta,
                     rating = site.rating,
                     desc = site.description,
+                    imageUrl = site.imageUrl,
                     isSaved = savedIds.contains(site.id),
                     onSaveClick = { onToggleSave(site.id) },
                     onCardClick = { onPlaceClick(site.id) }
@@ -250,6 +251,7 @@ private fun SearchPlaceCard(
     meta: String,
     rating: String,
     desc: String,
+    imageUrl: String? = null,
     isSaved: Boolean = false,
     onSaveClick: () -> Unit = {},
     onCardClick: () -> Unit = {}
@@ -262,6 +264,7 @@ private fun SearchPlaceCard(
         description = desc,
         imageHeight = 180.dp,
         imageCorner = 28.dp,
+        imageUrl = imageUrl,
         showSave = true,
         isSaved = isSaved,
         onSaveClick = onSaveClick,

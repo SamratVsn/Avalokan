@@ -97,7 +97,10 @@ fun EventDetailScreen(
         location = event?.meta?.substringBefore("•")?.trim()
             ?.ifBlank { "Basantapur Durbar Square" }
             ?: "Basantapur Durbar Square",
+        date = event?.date?.ifBlank { "Sept 17, 2024" } ?: "Sept 17, 2024",
+        description = event?.description ?: "The biggest religious street festival in Kathmandu, celebrating the end of monsoon with masked dances and chariot processions.",
         eventType = eventType,
+        imageUrl = event?.imageUrl,
         isFavorite = isFavorite,
         onFavoriteClick = { isFavorite = !isFavorite },
         onShareClick = onShareClick,
@@ -112,6 +115,9 @@ private fun EventDetailContent(
     title: String,
     location: String,
     eventType: EventType,
+    date: String,
+    description: String,
+    imageUrl: String? = null,
     isFavorite: Boolean,
     onFavoriteClick: () -> Unit,
     onShareClick: () -> Unit,
@@ -176,12 +182,21 @@ private fun EventDetailContent(
                             .background(MaterialTheme.colorScheme.surfaceVariant),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            Icons.Default.CalendarMonth,
-                            contentDescription = null,
-                            tint = PrimaryTeal,
-                            modifier = Modifier.size(48.dp)
-                        )
+                        if (imageUrl != null) {
+                            coil.compose.AsyncImage(
+                                model = imageUrl,
+                                contentDescription = title,
+                                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        } else {
+                            Icon(
+                                Icons.Default.CalendarMonth,
+                                contentDescription = null,
+                                tint = PrimaryTeal,
+                                modifier = Modifier.size(48.dp)
+                            )
+                        }
                     }
                     Row(
                         modifier = Modifier.fillMaxWidth()
@@ -245,7 +260,7 @@ private fun EventDetailContent(
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             DetailBadge(
-                                text = "Sept 17 • Festival",
+                                text = "$date • Festival",
                                 containerColor = accent.copy(alpha = 0.12f),
                                 contentColor = accent,
                                 icon = eventBadgeIcon(eventType)
@@ -274,57 +289,18 @@ private fun EventDetailContent(
                                 value = location
                             )
                         }
-                        // Experience card: #F9F9F9, 1dp border, 24dp padding, facepile.
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = StandardCardShape,
-                            border = BorderStroke(1.dp, GreyBorder),
-                            colors = CardDefaults.cardColors(containerColor = ExperienceCardBg)
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(24.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Text(
-                                    text = "Exclusive Heritage Tour",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                                listOf(
-                                    "Guided old-city walk at dawn",
-                                    "Traditional Samay Baji tasting",
-                                    "Masked-dance viewing terrace"
-                                ).forEach { point ->
-                                    Row(
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Check,
-                                            contentDescription = null,
-                                            tint = accent,
-                                            modifier = Modifier.size(18.dp)
-                                        )
-                                        Text(
-                                            text = point,
-                                            style = MaterialTheme.typography.bodyMedium
-                                        )
-                                    }
-                                }
-                                Spacer(Modifier.height(8.dp))
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Facepile(initials = listOf("A", "R", "S", "+12"))
-                                    Text(
-                                        text = "128 attending",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
+                        // About the festival: full Firestore description.
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(
+                                text = "About the Festival",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(
+                                text = description,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
+                            )
                         }
                     }
                 }
@@ -341,6 +317,8 @@ private fun EventDetailPreview() {
             title = "Indra Jatra 2024: The Chariot Procession",
             location = "Basantapur Durbar Square",
             eventType = EventType.RELIGIOUS,
+            date = "Sept 17, 2024",
+            description = "The biggest religious street festival in Kathmandu.",
             isFavorite = false,
             onFavoriteClick = {},
             onShareClick = {},

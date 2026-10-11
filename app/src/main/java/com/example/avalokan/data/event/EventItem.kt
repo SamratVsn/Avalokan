@@ -10,6 +10,8 @@ data class EventItem(
     val description: String,
     val meta: String = "",
     val fee: String = "",
-    val action: String = "",
-    val type: String = "CULTURAL"
+    val action: String = "Join >",
+    val type: String = "CULTURAL",
+    val date: String = "",
+    val imageUrl: String? = null
 )

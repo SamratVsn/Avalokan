@@ -19,7 +19,8 @@ private val FallbackPlaces = listOf(
         description = "Artistic heritage of Lalitpur.",
         meta = "Lalitpur • Historical Site",
         category = "Historical",
-        rating = "4.8"
+        rating = "4.8",
+        badge = "EST. 3D CENTURY"
     ),
     PlaceItem(
         id = "swayambhu",
@@ -27,7 +28,8 @@ private val FallbackPlaces = listOf(
         description = "The Ancient Hill.",
         meta = "Kathmandu • Spiritual Site",
         category = "Historical",
-        rating = "4.7"
+        rating = "4.7",
+        badge = "2500+ YRS"
     ),
     PlaceItem(
         id = "boudha-stupa",
@@ -35,7 +37,8 @@ private val FallbackPlaces = listOf(
         description = "Boudhanath • Spiritual Site.",
         meta = "Boudhanath • Spiritual Site",
         category = "Cultural",
-        rating = "4.9"
+        rating = "4.9",
+        badge = "2500+ YRS"
     ),
     PlaceItem(
         id = "bhaktapur-pottery",
@@ -43,7 +46,8 @@ private val FallbackPlaces = listOf(
         description = "Bhaktapur • Craft Quarter.",
         meta = "Bhaktapur • Craft Quarter",
         category = "Cultural",
-        rating = "4.7"
+        rating = "4.7",
+        badge = "2500+ YRS"
     )
 )
 

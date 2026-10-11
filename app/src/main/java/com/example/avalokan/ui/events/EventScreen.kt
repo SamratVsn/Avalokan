@@ -263,7 +263,6 @@ private fun UpcomingEvents(
                 name = event.title,
                 meta = event.meta,
                 fee = event.fee,
-                action = event.action,
                 onCardClick = { onEventClick(event.id) }
             )
         }
@@ -275,7 +274,6 @@ private fun EventCards(
     name: String,
     meta: String,
     fee: String,
-    action: String,
     // API-ready: pass remote image URL/model here later; null = placeholder below
     imageUrl: String? = null,
     onCardClick: () -> Unit = {}
@@ -329,7 +327,7 @@ private fun EventCards(
                 )
             }
             Text(
-                text = action,
+                text = "Join >",
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
@@ -346,8 +344,8 @@ private fun EventsPreview() {
         EventContent(
             events = listOf(
                 EventItem("bhaktapur-pottery", "Bhaktapur Pottery Workshop", "", "Bhaktapur Square • 10:00 AM", "FREE ENTRY", "Join >"),
-                EventItem("samay-baji", "Alla & Samay Baji Festival", "", "Patan Square • 5:00 PM", "$15 ENTRY", "Sign Up >"),
-                EventItem("thangka-demo", "Live Thangka Art Demo", "", "Boudha • 11:00 AM", "DONATION BASED", "More Info >")
+                EventItem("samay-baji", "Alla & Samay Baji Festival", "", "Patan Square • 5:00 PM", "$15 ENTRY", "Join >"),
+                EventItem("thangka-demo", "Live Thangka Art Demo", "", "Boudha • 11:00 AM", "DONATION BASED", "Join >")
             ),
             onEventClick = {}
         )

@@ -1,5 +1,6 @@
 package com.example.avalokan.data.place
 
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import jakarta.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
@@ -16,6 +17,10 @@ interface PlaceRepository {
 
 private const val PLACES_COLLECTION = "places"
 
+/** Console fields may be stored as String or Number — coerce either. */
+private fun DocumentSnapshot.textField(name: String): String =
+    get(name)?.toString().orEmpty()
+
 class FirestorePlaceRepository @Inject constructor(
     private val firestore: FirebaseFirestore,
     private val placeDao: PlaceDao
@@ -28,11 +33,16 @@ class FirestorePlaceRepository @Inject constructor(
                 val items = snapshots?.documents.orEmpty().map { doc ->
                     PlaceItem(
                         id = doc.id,
-                        name = doc.getString("name").orEmpty(),
-                        description = doc.getString("description").orEmpty(),
-                        meta = doc.getString("meta").orEmpty(),
-                        category = doc.getString("category").orEmpty(),
-                        rating = doc.getString("rating").orEmpty()
+                        name = doc.textField("name"),
+                        description = doc.textField("description"),
+                        meta = doc.textField("meta"),
+                        category = doc.textField("category"),
+                        rating = doc.textField("rating"),
+                        badge = doc.textField("badge"),
+                        entryFee = doc.textField("entryFee"),
+                        bestTime = doc.textField("bestTime"),
+                        hours = doc.textField("hours"),
+                        imageUrl = doc.textField("imageUrl").ifBlank { null }
                     )
                 }
                 launch { placeDao.upsertAll(items)}
@@ -48,11 +58,16 @@ class FirestorePlaceRepository @Inject constructor(
                 val item = snapshot?.let { doc ->
                     PlaceItem(
                         id = doc.id,
-                        name = doc.getString("name").orEmpty(),
-                        description = doc.getString("description").orEmpty(),
-                        meta = doc.getString("meta").orEmpty(),
-                        category = doc.getString("category").orEmpty(),
-                        rating = doc.getString("rating").orEmpty()
+                        name = doc.textField("name"),
+                        description = doc.textField("description"),
+                        meta = doc.textField("meta"),
+                        category = doc.textField("category"),
+                        rating = doc.textField("rating"),
+                        badge = doc.textField("badge"),
+                        entryFee = doc.textField("entryFee"),
+                        bestTime = doc.textField("bestTime"),
+                        hours = doc.textField("hours"),
+                        imageUrl = doc.textField("imageUrl").ifBlank { null }
                     )
                 }
                 if (item != null) {

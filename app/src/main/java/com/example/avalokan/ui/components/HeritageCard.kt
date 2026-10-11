@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -30,11 +31,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.example.avalokan.ui.theme.AccentMarigold
 import com.example.avalokan.ui.theme.BadgeShape
 import com.example.avalokan.ui.theme.PrimaryLight
@@ -74,6 +77,7 @@ fun HeritageCard(
                 HeritageImage(
                     imageHeight = imageHeight,
                     title = title,
+                    imageUrl = imageUrl,
                     showSave = showSave,
                     isSaved = isSaved,
                     onSaveClick = onSaveClick
@@ -103,6 +107,7 @@ fun HeritageCard(
                 HeritageImage(
                     imageHeight = imageHeight,
                     title = title,
+                    imageUrl = imageUrl,
                     showSave = showSave,
                     isSaved = isSaved,
                     onSaveClick = onSaveClick
@@ -125,21 +130,31 @@ fun HeritageCard(
 private fun HeritageImage(
     imageHeight: Dp,
     title: String,
+    imageUrl: String?,
     showSave: Boolean,
     isSaved: Boolean,
     onSaveClick: (() -> Unit)?
 ) {
-    // Image container (reference size/shape); AsyncImage fills it when data lands
+    // AsyncImage fills this exact container when the Data layer supplies a URL.
     Box(
         modifier = Modifier.fillMaxWidth().height(imageHeight)
             .background(PrimaryLight),
         contentAlignment = Alignment.Center
     ) {
-        Icon(
-            Icons.Default.Landscape,
-            contentDescription = null,
-            tint = PrimaryTeal
-        )
+        if (imageUrl != null) {
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            Icon(
+                Icons.Default.Landscape,
+                contentDescription = null,
+                tint = PrimaryTeal
+            )
+        }
         if (showSave && onSaveClick != null) {
             Surface(
                 modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),

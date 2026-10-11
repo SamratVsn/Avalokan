@@ -1,5 +1,6 @@
 package com.example.avalokan.data.event
 
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -16,6 +17,10 @@ interface EventRepository {
 
 private const val EVENTS_COLLECTION = "events"
 
+/** Console fields may be stored as String or Number — coerce either. */
+private fun DocumentSnapshot.textField(name: String): String =
+    get(name)?.toString().orEmpty()
+
 class FirestoreEventRepository @Inject constructor(
     private val firestore: FirebaseFirestore,
     private val eventDao: EventDao
@@ -28,12 +33,14 @@ class FirestoreEventRepository @Inject constructor(
                 val items = snapshot?.documents.orEmpty().map { doc ->
                     EventItem(
                         id = doc.id,
-                        title = doc.getString("title").orEmpty(),
-                        description = doc.getString("description").orEmpty(),
-                        meta = doc.getString("meta").orEmpty(),
-                        fee = doc.getString("fee").orEmpty(),
-                        action = doc.getString("action").orEmpty(),
-                        type = doc.getString("type").orEmpty().ifBlank { "CULTURAL" }
+                        title = doc.textField("title"),
+                        description = doc.textField("description"),
+                        meta = doc.textField("meta"),
+                        fee = doc.textField("fee"),
+                        action = doc.textField("action").ifBlank { "Join >" },
+                        type = doc.textField("type").ifBlank { "CULTURAL" },
+                        date = doc.textField("date"),
+                        imageUrl = doc.textField("imageUrl").ifBlank { null }
                     )
                 }
                 launch { eventDao.upsertAll(items) }
@@ -49,12 +56,14 @@ class FirestoreEventRepository @Inject constructor(
                 val item = snapshot?.let { doc ->
                     EventItem(
                         id = doc.id,
-                        title = doc.getString("title").orEmpty(),
-                        description = doc.getString("description").orEmpty(),
-                        meta = doc.getString("meta").orEmpty(),
-                        fee = doc.getString("fee").orEmpty(),
-                        action = doc.getString("action").orEmpty(),
-                        type = doc.getString("type").orEmpty().ifBlank { "CULTURAL" }
+                        title = doc.textField("title"),
+                        description = doc.textField("description"),
+                        meta = doc.textField("meta"),
+                        fee = doc.textField("fee"),
+                        action = doc.textField("action").ifBlank { "Join >" },
+                        type = doc.textField("type").ifBlank { "CULTURAL" },
+                        date = doc.textField("date"),
+                        imageUrl = doc.textField("imageUrl").ifBlank { null }
                     )
                 }
                 if (item != null) {

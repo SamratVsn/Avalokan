@@ -252,7 +252,10 @@ private fun HistoricalGems(
                 PlaceCard(
                     title = place.name,
                     subtitle = place.description,
-                    badge = if (index == 0) "EST. 3D CENTURY" else "2500+ YRS",
+                    badge = place.badge.ifBlank {
+                        if (index == 0) "EST. 3D CENTURY" else "2500+ YRS"
+                    },
+                    imageUrl = place.imageUrl,
                     onCardClick = { onPlaceClick(place.id) }
                 )
             }
@@ -309,6 +312,7 @@ private fun RecentDiscoveries(
                     subtitle = place.meta,
                     badge = if (place.id == "boudha-stupa") "NEW" else "TRENDING",
                     rating = place.rating,
+                    imageUrl = place.imageUrl,
                     onCardClick = { onPlaceClick(place.id) }
                 )
             }
