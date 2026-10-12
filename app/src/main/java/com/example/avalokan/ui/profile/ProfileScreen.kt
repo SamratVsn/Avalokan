@@ -86,7 +86,7 @@ private fun ProfileContent(
 ) {
     Column(
         modifier = Modifier.fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(bottom = Spacing.extraLarge),
