@@ -88,9 +88,8 @@ fun AvalokanNavHost(
         composable(
             route = StoryDetail.route,
             arguments = listOf(navArgument(StoryDetail.ARG) { type = NavType.StringType })
-        ) { entry ->
+        ) {
             StoryDetailScreen(
-                storyId = entry.arguments?.getString(StoryDetail.ARG).orEmpty(),
                 onBackClick = { navController.navigateUp() }
             )
         }

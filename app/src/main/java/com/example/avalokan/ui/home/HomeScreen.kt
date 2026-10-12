@@ -72,10 +72,14 @@ fun AvalokanHome(
     viewModel: HomeScreenViewModel = hiltViewModel()
 ) {
     val places by viewModel.places.collectAsState()
+    val heroStory by viewModel.heroStory.collectAsState()
 
     HomeContent(
         modifier = modifier,
         heroStoryId = viewModel.heroStoryId,
+        heroTitle = heroStory?.title,
+        heroSubtitle = heroStory?.subtitle,
+        heroImageUrl = heroStory?.imageUrl,
         places = places,
         onStoryClick = onStoryClick,
         onPlaceClick = onPlaceClick,
@@ -86,6 +90,9 @@ fun AvalokanHome(
 @Composable
 private fun HomeContent(
     heroStoryId: String,
+    heroTitle: String?,
+    heroSubtitle: String?,
+    heroImageUrl: String?,
     places: List<PlaceItem>,
     onStoryClick: (String) -> Unit,
     onPlaceClick: (String) -> Unit,
@@ -105,6 +112,9 @@ private fun HomeContent(
         TopIcons()
         StoryCard(
             modifier = Modifier.padding(horizontal = 24.dp),
+            title = heroTitle,
+            subtitle = heroSubtitle,
+            imageUrl = heroImageUrl,
             onReadClick = { onStoryClick(heroStoryId) }
         )
         HistoricalGems(places = places, onPlaceClick = onPlaceClick)
@@ -165,7 +175,8 @@ private fun TopIcons(modifier: Modifier = Modifier) {
 @Composable
 private fun StoryCard(
     modifier: Modifier = Modifier,
-    // API-ready: pass remote image URL/model here later; null = placeholder below
+    title: String? = null,
+    subtitle: String? = null,
     imageUrl: String? = null,
     onReadClick: () -> Unit = {}
 ) {
@@ -175,13 +186,21 @@ private fun StoryCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Box(modifier = Modifier.fillMaxWidth().height(300.dp)) {
-            // Placeholder image container (correct size/shape for future API image).
-            // Later: if (imageUrl != null) AsyncImage(imageUrl, ..., contentScale = Crop)
-            // else placeholder below. No networking added yet.
+            // Hero image from the story stream; gradient placeholder until it loads.
             Box(
                 modifier = Modifier.fillMaxSize()
-                    .background(Brush.verticalGradient(listOf(PrimaryTeal, TextPrimary)))
-            )
+                    .background(Brush.verticalGradient(listOf(PrimaryTeal, TextPrimary))),
+                contentAlignment = Alignment.Center
+            ) {
+                if (imageUrl != null) {
+                    coil.compose.AsyncImage(
+                        model = imageUrl,
+                        contentDescription = title,
+                        contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            }
             // Dark scrim so badge/title/button stay legible over any future photo
             Box(
                 modifier = Modifier.fillMaxSize()
@@ -201,8 +220,14 @@ private fun StoryCard(
                 modifier = Modifier.align(Alignment.BottomStart).padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Text(text = "The Sacred Echoes of Boudhanath", style = MaterialTheme.typography.headlineLarge.copy(fontSize = 24.sp, lineHeight = 30.sp), color = Color.White, maxLines = 3, overflow = TextOverflow.Ellipsis)
-                Text(text = "Discover the spiritual significance...", style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(0.85f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(
+                    text = title ?: "The Sacred Echoes of Boudhanath",
+                    style = MaterialTheme.typography.headlineLarge.copy(fontSize = 24.sp, lineHeight = 30.sp),
+                    color = Color.White, maxLines = 3, overflow = TextOverflow.Ellipsis)
+                Text(
+                    text = subtitle ?: "Discover the spiritual significance...",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White.copy(0.85f), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Spacer(Modifier.height(2.dp))
                 Button(
                     onClick = onReadClick,
@@ -373,6 +398,9 @@ private fun HomeScreenPreview(){
     AvalokanTheme() {
         HomeContent(
             heroStoryId = "boudhanath",
+            heroTitle = null,
+            heroSubtitle = null,
+            heroImageUrl = null,
             places = listOf(
                 PlaceItem("patan-durbar", "Patan Durbar Square", "Artistic heritage of Lalitpur.", "Lalitpur • Historical Site", "Historical", "4.8"),
                 PlaceItem("swayambhu", "Swayambhu", "The Ancient Hill.", "Kathmandu • Spiritual Site", "Historical", "4.7"),

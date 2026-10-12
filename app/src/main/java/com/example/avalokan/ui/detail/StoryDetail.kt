@@ -18,6 +18,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
@@ -26,9 +28,19 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,6 +49,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 import com.example.avalokan.ui.theme.AccentMarigold
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.PrimaryTeal
@@ -59,31 +72,65 @@ private data class StoryUi(
 @Composable
 fun StoryDetailScreen(
     storyId: String = "preview",
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    viewModel: StoryDetailViewModel = hiltViewModel()
 ) {
-    val story = StoryUi()
+    val story = StoryUi(
+        badge = "Cultural Insight",
+        title = "The Sacred Echoes of Boudhanath",
+        author = "Aravind Sharma",
+        date = "Sept 12, 2024",
+        readTime = "6 min read"
+    )
+    val item = viewModel.story.collectAsState().value
+    val resolved = story.copy(
+        badge = item?.badge?.ifBlank { story.badge } ?: story.badge,
+        title = item?.title?.ifBlank { story.title } ?: story.title,
+        author = item?.author?.ifBlank { story.author } ?: story.author,
+        date = item?.date?.ifBlank { story.date } ?: story.date,
+        readTime = item?.readTime?.ifBlank { story.readTime } ?: story.readTime,
+        body = item?.description
+            ?.split("\n\n")
+            ?.map { it.trim() }
+            ?.filter { it.isNotEmpty() }
+            ?: story.body
+    )
+    val snackbarHost = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    var isFavorite by rememberSaveable { mutableStateOf(false) }
     Scaffold(
         containerColor = Color.White,
-        contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0)
+        contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
+        snackbarHost = { SnackbarHost(hostState = snackbarHost) }
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(innerPadding),
             contentPadding = PaddingValues(bottom = 32.dp)
         ) {
             item {
-                // 350dp hero with back overlay (placeholder until Data layer image)
+                // 350dp hero with back overlay (AsyncImage when the story has one)
                 Box(modifier = Modifier.fillMaxWidth().height(350.dp)) {
                     Box(
                         modifier = Modifier.fillMaxSize()
                             .background(MaterialTheme.colorScheme.surfaceVariant),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            Icons.Default.Person,
-                            contentDescription = null,
-                            tint = PrimaryTeal,
-                            modifier = Modifier.size(48.dp)
-                        )
+                        val heroImage = item?.imageUrl
+                        if (heroImage != null) {
+                            coil.compose.AsyncImage(
+                                model = heroImage,
+                                contentDescription = resolved.title,
+                                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        } else {
+                            Icon(
+                                Icons.Default.Person,
+                                contentDescription = null,
+                                tint = PrimaryTeal,
+                                modifier = Modifier.size(48.dp)
+                            )
+                        }
                     }
                     IconButton(
                         onClick = onBackClick,
@@ -100,6 +147,26 @@ fun StoryDetailScreen(
                             modifier = Modifier.size(18.dp)
                         )
                     }
+                    IconButton(
+                        onClick = {
+                            isFavorite = !isFavorite
+                            if (isFavorite) {
+                                scope.launch { snackbarHost.showSnackbar("Saved to Collection") }
+                            }
+                        },
+                        modifier = Modifier.align(Alignment.TopEnd)
+                            .statusBarsPadding()
+                            .padding(top = 8.dp, end = 16.dp)
+                            .size(40.dp)
+                            .background(Color.Black.copy(alpha = 0.2f), CircleShape)
+                    ) {
+                        Icon(
+                            if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            contentDescription = if (isFavorite) "Remove from favorites" else "Save to favorites",
+                            tint = Color.White,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
             }
             item {
@@ -111,7 +178,7 @@ fun StoryDetailScreen(
                     color = MaterialTheme.colorScheme.surface
                 ) {
                     StoryBody(
-                        story = story,
+                        story = resolved,
                         modifier = Modifier.padding(horizontal = 24.dp)
                             .padding(top = 24.dp)
                     )
@@ -225,6 +292,6 @@ private fun StoryBody(story: StoryUi, modifier: Modifier = Modifier) {
 @Composable
 private fun StoryDetailPreview() {
     AvalokanTheme {
-        StoryDetailScreen()
+        StoryBody(story = StoryUi())
     }
 }

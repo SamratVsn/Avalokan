@@ -11,6 +11,9 @@ import com.example.avalokan.data.local.UserPreferences
 import com.example.avalokan.data.place.PlaceDao
 import com.example.avalokan.data.place.PlaceRepository
 import com.example.avalokan.data.place.FirestorePlaceRepository
+import com.example.avalokan.data.story.StoryDao
+import com.example.avalokan.data.story.StoryRepository
+import com.example.avalokan.data.story.FirestoreStoryRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Binds
 import dagger.Module
@@ -45,6 +48,9 @@ object AppModule {
 
     @Provides
     fun provideEventDao(database: AvalokanDatabase): EventDao = database.eventDao()
+
+    @Provides
+    fun provideStoryDao(database: AvalokanDatabase): StoryDao = database.storyDao()
 }
 
 @Module
@@ -56,4 +62,7 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindEventRepository(impl: FirestoreEventRepository): EventRepository
+
+    @Binds
+    abstract fun bindStoryRepository(impl: FirestoreStoryRepository): StoryRepository
 }

@@ -13,5 +13,6 @@ data class EventItem(
     val action: String = "Join >",
     val type: String = "CULTURAL",
     val date: String = "",
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+    val featured: Boolean? = false
 )
