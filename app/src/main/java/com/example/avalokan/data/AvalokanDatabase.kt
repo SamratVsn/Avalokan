@@ -9,7 +9,7 @@ import com.example.avalokan.data.place.PlaceItem
 import com.example.avalokan.data.story.StoryDao
 import com.example.avalokan.data.story.StoryItem
 
-@Database(entities = [PlaceItem::class, EventItem::class, StoryItem::class], version = 5)
+@Database(entities = [PlaceItem::class, EventItem::class, StoryItem::class], version = 6)
 abstract class AvalokanDatabase : RoomDatabase() {
     abstract fun placeDao(): PlaceDao
     abstract fun eventDao(): EventDao

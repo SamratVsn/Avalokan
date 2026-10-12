@@ -14,5 +14,5 @@ data class EventItem(
     val type: String = "CULTURAL",
     val date: String = "",
     val imageUrl: String? = null,
-    val featured: Boolean? = false
+    val featured: Boolean = false
 )

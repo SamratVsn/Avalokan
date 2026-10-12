@@ -87,11 +87,14 @@ private fun EventContent(
     ) {
         Spacer(Modifier.height(Spacing.small))
         TopTexts(modifier = Modifier.padding(horizontal = 24.dp))
-        FeaturedEvent(
-            modifier = Modifier.padding(horizontal = 24.dp),
-            imageUrl = events.find { it.id == "indra-jatra-2024" }?.imageUrl,
-            onRemindClick = { onEventClick("indra-jatra-2024") }
-        )
+        val featured = events.find { it.featured } ?: events.firstOrNull()
+        if (featured != null) {
+            FeaturedEvent(
+                event = featured,
+                modifier = Modifier.padding(horizontal = 24.dp),
+                onRemindClick = { onEventClick(featured.id) }
+            )
+        }
         UpcomingEvents(
             events = events,
             modifier = Modifier.padding(horizontal = 24.dp).padding(top = 20.dp),
@@ -140,11 +143,13 @@ private fun TopTexts(modifier: Modifier = Modifier) {
 
 @Composable
 private fun FeaturedEvent(
+    event: EventItem,
     modifier: Modifier = Modifier,
-    // API-ready: pass remote image URL/model here later; null = placeholder below
-    imageUrl: String? = null,
     onRemindClick: () -> Unit = {}
 ) {
+    val dateParts = event.date.split(" ", ",").filter { it.isNotBlank() }
+    val month = dateParts.getOrElse(0) { "SEPT" }
+    val day = dateParts.getOrElse(1) { "17" }
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = "Featured Festival",
@@ -157,17 +162,17 @@ private fun FeaturedEvent(
             colors = CardDefaults.cardColors(containerColor = Color.Transparent)
         ) {
             Column {
-                // Image container; AsyncImage fills it when the Data layer has a URL.
+                // Image container; AsyncImage fills it when the event has a URL.
                 Box(
                     modifier = Modifier.fillMaxWidth().height(180.dp)
                         .background(PrimaryLight)
                         .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (imageUrl != null) {
+                    if (event.imageUrl != null) {
                         AsyncImage(
-                            model = imageUrl,
-                            contentDescription = "Featured festival",
+                            model = event.imageUrl,
+                            contentDescription = event.title,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
                         )
@@ -209,7 +214,7 @@ private fun FeaturedEvent(
                         verticalAlignment = Alignment.Top
                     ) {
                         Text(
-                            text = "Indra Jatra 2024",
+                            text = event.title,
                             style = MaterialTheme.typography.titleMedium,
                             color = Color.White,
                             modifier = Modifier.weight(1f)
@@ -217,12 +222,12 @@ private fun FeaturedEvent(
                         Spacer(Modifier.width(8.dp))
                         Column(horizontalAlignment = Alignment.End) {
                             Text(
-                                text = "SEPT",
+                                text = month.uppercase(),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = Color.White.copy(alpha = 0.8f)
                             )
                             Text(
-                                text = "17",
+                                text = day,
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
@@ -230,7 +235,7 @@ private fun FeaturedEvent(
                         }
                     }
                     Text(
-                        text = "The biggest religious street festival in Kathmandu, celebrating the end of monsoon with masked dances and chariot processions.",
+                        text = event.description,
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White.copy(alpha = 0.85f),
                         maxLines = 2,

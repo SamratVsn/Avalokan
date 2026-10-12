@@ -39,6 +39,7 @@ class FirestoreEventRepository @Inject constructor(
                         fee = doc.textField("fee"),
                         action = doc.textField("action").ifBlank { "Join >" },
                         type = doc.textField("type").ifBlank { "CULTURAL" },
+                        featured = doc.getBoolean("featured") == true,
                         date = doc.textField("date"),
                         imageUrl = doc.textField("imageUrl").ifBlank { null }
                     )
@@ -62,6 +63,7 @@ class FirestoreEventRepository @Inject constructor(
                         fee = doc.textField("fee"),
                         action = doc.textField("action").ifBlank { "Join >" },
                         type = doc.textField("type").ifBlank { "CULTURAL" },
+                        featured = doc.getBoolean("featured") == true,
                         date = doc.textField("date"),
                         imageUrl = doc.textField("imageUrl").ifBlank { null }
                     )
