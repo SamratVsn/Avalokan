@@ -94,6 +94,10 @@ fun SettingsScreen(
         }
         context.startActivity(Intent.createChooser(intent, "Send suggestion"))
     }
+    var showAboutDialog by rememberSaveable { mutableStateOf(false) }
+    if (showAboutDialog) {
+        AboutDialog(onDismiss = { showAboutDialog = false })
+    }
 
     fun hasNotificationPermission(): Boolean =
         Build.VERSION.SDK_INT < 33 || ContextCompat.checkSelfPermission(
@@ -121,6 +125,7 @@ fun SettingsScreen(
         onClearCache = viewModel::clearCachedData,
         onResetSettings = viewModel::resetSettings,
         onSendSuggestions = onSendSuggestions,
+        onAboutClick = { showAboutDialog = true },
         onBackClick = onBackClick,
         onEditProfileClick = onEditProfileClick
     )
@@ -136,7 +141,8 @@ private fun SettingsContent(
     onEditProfileClick: () -> Unit,
     onClearCache: () -> Unit,
     onResetSettings: () -> Unit,
-    onSendSuggestions: () -> Unit
+    onSendSuggestions: () -> Unit,
+    onAboutClick: () -> Unit
 ) {
     var showClearDialog by rememberSaveable { mutableStateOf(false) }
     var showResetDialog by rememberSaveable { mutableStateOf(false) }
@@ -193,6 +199,7 @@ private fun SettingsContent(
             )
             SuppNFeed(
                 onSendSuggestions = onSendSuggestions,
+                onAboutClick = onAboutClick,
                 modifier = Modifier.padding(horizontal = Spacing.sidePadding)
             )
             StorageSection(
@@ -451,6 +458,7 @@ private fun AppearanceSection(
 @Composable
 private fun SuppNFeed(
     onSendSuggestions: () -> Unit,
+    onAboutClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -480,7 +488,8 @@ private fun SuppNFeed(
                     iconBg = NeutralBg,
                     iconTint = TextSecondary,
                     name = stringResource(R.string.appVersion),
-                    trailing = "1.0.0"
+                    trailing = "1.0.0",
+                    onClick = onAboutClick
                 )
             }
         }
@@ -575,6 +584,36 @@ private fun SettingRow(
     }
 }
 
+@Composable
+private fun AboutDialog(onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = "Avalokan") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "Nepal Heritage Explorer",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = "Version 1.0.0",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = "Crafted with ♥ for Nepal's Heritage. Heritage data syncs from Firestore and stays available offline.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text(text = "Close") }
+        }
+    )
+}
+
 @Preview
 @Composable
 private fun SettingsPreview() {
@@ -588,7 +627,8 @@ private fun SettingsPreview() {
             onEditProfileClick = {},
             onClearCache = {},
             onResetSettings = {},
-            onSendSuggestions = {}
+            onSendSuggestions = {},
+            onAboutClick = {}
         )
     }
 }
