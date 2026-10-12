@@ -9,6 +9,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.avalokan.navigateTab
 import com.example.avalokan.ui.detail.EventDetailScreen
 import com.example.avalokan.ui.detail.PlaceDetailScreen
 import com.example.avalokan.ui.detail.StoryDetailScreen
@@ -43,7 +44,7 @@ fun AvalokanNavHost(
             AvalokanHome(
                 onStoryClick = { id -> navController.navigate(StoryDetail.createRoute(id)) },
                 onPlaceClick = { id -> navController.navigate(PlaceDetail.createRoute(id)) },
-                onExploreEventsClick = { navController.navigate(Events.route) }
+                onExploreEventsClick = { navController.navigateTab(Events.route) }
             )
         }
 

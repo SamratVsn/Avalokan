@@ -52,6 +52,21 @@ val bottomNavItems = listOf(
     BottomNavItem.Profile
 )
 
+/**
+ * Single doorway for every tab switch (bottom bar AND in-screen buttons like
+ * Home's "Explore Events"). Same options everywhere means the backstack always
+ * looks like [home] + [current tab], so tab taps and system back behave.
+ */
+fun NavHostController.navigateTab(route: String) {
+    navigate(route) {
+        popUpTo(graph.findStartDestination().id) {
+            saveState = true
+        }
+        launchSingleTop = true
+        restoreState = true
+    }
+}
+
 @Composable
 fun AvalokanApp(
     navController: NavHostController = rememberNavController()
@@ -125,13 +140,7 @@ fun AvalokanBottomNavigation(
                     selected = selected,
                     onClick = {
                         if (currentRoute != item.destination.route) {
-                            navController.navigate(item.destination.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
+                            navController.navigateTab(item.destination.route)
                         }
                     },
                     colors = NavigationBarItemDefaults.colors(
