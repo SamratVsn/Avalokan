@@ -85,6 +85,7 @@ class DiscoverViewModelTest {
     fun `category chip filters sites`() = runTest {
         val vm = DiscoverViewModel(FakePlaceRepository(), FakePreferencesStore())
         vm.sites.test {
+            skipItems(1) // stateIn replays its empty initial value first
             assertEquals(2, awaitItem().size) // All
             vm.onCategorySelect(1) // Historical
             assertEquals(listOf("kathmandu-durbar"), awaitItem().map { it.id })

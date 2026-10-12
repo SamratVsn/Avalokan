@@ -83,7 +83,7 @@ fun EventDetailScreen(
     val snackbarHost = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var isFavorite by rememberSaveable { mutableStateOf(false) }
-    val eventTitle = event?.title ?: "Indra Jatra 2024: The Chariot Procession"
+    val eventTitle = event?.title.orEmpty()
     val eventType = EventType.from(event?.type)
     val onShareClick = {
         val intent = Intent(Intent.ACTION_SEND).apply {
@@ -93,13 +93,12 @@ fun EventDetailScreen(
         context.startActivity(Intent.createChooser(intent, "Share event"))
     }
     EventDetailContent(
-        title = event?.title ?: "Indra Jatra 2024: The Chariot Procession",
+        title = event?.title.orEmpty(),
         location = event?.meta?.substringBefore("•")?.trim()
-            ?.ifBlank { "Basantapur Durbar Square" }
-            ?: "Basantapur Durbar Square",
-        date = event?.date?.ifBlank { "Sept 17, 2024" } ?: "Sept 17, 2024",
-        description = event?.description ?: "The biggest religious street festival in Kathmandu, celebrating the end of monsoon with masked dances and chariot processions.",
+            ?.ifBlank { "Nepal" } ?: "Nepal",
         eventType = eventType,
+        date = event?.date.orEmpty(),
+        description = event?.description.orEmpty(),
         imageUrl = event?.imageUrl,
         isFavorite = isFavorite,
         onFavoriteClick = { isFavorite = !isFavorite },
@@ -260,7 +259,7 @@ private fun EventDetailContent(
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             DetailBadge(
-                                text = "$date • Festival",
+                                text = if (date.isBlank()) "Festival" else "$date • Festival",
                                 containerColor = accent.copy(alpha = 0.12f),
                                 contentColor = accent,
                                 icon = eventBadgeIcon(eventType)

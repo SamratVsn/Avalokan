@@ -92,7 +92,7 @@ fun PlaceDetailScreen(
     val scope = rememberCoroutineScope()
     val savedIds by viewModel.savedIds.collectAsState()
     val isSaved = savedIds.contains(place?.id)
-    val placeTitle = place?.name ?: "Kathmandu Durbar Square"
+    val placeTitle = place?.name.orEmpty()
     // Location comes from the place itself ("Lalitpur • Historical Site"),
     // never a hardcoded city — places can be anywhere in Nepal.
     val placeLocation = place?.meta?.substringBefore("•")?.trim()
@@ -113,11 +113,11 @@ fun PlaceDetailScreen(
     }
     PlaceDetailContent(
         title = placeTitle,
-        rating = place?.rating?.ifBlank { "4.8" } ?: "4.8",
-        description = place?.description ?: "Once the royal palace of the Malla kings, Kathmandu Durbar Square packs centuries of Newari art, temples, and courtyards into one plaza. Don't miss the Kumari Ghar, Taleju Temple, and the morning pigeon-dotted courtyards before the crowds arrive.",
-        entryFee = place?.entryFee?.ifBlank { "Rs. 100" } ?: "Rs. 100",
-        bestTime = place?.bestTime?.ifBlank { "Oct – Mar" } ?: "Oct – Mar",
-        hours = place?.hours?.ifBlank { "9 AM – 5 PM" } ?: "9 AM – 5 PM",
+        rating = place?.rating.orEmpty(),
+        description = place?.description.orEmpty(),
+        entryFee = place?.entryFee.orEmpty(),
+        bestTime = place?.bestTime.orEmpty(),
+        hours = place?.hours.orEmpty(),
         imageUrl = place?.imageUrl,
         isSaved = isSaved,
         onSaveClick = {

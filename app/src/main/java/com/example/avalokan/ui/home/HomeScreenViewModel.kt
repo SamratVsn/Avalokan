@@ -7,49 +7,8 @@ import com.example.avalokan.data.place.PlaceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
-
-/** Hardcoded fallback so the UI stays intact until Firestore has documents. */
-private val FallbackPlaces = listOf(
-    PlaceItem(
-        id = "patan-durbar",
-        name = "Patan Durbar Square",
-        description = "Artistic heritage of Lalitpur.",
-        meta = "Lalitpur • Historical Site",
-        category = "Historical",
-        rating = "4.8",
-        badge = "EST. 3D CENTURY"
-    ),
-    PlaceItem(
-        id = "swayambhu",
-        name = "Swayambhu",
-        description = "The Ancient Hill.",
-        meta = "Kathmandu • Spiritual Site",
-        category = "Historical",
-        rating = "4.7",
-        badge = "2500+ YRS"
-    ),
-    PlaceItem(
-        id = "boudha-stupa",
-        name = "Boudha Stupa",
-        description = "Boudhanath • Spiritual Site.",
-        meta = "Boudhanath • Spiritual Site",
-        category = "Cultural",
-        rating = "4.9",
-        badge = "2500+ YRS"
-    ),
-    PlaceItem(
-        id = "bhaktapur-pottery",
-        name = "Bhaktapur Pottery Square",
-        description = "Bhaktapur • Craft Quarter.",
-        meta = "Bhaktapur • Craft Quarter",
-        category = "Cultural",
-        rating = "4.7",
-        badge = "2500+ YRS"
-    )
-)
 
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
@@ -59,6 +18,5 @@ class HomeScreenViewModel @Inject constructor(
     val heroStoryId: String = "boudhanath"
 
     val places: StateFlow<List<PlaceItem>> = placeRepository.observePlaces()
-        .map { remote -> remote.ifEmpty { FallbackPlaces } }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), FallbackPlaces)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 }

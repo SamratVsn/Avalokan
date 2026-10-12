@@ -36,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -44,6 +45,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
 import com.example.avalokan.data.event.EventItem
@@ -87,6 +89,7 @@ private fun EventContent(
         TopTexts(modifier = Modifier.padding(horizontal = 24.dp))
         FeaturedEvent(
             modifier = Modifier.padding(horizontal = 24.dp),
+            imageUrl = events.find { it.id == "indra-jatra-2024" }?.imageUrl,
             onRemindClick = { onEventClick("indra-jatra-2024") }
         )
         UpcomingEvents(
@@ -154,19 +157,28 @@ private fun FeaturedEvent(
             colors = CardDefaults.cardColors(containerColor = Color.Transparent)
         ) {
             Column {
-                // Image container (reference aspect); swap for AsyncImage when Data layer lands
+                // Image container; AsyncImage fills it when the Data layer has a URL.
                 Box(
                     modifier = Modifier.fillMaxWidth().height(180.dp)
                         .background(PrimaryLight)
                         .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        Icons.Default.Landscape,
-                        contentDescription = null,
-                        tint = PrimaryTeal,
-                        modifier = Modifier.size(32.dp)
-                    )
+                    if (imageUrl != null) {
+                        AsyncImage(
+                            model = imageUrl,
+                            contentDescription = "Featured festival",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } else {
+                        Icon(
+                            Icons.Default.Landscape,
+                            contentDescription = null,
+                            tint = PrimaryTeal,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
                     Surface(
                         modifier = Modifier.align(Alignment.TopStart).padding(12.dp),
                         shape = BadgeShape,
@@ -263,6 +275,7 @@ private fun UpcomingEvents(
                 name = event.title,
                 meta = event.meta,
                 fee = event.fee,
+                imageUrl = event.imageUrl,
                 onCardClick = { onEventClick(event.id) }
             )
         }
@@ -295,12 +308,21 @@ private fun EventCards(
                     modifier = Modifier.fillMaxSize().background(PrimaryLight),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        Icons.Default.Landscape,
-                        null,
-                        tint = PrimaryTeal,
-                        modifier = Modifier.size(20.dp)
-                    )
+                    if (imageUrl != null) {
+                        AsyncImage(
+                            model = imageUrl,
+                            contentDescription = name,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } else {
+                        Icon(
+                            Icons.Default.Landscape,
+                            null,
+                            tint = PrimaryTeal,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
             Column(

@@ -17,16 +17,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-/** Known places for resolving saved IDs offline (mirrors nav IDs). */
-private val KnownPlaces = listOf(
-    PlaceItem("kathmandu-durbar", "Kathmandu Durbar Square", "", "Kathmandu • Historical Site", "Historical", "4.8"),
-    PlaceItem("patan-durbar", "Patan Durbar Square", "", "Lalitpur • Historical Site", "Historical", "4.8"),
-    PlaceItem("swayambhu", "Swayambhu", "", "Kathmandu • Spiritual Site", "Historical", "4.7"),
-    PlaceItem("boudha-stupa", "Boudha Stupa", "", "Boudhanath • Spiritual Site", "Cultural", "4.9"),
-    PlaceItem("lumbini-garden", "Lumbini Garden", "", "Lumbini • Spiritual Site", "Cultural", "4.9"),
-    PlaceItem("bhaktapur-pottery", "Bhaktapur Pottery Square", "", "Bhaktapur • Craft Quarter", "Cultural", "4.7")
-)
-
 data class ProfileStats(
     val visited: Int = 0,
     val saved: Int = 0,
@@ -47,13 +37,12 @@ class ProfileViewModel @Inject constructor(
     private val _stats = MutableStateFlow(ProfileStats())
     val stats: StateFlow<ProfileStats> = _stats.asStateFlow()
 
-    /** Saved places resolved against known + remote data. */
+    /** Saved places resolved from the repository (Room cache + Firestore). */
     val savedPlaces: StateFlow<List<PlaceItem>> = combine(
         placeRepository.observePlaces(),
         userPreferences.savedPlaceIds
     ) { remote, ids ->
-        val all = (remote + KnownPlaces).distinctBy { it.id }
-        ids.mapNotNull { id -> all.find { it.id == id } }
+        ids.mapNotNull { id -> remote.find { it.id == id } }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val avatarUri: StateFlow<String?> = userPreferences.avatarUri

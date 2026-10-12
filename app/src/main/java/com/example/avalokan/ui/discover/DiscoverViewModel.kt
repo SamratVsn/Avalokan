@@ -17,25 +17,6 @@ import javax.inject.Inject
 
 val DiscoverCategories = listOf("All", "Historical", "Cultural", "Nature")
 
-/** Hardcoded fallback so the UI stays intact until Firestore has documents. */
-private val FallbackSites = listOf(
-    PlaceItem(
-        id = "kathmandu-durbar",
-        name = "Kathmandu Durbar Square",
-        description = "The heart of old Kathmandu city, once the residence of the Nepalese Royal Family and home to the living goddess, Kumari.",
-        meta = "Kathmandu • Historical Site",
-        category = "Historical",
-        rating = "4.8"
-    ),
-    PlaceItem(
-        id = "lumbini-garden",
-        name = "Lumbini Garden",
-        description = "The sacred birthplace of Lord Buddha, a UNESCO World Heritage site offering profound peace and historical depth.",
-        meta = "Lumbini • Spiritual Site",
-        category = "Cultural",
-        rating = "4.9"
-    )
-)
 
 @HiltViewModel
 class DiscoverViewModel @Inject constructor(
@@ -56,13 +37,12 @@ class DiscoverViewModel @Inject constructor(
         _query,
         _selectedCategory
     ) { remote, query, selected ->
-        val all = remote.ifEmpty { FallbackSites }
         val category = DiscoverCategories.getOrElse(selected) { "All" }
-        all.filter { site ->
+        remote.filter { site ->
             (category == "All" || site.category == category) &&
                     (query.isBlank() || site.name.contains(query, ignoreCase = true))
         }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), FallbackSites)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     fun onQueryChange(value: String) { _query.value = value }
 
