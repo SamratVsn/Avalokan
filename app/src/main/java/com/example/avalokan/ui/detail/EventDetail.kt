@@ -95,6 +95,7 @@ fun EventDetailScreen(
         eventType = eventType,
         date = event?.date.orEmpty(),
         description = event?.description.orEmpty(),
+        fee = event?.fee?.ifBlank { "Rs. 500" } ?: "Rs. 500",
         imageUrl = event?.imageUrl,
         isFavorite = isFavorite,
         onFavoriteClick = { isFavorite = !isFavorite },
@@ -112,6 +113,7 @@ private fun EventDetailContent(
     eventType: EventType,
     date: String,
     description: String,
+    fee: String,
     imageUrl: String? = null,
     isFavorite: Boolean,
     onFavoriteClick: () -> Unit,
@@ -142,7 +144,7 @@ private fun EventDetailContent(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = "Rs. 500",
+                            text = fee,
                             style = MaterialTheme.typography.headlineMedium
                         )
                     }
@@ -314,6 +316,7 @@ private fun EventDetailPreview() {
             eventType = EventType.RELIGIOUS,
             date = "Sept 17, 2024",
             description = "The biggest religious street festival in Kathmandu.",
+            fee = "Rs. 500",
             isFavorite = false,
             onFavoriteClick = {},
             onShareClick = {},

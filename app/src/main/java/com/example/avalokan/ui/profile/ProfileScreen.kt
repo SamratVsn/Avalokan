@@ -19,7 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material.icons.filled.Landscape
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
@@ -320,65 +319,11 @@ private fun UpcomingRegistrations(modifier: Modifier = Modifier) {
             text = stringResource(R.string.upcomingReg),
             style = MaterialTheme.typography.titleMedium
         )
-        RegisteredBox()
-    }
-}
-
-@Composable
-private fun RegisteredBox() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = StandardCardShape,
-        colors = CardDefaults.cardColors(containerColor = PrimaryTeal)
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            Surface(shape = StandardCardShape, color = Color.White.copy(alpha = 0.2f)) {
-                Column(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "SEP",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.White
-                    )
-                    Text(
-                        text = "17",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                }
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "Indra Jatra Festival",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Color.White,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = "Basantapur Durbar Square • 12:00 PM",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White.copy(alpha = 0.8f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-            Surface(shape = CircleShape, color = Color.White.copy(alpha = 0.2f)) {
-                Icon(
-                    Icons.Default.ConfirmationNumber,
-                    null,
-                    tint = Color.White,
-                    modifier = Modifier.padding(8.dp).size(20.dp)
-                )
-            }
-        }
+        Text(
+            text = "No registrations yet — book an event to see it here.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
