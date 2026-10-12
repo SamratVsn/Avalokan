@@ -74,6 +74,7 @@ import com.example.avalokan.ui.theme.PrimaryLight
 import com.example.avalokan.ui.theme.PrimaryTeal
 import com.example.avalokan.ui.theme.Spacing
 import com.example.avalokan.ui.theme.StandardCardShape
+import com.example.avalokan.ui.theme.TextSecondary
 import com.example.avalokan.ui.theme.WarmBg
 
 @Composable
@@ -477,7 +478,7 @@ private fun SuppNFeed(
                 SettingRow(
                     icon = Icons.Default.Info,
                     iconBg = NeutralBg,
-                    iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    iconTint = TextSecondary,
                     name = stringResource(R.string.appVersion),
                     trailing = "1.0.0"
                 )

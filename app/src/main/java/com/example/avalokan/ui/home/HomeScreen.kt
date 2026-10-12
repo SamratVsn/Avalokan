@@ -61,6 +61,7 @@ import com.example.avalokan.ui.theme.Spacing
 import com.example.avalokan.ui.theme.StandardButtonShape
 import com.example.avalokan.ui.theme.StandardCardShape
 import com.example.avalokan.ui.theme.TextPrimary
+import com.example.avalokan.ui.theme.TextSecondary
 
 @Composable
 fun AvalokanHome(
@@ -331,8 +332,18 @@ private fun EventSuggestion(
     ) {
         Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(text = stringResource(R.string.localED), style = MaterialTheme.typography.titleMedium)
-                Text(text = stringResource(R.string.joinEventDesc), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text(
+                    text = stringResource(R.string.localED),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = TextPrimary
+                )
+                Text(
+                    text = stringResource(R.string.joinEventDesc),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextSecondary,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
                 Spacer(Modifier.height(4.dp))
                 Button(
                     onClick = onExploreClick,

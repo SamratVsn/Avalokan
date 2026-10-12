@@ -52,11 +52,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.avalokan.ui.theme.AvalokanTheme
-import com.example.avalokan.ui.theme.GreyBorder
 import com.example.avalokan.ui.theme.HeroScrim
 import com.example.avalokan.ui.theme.PrimaryTeal
 import com.example.avalokan.ui.theme.StandardCardShape
-import com.example.avalokan.ui.theme.SurfaceMuted
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.material.icons.filled.Favorite
@@ -69,8 +67,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.launch
-
-private val ExperienceCardBg = SurfaceMuted
 
 @Composable
 fun EventDetailScreen(

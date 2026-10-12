@@ -41,7 +41,6 @@ import com.example.avalokan.ui.theme.AccentMarigold
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.PrimaryTeal
 import com.example.avalokan.ui.theme.Spacing
-import com.example.avalokan.ui.theme.StoryBody
 
 private data class StoryUi(
     val badge: String = "Cultural Insight",
@@ -183,7 +182,7 @@ private fun StoryBody(story: StoryUi, modifier: Modifier = Modifier) {
             Text(
                 text = paragraph,
                 style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 24.sp),
-                color = StoryBody
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
             )
         }
         // Interesting-fact callout, light teal

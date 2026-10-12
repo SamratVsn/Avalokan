@@ -81,7 +81,7 @@ fun MetaRow(
             Icon(
                 icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = PrimaryTeal,
                 modifier = Modifier.size(18.dp)
             )
         }

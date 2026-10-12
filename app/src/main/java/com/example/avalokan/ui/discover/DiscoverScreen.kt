@@ -60,6 +60,8 @@ import com.example.avalokan.ui.theme.PrimaryLight
 import com.example.avalokan.ui.theme.PrimaryTeal
 import com.example.avalokan.ui.theme.Spacing
 import com.example.avalokan.ui.theme.StandardCardShape
+import com.example.avalokan.ui.theme.TextPrimary
+import com.example.avalokan.ui.theme.TextSecondary
 
 @Composable
 fun DiscoverScreen(
@@ -176,7 +178,13 @@ private fun SearchField(
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = Color.Transparent, unfocusedBorderColor = Color.Transparent,
             focusedContainerColor = GreyLight,
-            unfocusedContainerColor = GreyLight
+            unfocusedContainerColor = GreyLight,
+            focusedTextColor = TextPrimary,
+            unfocusedTextColor = TextPrimary,
+            focusedPlaceholderColor = TextSecondary,
+            unfocusedPlaceholderColor = TextSecondary,
+            focusedLeadingIconColor = TextSecondary,
+            unfocusedLeadingIconColor = TextSecondary
         )
     )
 }

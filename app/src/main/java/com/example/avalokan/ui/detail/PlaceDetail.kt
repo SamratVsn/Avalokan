@@ -71,12 +71,10 @@ import androidx.compose.ui.unit.sp
 import com.example.avalokan.ui.theme.AccentMarigold
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
-import com.example.avalokan.ui.theme.GreyBorder
 import com.example.avalokan.ui.theme.PrimaryLight
 import com.example.avalokan.ui.theme.PrimaryTeal
 import com.example.avalokan.ui.theme.Spacing
 import com.example.avalokan.ui.theme.StandardCardShape
-import com.example.avalokan.ui.theme.SurfaceMuted
 
 private data class StatUi(val icon: ImageVector, val label: String, val value: String)
 
@@ -149,7 +147,7 @@ private fun PlaceDetailContent(
     snackbarHost: SnackbarHostState
 ) {
     Scaffold(
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = { SnackbarHost(hostState = snackbarHost) },
         bottomBar = {
@@ -382,8 +380,11 @@ private fun PlaceDetailContent(
 private fun StatCard(stat: StatUi) {
     Card(
         shape = StandardCardShape,
-        border = androidx.compose.foundation.BorderStroke(1.dp, GreyBorder),
-        colors = CardDefaults.cardColors(containerColor = SurfaceMuted)
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
+        ),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(
             modifier = Modifier.padding(16.dp),

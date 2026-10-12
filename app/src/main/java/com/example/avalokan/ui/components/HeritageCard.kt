@@ -211,7 +211,7 @@ private fun HeritageTexts(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            if (badge != null) {
+            if (!badge.isNullOrBlank()) {
                 Surface(
                     shape = BadgeShape,
                     color = MaterialTheme.colorScheme.primaryContainer
