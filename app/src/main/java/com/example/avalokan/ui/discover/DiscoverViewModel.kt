@@ -15,7 +15,13 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-val DiscoverCategories = listOf("All", "Historical", "Cultural", "Nature", "Local")
+val DiscoverCategories = listOf(
+    "All",
+    "Historical",
+    "Spiritual",
+    "Nature",
+    "Adventure",
+)
 
 
 @HiltViewModel
