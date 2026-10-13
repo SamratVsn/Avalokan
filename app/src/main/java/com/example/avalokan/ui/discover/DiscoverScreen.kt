@@ -35,6 +35,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -72,18 +73,25 @@ fun DiscoverScreen(
     val selectedChip by viewModel.selectedCategory.collectAsState()
     val sites by viewModel.sites.collectAsState()
     val savedIds by viewModel.savedIds.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
 
-    DiscoverContent(
-        query = query,
-        onQuery = viewModel::onQueryChange,
-        filters = DiscoverCategories,
-        selected = selectedChip,
-        onSelect = viewModel::onCategorySelect,
-        sites = sites,
-        savedIds = savedIds,
-        onToggleSave = { viewModel.toggleSave(it) },
-        onPlaceClick = onPlaceClick
-    )
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = viewModel::refresh,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        DiscoverContent(
+            query = query,
+            onQuery = viewModel::onQueryChange,
+            filters = DiscoverCategories,
+            selected = selectedChip,
+            onSelect = viewModel::onCategorySelect,
+            sites = sites,
+            savedIds = savedIds,
+            onToggleSave = { viewModel.toggleSave(it) },
+            onPlaceClick = onPlaceClick
+        )
+    }
 }
 
 @Composable

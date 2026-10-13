@@ -2,18 +2,22 @@ package com.example.avalokan.data.event
 
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Source
 import android.util.Log
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
+import kotlin.coroutines.resumeWithException
 
 interface EventRepository {
     fun observeEvents(): Flow<List<EventItem>>
     fun observeEvent(id: String): Flow<EventItem?>
     suspend fun clearCache()
+    suspend fun refresh()
 }
 
 private const val EVENTS_COLLECTION = "events"
@@ -21,6 +25,19 @@ private const val EVENTS_COLLECTION = "events"
 /** Console fields may be stored as String or Number — coerce either. */
 private fun DocumentSnapshot.textField(name: String): String =
     get(name)?.toString().orEmpty()
+
+private fun DocumentSnapshot.toEventItem() = EventItem(
+    id = id,
+    title = textField("title"),
+    description = textField("description"),
+    meta = textField("meta"),
+    fee = textField("fee"),
+    action = textField("action").ifBlank { "Join >" },
+    type = textField("type").ifBlank { "CULTURAL" },
+    featured = getBoolean("featured") == true,
+    date = textField("date"),
+    imageUrl = textField("imageUrl").ifBlank { null }
+)
 
 class FirestoreEventRepository @Inject constructor(
     private val firestore: FirebaseFirestore,
@@ -33,18 +50,7 @@ class FirestoreEventRepository @Inject constructor(
             .addSnapshotListener { snapshot, error ->
                 if (error != null) Log.w("AvalokanRepo", "Firestore listen failed", error)
                 val items = snapshot?.documents.orEmpty().map { doc ->
-                    EventItem(
-                        id = doc.id,
-                        title = doc.textField("title"),
-                        description = doc.textField("description"),
-                        meta = doc.textField("meta"),
-                        fee = doc.textField("fee"),
-                        action = doc.textField("action").ifBlank { "Join >" },
-                        type = doc.textField("type").ifBlank { "CULTURAL" },
-                        featured = doc.getBoolean("featured") == true,
-                        date = doc.textField("date"),
-                        imageUrl = doc.textField("imageUrl").ifBlank { null }
-                    )
+                    doc.toEventItem()
                 }
                 launch { eventDao.upsertAll(items) }
                 trySend(items)
@@ -58,18 +64,7 @@ class FirestoreEventRepository @Inject constructor(
             .addSnapshotListener { snapshot, error ->
                 if (error != null) Log.w("AvalokanRepo", "Firestore listen failed", error)
                 val item = snapshot?.let { doc ->
-                    EventItem(
-                        id = doc.id,
-                        title = doc.textField("title"),
-                        description = doc.textField("description"),
-                        meta = doc.textField("meta"),
-                        fee = doc.textField("fee"),
-                        action = doc.textField("action").ifBlank { "Join >" },
-                        type = doc.textField("type").ifBlank { "CULTURAL" },
-                        featured = doc.getBoolean("featured") == true,
-                        date = doc.textField("date"),
-                        imageUrl = doc.textField("imageUrl").ifBlank { null }
-                    )
+                    doc.toEventItem()
                 }
                 if (item != null) {
                     launch { eventDao.upsertAll(listOf(item)) }
@@ -83,5 +78,16 @@ class FirestoreEventRepository @Inject constructor(
 
     override suspend fun clearCache() {
         eventDao.clearAll()
+    }
+
+    override suspend fun refresh() {
+        val items = suspendCancellableCoroutine { cont ->
+            firestore.collection(EVENTS_COLLECTION).get(Source.SERVER)
+                .addOnSuccessListener { snapshot ->
+                    cont.resume(snapshot.documents.map { it.toEventItem() }) {}
+                }
+                .addOnFailureListener { e -> cont.resumeWithException(e) }
+        }
+        eventDao.upsertAll(items)
     }
 }

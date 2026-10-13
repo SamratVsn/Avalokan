@@ -30,6 +30,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -65,11 +66,18 @@ fun EventScreen(
     viewModel: EventsViewModel = hiltViewModel()
 ) {
     val events by viewModel.events.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
 
-    EventContent(
-        events = events,
-        onEventClick = onEventClick
-    )
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = viewModel::refresh,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        EventContent(
+            events = events,
+            onEventClick = onEventClick
+        )
+    }
 }
 
 @Composable

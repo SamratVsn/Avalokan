@@ -2,17 +2,21 @@ package com.example.avalokan.data.story
 
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Source
 import android.util.Log
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
+import kotlin.coroutines.resumeWithException
 
 interface StoryRepository {
     fun observeStories(): Flow<List<StoryItem>>
     fun observeStory(id: String): Flow<StoryItem?>
+    suspend fun refresh()
 }
 
 private const val STORIES_COLLECTION = "stories"
@@ -20,6 +24,18 @@ private const val STORIES_COLLECTION = "stories"
 /** Console fields may be stored as String or Number — coerce either. */
 private fun DocumentSnapshot.textField(name: String): String =
     get(name)?.toString().orEmpty()
+
+private fun DocumentSnapshot.toStoryItem() = StoryItem(
+    id = id,
+    title = textField("title"),
+    subtitle = textField("subTitle"),
+    description = textField("description"),
+    imageUrl = textField("imageUrl").ifBlank { null },
+    author = textField("author"),
+    date = textField("date"),
+    readTime = textField("readtime"),
+    badge = textField("badge")
+)
 
 class FirestoreStoryRepository @Inject constructor(
     private val firestore: FirebaseFirestore,
@@ -30,19 +46,7 @@ class FirestoreStoryRepository @Inject constructor(
         val registration = firestore.collection(STORIES_COLLECTION)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) Log.w("AvalokanRepo", "Firestore listen failed", error)
-                val items = snapshot?.documents.orEmpty().map { doc ->
-                    StoryItem(
-                        id = doc.id,
-                        title = doc.textField("title"),
-                        subtitle = doc.textField("subTitle"),
-                        description = doc.textField("description"),
-                        imageUrl = doc.textField("imageUrl").ifBlank { null },
-                        author = doc.textField("author"),
-                        date = doc.textField("date"),
-                        readTime = doc.textField("readtime"),
-                        badge = doc.textField("badge")
-                    )
-                }
+                val items = snapshot?.documents.orEmpty().map { it.toStoryItem() }
                 launch { storyDao.upsertAll(items) }
                 trySend(items)
             }
@@ -54,19 +58,7 @@ class FirestoreStoryRepository @Inject constructor(
         val registration = firestore.collection(STORIES_COLLECTION).document(id)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) Log.w("AvalokanRepo", "Firestore listen failed", error)
-                val item = snapshot?.let { doc ->
-                    StoryItem(
-                        id = doc.id,
-                        title = doc.textField("title"),
-                        subtitle = doc.textField("subTitle"),
-                        description = doc.textField("description"),
-                        imageUrl = doc.textField("imageUrl").ifBlank { null },
-                        author = doc.textField("author"),
-                        date = doc.textField("date"),
-                        readTime = doc.textField("readtime"),
-                        badge = doc.textField("badge")
-                    )
-                }
+                val item = snapshot?.let { it.toStoryItem() }
                 if (item != null) {
                     launch { storyDao.upsertAll(listOf(item)) }
                     trySend(item)
@@ -75,5 +67,16 @@ class FirestoreStoryRepository @Inject constructor(
                 }
             }
         awaitClose { registration.remove() }
+    }
+
+    override suspend fun refresh() {
+        val items = suspendCancellableCoroutine { cont ->
+            firestore.collection(STORIES_COLLECTION).get(Source.SERVER)
+                .addOnSuccessListener { snapshot ->
+                    cont.resume(snapshot.documents.map { it.toStoryItem() }) {}
+                }
+                .addOnFailureListener { e -> cont.resumeWithException(e) }
+        }
+        storyDao.upsertAll(items)
     }
 }

@@ -2,6 +2,7 @@ package com.example.avalokan.data.place
 
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Source
 import jakarta.inject.Inject
 import android.util.Log
 import kotlinx.coroutines.channels.awaitClose
@@ -9,11 +10,15 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resumeWithException
 
 interface PlaceRepository {
     fun observePlaces(): Flow<List<PlaceItem>>
     fun observePlace(id: String): Flow<PlaceItem?>
     suspend fun clearCache()
+    /** Forces a server fetch; snapshot listeners keep streaming afterwards. */
+    suspend fun refresh()
 }
 
 private const val PLACES_COLLECTION = "places"
@@ -21,6 +26,21 @@ private const val PLACES_COLLECTION = "places"
 /** Console fields may be stored as String or Number — coerce either. */
 private fun DocumentSnapshot.textField(name: String): String =
     get(name)?.toString().orEmpty()
+
+private fun DocumentSnapshot.toPlaceItem() = PlaceItem(
+    id = id,
+    name = textField("name"),
+    description = textField("description"),
+    meta = textField("meta"),
+    category = textField("category"),
+    rating = textField("rating"),
+    featured = getBoolean("featured") == true,
+    badge = textField("badge"),
+    entryFee = textField("entryFee"),
+    bestTime = textField("bestTime"),
+    hours = textField("hours"),
+    imageUrl = textField("imageUrl").ifBlank { null }
+)
 
 class FirestorePlaceRepository @Inject constructor(
     private val firestore: FirebaseFirestore,
@@ -59,22 +79,7 @@ class FirestorePlaceRepository @Inject constructor(
         val registration = firestore.collection(PLACES_COLLECTION).document(id)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) Log.w("AvalokanRepo", "Firestore listen failed", error)
-                val item = snapshot?.let { doc ->
-                    PlaceItem(
-                        id = doc.id,
-                        name = doc.textField("name"),
-                        description = doc.textField("description"),
-                        meta = doc.textField("meta"),
-                        category = doc.textField("category"),
-                        rating = doc.textField("rating"),
-                        featured = doc.getBoolean("featured") == true,
-                        badge = doc.textField("badge"),
-                        entryFee = doc.textField("entryFee"),
-                        bestTime = doc.textField("bestTime"),
-                        hours = doc.textField("hours"),
-                        imageUrl = doc.textField("imageUrl").ifBlank { null }
-                    )
-                }
+                val item = snapshot?.let { it.toPlaceItem() }
                 if (item != null) {
                     launch { placeDao.upsertAll(listOf(item)) }
                     trySend(item)
@@ -83,6 +88,17 @@ class FirestorePlaceRepository @Inject constructor(
                 }
             }
         awaitClose { registration.remove() }
+    }
+
+    override suspend fun refresh() {
+        val items = suspendCancellableCoroutine { cont ->
+            firestore.collection(PLACES_COLLECTION).get(Source.SERVER)
+                .addOnSuccessListener { snapshot ->
+                    cont.resume(snapshot.documents.map { it.toPlaceItem() }) {}
+                }
+                .addOnFailureListener { e -> cont.resumeWithException(e) }
+        }
+        placeDao.upsertAll(items)
     }
 
     override suspend fun clearCache() {

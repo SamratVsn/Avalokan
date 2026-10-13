@@ -46,6 +46,8 @@ private class FakePlaceRepository : PlaceRepository {
         flowOf(TestSites.find { it.id == id })
 
     override suspend fun clearCache() = Unit
+
+    override suspend fun refresh() = Unit
 }
 
 private class FakePreferencesStore : PreferencesStore {

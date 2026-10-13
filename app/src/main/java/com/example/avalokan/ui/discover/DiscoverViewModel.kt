@@ -20,7 +20,7 @@ val DiscoverCategories = listOf("All", "Historical", "Cultural", "Nature", "Loca
 
 @HiltViewModel
 class DiscoverViewModel @Inject constructor(
-    placeRepository: PlaceRepository,
+    private val placeRepository: PlaceRepository,
     private val userPreferences: PreferencesStore
 ) : ViewModel() {
     private val _query = MutableStateFlow("")
@@ -47,6 +47,22 @@ class DiscoverViewModel @Inject constructor(
     fun onQueryChange(value: String) { _query.value = value }
 
     fun onCategorySelect(index: Int) { _selectedCategory.value = index }
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
+    fun refresh() {
+        if (_isRefreshing.value) return
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            try {
+                placeRepository.refresh()
+            } catch (_: Exception) {
+            } finally {
+                _isRefreshing.value = false
+            }
+        }
+    }
 
     fun toggleSave(siteId: String): Boolean {
         val current = savedIds.value.toMutableSet()

@@ -33,6 +33,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -73,18 +74,24 @@ fun AvalokanHome(
 ) {
     val places by viewModel.places.collectAsState()
     val heroStory by viewModel.heroStory.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
 
-    HomeContent(
-        modifier = modifier,
-        heroStoryId = heroStory?.id ?: viewModel.heroStoryId,
-        heroTitle = heroStory?.title,
-        heroSubtitle = heroStory?.subtitle,
-        heroImageUrl = heroStory?.imageUrl,
-        places = places,
-        onStoryClick = onStoryClick,
-        onPlaceClick = onPlaceClick,
-        onExploreEventsClick = onExploreEventsClick
-    )
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = viewModel::refresh,
+        modifier = modifier.fillMaxSize()
+    ) {
+        HomeContent(
+            heroStoryId = heroStory?.id ?: viewModel.heroStoryId,
+            heroTitle = heroStory?.title,
+            heroSubtitle = heroStory?.subtitle,
+            heroImageUrl = heroStory?.imageUrl,
+            places = places,
+            onStoryClick = onStoryClick,
+            onPlaceClick = onPlaceClick,
+            onExploreEventsClick = onExploreEventsClick
+        )
+    }
 }
 
 @Composable
