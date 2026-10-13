@@ -15,5 +15,6 @@ data class PlaceItem(
     val bestTime: String = "",
     val hours: String = "",
     val badge: String = "",
+    val featured: Boolean = false,
     val imageUrl: String? = null
 )

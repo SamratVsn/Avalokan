@@ -270,11 +270,12 @@ private fun HistoricalGems(
             contentPadding = PaddingValues(horizontal = 24.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            val historical = places.filter { it.category == "Historical" }
             items(
-                count = places.size,
-                key = { index -> places[index].id }
+                count = historical.size,
+                key = { index -> historical[index].id }
             ) { index ->
-                val place = places[index]
+                val place = historical[index]
                 PlaceCard(
                     title = place.name,
                     subtitle = place.description,
@@ -331,7 +332,7 @@ private fun RecentDiscoveries(
             )
             Text(text = stringResource(R.string.viewAll), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
         }
-        places.filter { it.id == "boudha-stupa" || it.id == "bhaktapur-pottery" }
+        places.filter { it.featured }
             .forEach { place ->
                 com.example.avalokan.ui.components.HeritageCard(
                     title = place.name,
