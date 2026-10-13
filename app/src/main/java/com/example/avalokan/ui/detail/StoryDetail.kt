@@ -58,7 +58,7 @@ import com.example.avalokan.ui.theme.Spacing
 private data class StoryUi(
     val badge: String = "Cultural Insight",
     val title: String = "The Sacred Echoes of Boudhanath",
-    val author: String = "Aravind Sharma",
+    val author: String = "Samrat Parajuli",
     val date: String = "Sept 12, 2024",
     val readTime: String = "6 min read",
     val fact: String = "Boudhanath is one of the largest stupas in the world — its all-seeing Buddha eyes watch over Kathmandu from all four directions.",
@@ -78,7 +78,7 @@ fun StoryDetailScreen(
     val story = StoryUi(
         badge = "Cultural Insight",
         title = "The Sacred Echoes of Boudhanath",
-        author = "Aravind Sharma",
+        author = "Samrat Parajuli",
         date = "Sept 12, 2024",
         readTime = "6 min read"
     )
