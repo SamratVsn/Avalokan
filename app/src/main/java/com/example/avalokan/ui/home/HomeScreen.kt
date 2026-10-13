@@ -76,7 +76,7 @@ fun AvalokanHome(
 
     HomeContent(
         modifier = modifier,
-        heroStoryId = viewModel.heroStoryId,
+        heroStoryId = heroStory?.id ?: viewModel.heroStoryId,
         heroTitle = heroStory?.title,
         heroSubtitle = heroStory?.subtitle,
         heroImageUrl = heroStory?.imageUrl,

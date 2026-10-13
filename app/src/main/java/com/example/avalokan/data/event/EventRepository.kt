@@ -2,6 +2,7 @@ package com.example.avalokan.data.event
 
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import android.util.Log
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -29,7 +30,8 @@ class FirestoreEventRepository @Inject constructor(
         // Offline-first: emit cached Room rows first, then live Firestore updates.
         send(eventDao.observeAll().first())
         val registration = firestore.collection(EVENTS_COLLECTION)
-            .addSnapshotListener { snapshot, _ ->
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) Log.w("AvalokanRepo", "Firestore listen failed", error)
                 val items = snapshot?.documents.orEmpty().map { doc ->
                     EventItem(
                         id = doc.id,
@@ -53,7 +55,8 @@ class FirestoreEventRepository @Inject constructor(
     override fun observeEvent(id: String): Flow<EventItem?> = callbackFlow {
         send(eventDao.observeById(id).first())
         val registration = firestore.collection(EVENTS_COLLECTION).document(id)
-            .addSnapshotListener { snapshot, _ ->
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) Log.w("AvalokanRepo", "Firestore listen failed", error)
                 val item = snapshot?.let { doc ->
                     EventItem(
                         id = doc.id,

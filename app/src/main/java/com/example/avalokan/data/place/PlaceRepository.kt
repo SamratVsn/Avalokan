@@ -3,6 +3,7 @@ package com.example.avalokan.data.place
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import jakarta.inject.Inject
+import android.util.Log
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -29,7 +30,8 @@ class FirestorePlaceRepository @Inject constructor(
         //Offline-first:
         send(placeDao.observeAll().first())
         val registration = firestore.collection(PLACES_COLLECTION)
-            .addSnapshotListener { snapshots, _ ->
+            .addSnapshotListener { snapshots, error ->
+                if (error != null) Log.w("AvalokanRepo", "Firestore listen failed", error)
                 val items = snapshots?.documents.orEmpty().map { doc ->
                     PlaceItem(
                         id = doc.id,
@@ -54,7 +56,8 @@ class FirestorePlaceRepository @Inject constructor(
     override fun observePlace(id: String): Flow<PlaceItem?> = callbackFlow {
         send(placeDao.observeById(id).first())
         val registration = firestore.collection(PLACES_COLLECTION).document(id)
-            .addSnapshotListener { snapshot, _ ->
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) Log.w("AvalokanRepo", "Firestore listen failed", error)
                 val item = snapshot?.let { doc ->
                     PlaceItem(
                         id = doc.id,

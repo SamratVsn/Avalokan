@@ -2,6 +2,7 @@ package com.example.avalokan.data.story
 
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import android.util.Log
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -10,6 +11,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 interface StoryRepository {
+    fun observeStories(): Flow<List<StoryItem>>
     fun observeStory(id: String): Flow<StoryItem?>
 }
 
@@ -23,10 +25,35 @@ class FirestoreStoryRepository @Inject constructor(
     private val firestore: FirebaseFirestore,
     private val storyDao: StoryDao
 ) : StoryRepository {
+    override fun observeStories(): Flow<List<StoryItem>> = callbackFlow {
+        send(storyDao.observeAll().first())
+        val registration = firestore.collection(STORIES_COLLECTION)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) Log.w("AvalokanRepo", "Firestore listen failed", error)
+                val items = snapshot?.documents.orEmpty().map { doc ->
+                    StoryItem(
+                        id = doc.id,
+                        title = doc.textField("title"),
+                        subtitle = doc.textField("subTitle"),
+                        description = doc.textField("description"),
+                        imageUrl = doc.textField("imageUrl").ifBlank { null },
+                        author = doc.textField("author"),
+                        date = doc.textField("date"),
+                        readTime = doc.textField("readtime"),
+                        badge = doc.textField("badge")
+                    )
+                }
+                launch { storyDao.upsertAll(items) }
+                trySend(items)
+            }
+        awaitClose { registration.remove() }
+    }
+
     override fun observeStory(id: String): Flow<StoryItem?> = callbackFlow {
         send(storyDao.observeById(id).first())
         val registration = firestore.collection(STORIES_COLLECTION).document(id)
-            .addSnapshotListener { snapshot, _ ->
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) Log.w("AvalokanRepo", "Firestore listen failed", error)
                 val item = snapshot?.let { doc ->
                     StoryItem(
                         id = doc.id,
