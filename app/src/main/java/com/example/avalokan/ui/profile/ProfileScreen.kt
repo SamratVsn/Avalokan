@@ -52,6 +52,8 @@ import com.example.avalokan.ui.theme.PrimaryLight
 import com.example.avalokan.ui.theme.PrimaryTeal
 import com.example.avalokan.ui.theme.Spacing
 import com.example.avalokan.ui.theme.StandardCardShape
+import com.example.avalokan.ui.theme.TextPrimary
+import com.example.avalokan.ui.theme.TextSecondary
 
 @Composable
 fun ProfileScreen(
@@ -141,7 +143,7 @@ private fun UserSection(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(40.dp),
-        colors = CardDefaults.cardColors(containerColor = PrimaryLight.copy(alpha = 0.3f))
+        colors = CardDefaults.cardColors(containerColor = PrimaryLight)
     ) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 28.dp),
@@ -192,12 +194,13 @@ private fun UserSection(
             Text(
                 text = userName,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
+                color = TextPrimary
             )
             Text(
                 text = bio,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = TextSecondary
             )
             Spacer(Modifier.height(20.dp))
             Row(
@@ -227,7 +230,7 @@ private fun UserSectionInfo(number: Int, text: String) {
                 fontSize = 10.sp,
                 letterSpacing = 1.sp
             ),
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = TextSecondary
         )
     }
 }

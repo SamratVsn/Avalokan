@@ -27,7 +27,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material.icons.filled.Directions
@@ -315,61 +314,6 @@ private fun PlaceDetailContent(
                     description = description,
                     modifier = Modifier.padding(horizontal = 24.dp)
                 )
-            }
-            // Breathing room between About and Guide sections.
-            item {
-                Spacer(Modifier.height(16.dp))
-            }
-            item {
-                // Book-a-guide teal card with availability status
-                Card(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
-                    shape = StandardCardShape,
-                    colors = CardDefaults.cardColors(containerColor = PrimaryTeal)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(24.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = Modifier.size(48.dp)
-                                .background(
-                                    Color.White.copy(alpha = 0.15f),
-                                    CircleShape
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                Icons.Default.AccessTime,
-                                null,
-                                tint = Color.White,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                        Column(modifier = Modifier.weight(1f)) {
-                            Surface(shape = BadgeShape, color = Color.White.copy(alpha = 0.2f)) {
-                                Text(
-                                    text = "● Guide Available",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = Color.White,
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                                )
-                            }
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                text = "Book a Heritage Guide",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = Color.White
-                            )
-                            Text(
-                                text = "Local experts, 2-hr walk • Rs. 800",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.White.copy(alpha = 0.85f)
-                            )
-                        }
-                    }
-                }
             }
         }
     }
