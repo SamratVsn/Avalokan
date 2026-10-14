@@ -55,7 +55,6 @@ import com.example.avalokan.data.place.PlaceItem
 import com.example.avalokan.ui.theme.AccentMarigold
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
-import com.example.avalokan.ui.theme.GreyBorder
 import com.example.avalokan.ui.theme.GreyLight
 import com.example.avalokan.ui.theme.PrimaryLight
 import com.example.avalokan.ui.theme.PrimaryTeal
@@ -234,7 +233,7 @@ private fun Suggestions(
                     border = FilterChipDefaults.filterChipBorder(
                         enabled = true,
                         selected = isSelected,
-                        borderColor = GreyBorder,
+                        borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
                         selectedBorderColor = Color.Transparent,
                         borderWidth = 1.dp
                     )
