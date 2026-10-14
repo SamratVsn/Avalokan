@@ -113,6 +113,7 @@ fun PlaceDetailScreen(
         title = placeTitle,
         rating = place?.rating.orEmpty(),
         description = place?.description.orEmpty(),
+        badge = place?.badge.orEmpty(),
         entryFee = place?.entryFee.orEmpty(),
         bestTime = place?.bestTime.orEmpty(),
         hours = place?.hours.orEmpty(),
@@ -135,6 +136,7 @@ private fun PlaceDetailContent(
     title: String,
     rating: String,
     description: String,
+    badge: String = "",
     entryFee: String = "Rs. 100",
     bestTime: String = "Oct – Mar",
     hours: String = "9 AM – 5 PM",
@@ -280,12 +282,9 @@ private fun PlaceDetailContent(
                         DetailBadge(text = "$rating ★")
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        DetailBadge(text = "UNESCO Site")
-                        DetailBadge(
-                            text = "Open Daily",
-                            containerColor = AccentMarigold.copy(alpha = 0.12f),
-                            contentColor = AccentMarigold
-                        )
+                        if (badge.isNotBlank()) {
+                            DetailBadge(text = badge)
+                        }
                     }
                 }
             }
@@ -440,6 +439,7 @@ private fun PlaceDetailPreview() {
             title = "Kathmandu Durbar Square",
             rating = "4.8",
             description = "Once the royal palace of the Malla kings.",
+            badge = "UNESCO Site",
             isSaved = false,
             onSaveClick = {},
             onBackClick = {},

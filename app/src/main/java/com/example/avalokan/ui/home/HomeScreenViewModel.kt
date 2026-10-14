@@ -2,6 +2,7 @@ package com.example.avalokan.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.avalokan.data.local.PreferencesStore
 import com.example.avalokan.data.place.PlaceItem
 import com.example.avalokan.data.place.PlaceRepository
 import com.example.avalokan.data.story.StoryItem
@@ -19,7 +20,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
     private val placeRepository: PlaceRepository,
-    private val storyRepository: StoryRepository
+    private val storyRepository: StoryRepository,
+    private val preferencesStore: PreferencesStore
 ) : ViewModel() {
     /** Curated hero story document. */
     val heroStoryId: String = "boudhanath"
@@ -33,6 +35,15 @@ class HomeScreenViewModel @Inject constructor(
 
     val places: StateFlow<List<PlaceItem>> = placeRepository.observePlaces()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val notificationsEnabled: StateFlow<Boolean> = preferencesStore.notificationsEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
+
+    fun toggleNotifications() {
+        viewModelScope.launch {
+            preferencesStore.setNotificationsEnabled(!notificationsEnabled.value)
+        }
+    }
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()

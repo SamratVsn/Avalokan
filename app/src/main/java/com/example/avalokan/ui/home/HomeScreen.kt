@@ -24,6 +24,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Landscape
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -75,6 +76,7 @@ fun AvalokanHome(
     val places by viewModel.places.collectAsState()
     val heroStory by viewModel.heroStory.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
+    val notificationsOn by viewModel.notificationsEnabled.collectAsState()
 
     PullToRefreshBox(
         isRefreshing = isRefreshing,
@@ -85,13 +87,15 @@ fun AvalokanHome(
             heroStoryId = heroStory?.id ?: viewModel.heroStoryId,
             heroTitle = heroStory?.title,
             heroSubtitle = heroStory?.subtitle,
-            heroImageUrl = heroStory?.imageUrl,
-            places = places,
-            onStoryClick = onStoryClick,
-            onPlaceClick = onPlaceClick,
-            onExploreEventsClick = onExploreEventsClick
-        )
-    }
+        heroImageUrl = heroStory?.imageUrl,
+        places = places,
+        notificationsOn = notificationsOn,
+        onNotificationsToggle = viewModel::toggleNotifications,
+        onStoryClick = onStoryClick,
+        onPlaceClick = onPlaceClick,
+        onExploreEventsClick = onExploreEventsClick
+    )
+}
 }
 
 @Composable
@@ -101,6 +105,8 @@ private fun HomeContent(
     heroSubtitle: String?,
     heroImageUrl: String?,
     places: List<PlaceItem>,
+    notificationsOn: Boolean,
+    onNotificationsToggle: () -> Unit,
     onStoryClick: (String) -> Unit,
     onPlaceClick: (String) -> Unit,
     onExploreEventsClick: () -> Unit,
@@ -116,7 +122,10 @@ private fun HomeContent(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Spacer(Modifier.height(Spacing.medium))
-        TopIcons()
+        TopIcons(
+            notificationsOn = notificationsOn,
+            onNotificationsToggle = onNotificationsToggle
+        )
         StoryCard(
             modifier = Modifier.padding(horizontal = 24.dp),
             title = heroTitle,
@@ -138,7 +147,11 @@ private fun HomeContent(
 }
 
 @Composable
-private fun TopIcons(modifier: Modifier = Modifier) {
+private fun TopIcons(
+    notificationsOn: Boolean,
+    onNotificationsToggle: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Row(
         modifier = modifier.fillMaxWidth().padding(horizontal = 24.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -160,7 +173,7 @@ private fun TopIcons(modifier: Modifier = Modifier) {
             )
         }
         IconButton(
-            onClick = { /* TODO: notifications */ },
+            onClick = onNotificationsToggle,
             modifier = Modifier
                 .size(36.dp)
                 .shadow(4.dp, CircleShape)
@@ -169,12 +182,24 @@ private fun TopIcons(modifier: Modifier = Modifier) {
                     shape = CircleShape
                 )
         ) {
-            Icon(
-                imageVector = Icons.Default.Notifications,
-                contentDescription = stringResource(R.string.notifications),
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(16.dp)
-            )
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = if (notificationsOn) Icons.Default.Notifications
+                    else Icons.Default.NotificationsOff,
+                    contentDescription = if (notificationsOn) "Mute notifications"
+                    else "Unmute notifications",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(16.dp)
+                )
+                if (notificationsOn) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .size(8.dp)
+                            .background(MaterialTheme.colorScheme.primary, CircleShape)
+                    )
+                }
+            }
         }
     }
 }
@@ -415,6 +440,8 @@ private fun HomeScreenPreview(){
                 PlaceItem("boudha-stupa", "Boudha Stupa", "Boudhanath • Spiritual Site.", "Boudhanath • Spiritual Site", "Cultural", "4.9"),
                 PlaceItem("bhaktapur-pottery", "Bhaktapur Pottery Square", "Bhaktapur • Craft Quarter.", "Bhaktapur • Craft Quarter", "Cultural", "4.7")
             ),
+            notificationsOn = true,
+            onNotificationsToggle = {},
             onStoryClick = {},
             onPlaceClick = {},
             onExploreEventsClick = {}
