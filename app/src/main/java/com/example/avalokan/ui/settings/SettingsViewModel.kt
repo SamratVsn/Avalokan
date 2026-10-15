@@ -2,6 +2,7 @@ package com.example.avalokan.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.avalokan.data.auth.AuthRepository
 import com.example.avalokan.data.event.EventRepository
 import com.example.avalokan.data.local.PreferencesStore
 import com.example.avalokan.data.place.PlaceRepository
@@ -22,7 +23,8 @@ data class SettingsUiState(
 class SettingsViewModel @Inject constructor(
     private val userPreferences: PreferencesStore,
     private val placeRepository: PlaceRepository,
-    private val eventRepository: EventRepository
+    private val eventRepository: EventRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     val uiState: StateFlow<SettingsUiState> = combine(
@@ -58,5 +60,9 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             userPreferences.clearAll()
         }
+    }
+
+    fun signOut() {
+        authRepository.signOut()
     }
 }

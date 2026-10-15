@@ -5,6 +5,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -16,11 +17,13 @@ import com.example.avalokan.ui.detail.StoryDetailScreen
 import com.example.avalokan.ui.discover.DiscoverScreen
 import com.example.avalokan.ui.events.EventScreen
 import com.example.avalokan.ui.home.AvalokanHome
+import com.example.avalokan.ui.auth.LoginScreen
 import com.example.avalokan.ui.navigation.NavDestination.Discover
 import com.example.avalokan.ui.navigation.NavDestination.EditProfile
 import com.example.avalokan.ui.navigation.NavDestination.EventDetail
 import com.example.avalokan.ui.navigation.NavDestination.Home
 import com.example.avalokan.ui.navigation.NavDestination.Events
+import com.example.avalokan.ui.navigation.NavDestination.Login
 import com.example.avalokan.ui.navigation.NavDestination.PlaceDetail
 import com.example.avalokan.ui.navigation.NavDestination.Profile
 import com.example.avalokan.ui.navigation.NavDestination.Settings
@@ -29,6 +32,7 @@ import com.example.avalokan.ui.profile.EditProfileScreen
 import com.example.avalokan.ui.profile.ProfileScreen
 import com.example.avalokan.ui.profile.ProfileViewModel
 import com.example.avalokan.ui.settings.SettingsScreen
+import com.example.avalokan.ui.settings.SettingsViewModel
 
 @Composable
 fun AvalokanNavHost(
@@ -67,12 +71,20 @@ fun AvalokanNavHost(
         }
 
         composable(route = Settings.route){
+            val settingsViewModel: SettingsViewModel = hiltViewModel()
             SettingsScreen(
                 onBackClick = { navController.navigateUp() },
-                onEditProfileClick = { navController.navigate(EditProfile.route) }
+                onEditProfileClick = { navController.navigate(EditProfile.route) },
+                onLogoutClick = {
+                    settingsViewModel.signOut()
+                    navController.navigate(Login.route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            inclusive = true
+                        }
+                    }
+                }
             )
         }
-
         composable(route = EditProfile.route){
             // Shared with Profile so edits reflect immediately on return.
             val profileEntry = remember {
@@ -109,6 +121,18 @@ fun AvalokanNavHost(
         ) {
             EventDetailScreen(
                 onBackClick = { navController.navigateUp() }
+            )
+        }
+
+        composable(route = Login.route){
+            LoginScreen(
+                onLoggedIn = {
+                    navController.navigate(Home.route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            inclusive = true
+                        }
+                    }
+                }
             )
         }
     }

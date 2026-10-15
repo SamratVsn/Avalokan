@@ -81,6 +81,7 @@ import com.example.avalokan.ui.theme.WarmBg
 fun SettingsScreen(
     onBackClick: () -> Unit = {},
     onEditProfileClick: () -> Unit = {},
+    onLogoutClick: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -126,6 +127,7 @@ fun SettingsScreen(
         onResetSettings = viewModel::resetSettings,
         onSendSuggestions = onSendSuggestions,
         onAboutClick = { showAboutDialog = true },
+        onLogoutClick = onLogoutClick,
         onBackClick = onBackClick,
         onEditProfileClick = onEditProfileClick
     )
@@ -142,7 +144,8 @@ private fun SettingsContent(
     onClearCache: () -> Unit,
     onResetSettings: () -> Unit,
     onSendSuggestions: () -> Unit,
-    onAboutClick: () -> Unit
+    onAboutClick: () -> Unit,
+    onLogoutClick: () -> Unit
 ) {
     var showClearDialog by rememberSaveable { mutableStateOf(false) }
     var showResetDialog by rememberSaveable { mutableStateOf(false) }
@@ -270,7 +273,7 @@ private fun SettingsContent(
                 confirmButton = {
                     TextButton(onClick = {
                         showLogoutDialog = false
-                        // TODO(auth): clear session + navigate to login
+                        onLogoutClick()
                     }) { Text(text = "Log out") }
                 },
                 dismissButton = {
@@ -628,7 +631,8 @@ private fun SettingsPreview() {
             onClearCache = {},
             onResetSettings = {},
             onSendSuggestions = {},
-            onAboutClick = {}
+            onAboutClick = {},
+            onLogoutClick = {}
         )
     }
 }

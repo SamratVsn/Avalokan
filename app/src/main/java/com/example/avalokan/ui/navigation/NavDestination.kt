@@ -27,6 +27,10 @@ sealed interface NavDestination {
         override val route = "settings"
         override val titleRes = R.string.settings
     }
+    data object Login : NavDestination {
+        override val route = "login"
+        override val titleRes = R.string.logIn
+    }
     data object EditProfile : NavDestination {
         override val route = "edit_profile"
         override val titleRes = R.string.editProfile
