@@ -108,7 +108,7 @@ Avalokan is being developed with a modern Android stack, with a focus on separat
 | **UI**                   | Jetpack Compose, Material 3                   |
 | **Navigation**           | Navigation Compose 2.10.1                     |
 | **Dependency Injection** | Hilt 2.60.1, KSP                              |
-| **Local Database**       | Room 3                                        |
+| **Local Database**       | Room 3  | DataStore                           |
 | **Cloud Data**           | Firebase Firestore                            |
 | **Analytics**            | Firebase Analytics                            |
 | **Build**                | Android Gradle Plugin 9.4.1, Java 11          |
