@@ -14,6 +14,8 @@ import com.example.avalokan.data.place.FirestorePlaceRepository
 import com.example.avalokan.data.story.StoryDao
 import com.example.avalokan.data.story.StoryRepository
 import com.example.avalokan.data.story.FirestoreStoryRepository
+import com.example.avalokan.data.user.FirestoreUserRepository
+import com.example.avalokan.data.user.UserRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Binds
 import dagger.Module
@@ -59,6 +61,9 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindPlaceRepository(impl: FirestorePlaceRepository): PlaceRepository
+
+    @Binds
+    abstract fun bindUserRepository(impl: FirestoreUserRepository): UserRepository
 
     @Binds
     abstract fun bindEventRepository(impl: FirestoreEventRepository): EventRepository
