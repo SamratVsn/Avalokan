@@ -3,7 +3,6 @@ package com.example.avalokan.ui.detail
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -50,11 +49,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -296,7 +292,7 @@ private fun PlaceDetailContent(
                     }
                 }
                 item {
-                    ExpandableDescription(
+                    DescriptionSection(
                         description = description,
                         modifier = Modifier.padding(horizontal = 24.dp)
                     )
@@ -356,23 +352,13 @@ private fun StatCard(stat: StatUi) {
 }
 
 @Composable
-private fun ExpandableDescription(description: String, modifier: Modifier = Modifier) {
-    var expanded by rememberSaveable { mutableStateOf(false) }
+private fun DescriptionSection(description: String, modifier: Modifier = Modifier) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
         DetailSectionTitle(text = "About this Place")
         Text(
             text = description,
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
-            maxLines = if (expanded) Int.MAX_VALUE else 3,
-            overflow = TextOverflow.Ellipsis
-        )
-        Text(
-            text = if (expanded) "Show less" else "Read more",
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Bold,
-            color = PrimaryTeal,
-            modifier = Modifier.clickable { expanded = !expanded }
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
         )
     }
 }
