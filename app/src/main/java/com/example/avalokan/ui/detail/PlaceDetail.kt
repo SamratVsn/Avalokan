@@ -206,113 +206,115 @@ private fun PlaceDetailContent(
             }
         }
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(innerPadding),
-            contentPadding = PaddingValues(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            item {
-                // Gallery header (AsyncImage fills it when the Data layer has a URL)
-                Box(modifier = Modifier.fillMaxWidth().height(300.dp)) {
-                    Box(
-                        modifier = Modifier.fillMaxSize()
-                            .background(PrimaryLight),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (imageUrl != null) {
-                            coil.compose.AsyncImage(
-                                model = imageUrl,
-                                contentDescription = title,
-                                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        } else {
+        Box(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().padding(innerPadding),
+                contentPadding = PaddingValues(bottom = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item {
+                    // Gallery header (AsyncImage fills it when the Data layer has a URL)
+                    Box(modifier = Modifier.fillMaxWidth().height(300.dp)) {
+                        Box(
+                            modifier = Modifier.fillMaxSize()
+                                .background(PrimaryLight),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (imageUrl != null) {
+                                coil.compose.AsyncImage(
+                                    model = imageUrl,
+                                    contentDescription = title,
+                                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            } else {
+                                Icon(
+                                    Icons.Default.Landscape,
+                                    contentDescription = null,
+                                    tint = PrimaryTeal,
+                                    modifier = Modifier.size(48.dp)
+                                )
+                            }
+                        }
+                        OutlinedButton(
+                            onClick = {},
+                            modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
+                        ) {
                             Icon(
-                                Icons.Default.Landscape,
-                                contentDescription = null,
-                                tint = PrimaryTeal,
-                                modifier = Modifier.size(48.dp)
+                                Icons.Default.PhotoLibrary,
+                                null,
+                                modifier = Modifier.size(16.dp)
                             )
-                        }
-                    }
-                    IconButton(
-                        onClick = onBackClick,
-                        modifier = Modifier.align(Alignment.TopStart)
-                            .statusBarsPadding()
-                            .padding(top = 8.dp, start = 16.dp)
-                            .size(40.dp)
-                            .background(Color.Black.copy(alpha = 0.2f), CircleShape)
-                    ) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = Color.White,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                    OutlinedButton(
-                        onClick = {},
-                        modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
-                    ) {
-                        Icon(
-                            Icons.Default.PhotoLibrary,
-                            null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(Modifier.width(6.dp))
-                        Text(text = "View Gallery")
-                    }
-                }
-            }
-            item {
-                Column(
-                    modifier = Modifier.padding(horizontal = 24.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = title,
-                            style = MaterialTheme.typography.headlineMedium,
-                            modifier = Modifier.weight(1f)
-                        )
-                        DetailBadge(text = "$rating ★")
-                    }
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        if (badge.isNotBlank()) {
-                            DetailBadge(text = badge)
+                            Spacer(Modifier.width(6.dp))
+                            Text(text = "View Gallery")
                         }
                     }
                 }
-            }
-            item {
-                // 2x2 quick-stats grid (values from data, spec defaults as fallback)
-                val stats = listOf(
-                    StatUi(Icons.Default.ConfirmationNumber, "Entry Fee", entryFee),
-                    StatUi(Icons.Default.CalendarMonth, "Best Time", bestTime),
-                    StatUi(Icons.Default.Schedule, "Hours", hours),
-                    StatUi(Icons.Default.Star, "Rating", rating)
-                )
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    modifier = Modifier.fillMaxWidth()
-                        .height(220.dp)
-                        .padding(horizontal = 24.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    userScrollEnabled = false
-                ) {
-                    items(stats) { stat ->
-                        StatCard(stat)
+                item {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 24.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = title,
+                                style = MaterialTheme.typography.headlineMedium,
+                                modifier = Modifier.weight(1f)
+                            )
+                            DetailBadge(text = "$rating ★")
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            if (badge.isNotBlank()) {
+                                DetailBadge(text = badge)
+                            }
+                        }
                     }
                 }
+                item {
+                    // 2x2 quick-stats grid (values from data, spec defaults as fallback)
+                    val stats = listOf(
+                        StatUi(Icons.Default.ConfirmationNumber, "Entry Fee", entryFee),
+                        StatUi(Icons.Default.CalendarMonth, "Best Time", bestTime),
+                        StatUi(Icons.Default.Schedule, "Hours", hours),
+                        StatUi(Icons.Default.Star, "Rating", rating)
+                    )
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        modifier = Modifier.fillMaxWidth()
+                            .height(220.dp)
+                            .padding(horizontal = 24.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        userScrollEnabled = false
+                    ) {
+                        items(stats) { stat ->
+                            StatCard(stat)
+                        }
+                    }
+                }
+                item {
+                    ExpandableDescription(
+                        description = description,
+                        modifier = Modifier.padding(horizontal = 24.dp)
+                    )
+                }
             }
-            item {
-                ExpandableDescription(
-                    description = description,
-                    modifier = Modifier.padding(horizontal = 24.dp)
+            IconButton(
+                onClick = onBackClick,
+                modifier = Modifier.align(Alignment.TopStart)
+                    .statusBarsPadding()
+                    .padding(top = 8.dp, start = 16.dp)
+                    .size(40.dp)
+                    .background(Color.Black.copy(alpha = 0.2f), CircleShape)
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Color.White,
+                    modifier = Modifier.size(18.dp)
                 )
             }
         }

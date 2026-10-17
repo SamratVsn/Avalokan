@@ -103,86 +103,88 @@ fun StoryDetailScreen(
         contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
         snackbarHost = { SnackbarHost(hostState = snackbarHost) }
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(innerPadding),
-            contentPadding = PaddingValues(bottom = 32.dp)
-        ) {
-            item {
-                // 350dp hero with back overlay (AsyncImage when the story has one)
-                Box(modifier = Modifier.fillMaxWidth().height(350.dp)) {
-                    Box(
-                        modifier = Modifier.fillMaxSize()
-                            .background(MaterialTheme.colorScheme.surfaceVariant),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        val heroImage = item?.imageUrl
-                        if (heroImage != null) {
-                            coil.compose.AsyncImage(
-                                model = heroImage,
-                                contentDescription = resolved.title,
-                                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        } else {
+        Box(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().padding(innerPadding),
+                contentPadding = PaddingValues(bottom = 32.dp)
+            ) {
+                item {
+                    // 350dp hero with back overlay (AsyncImage when the story has one)
+                    Box(modifier = Modifier.fillMaxWidth().height(350.dp)) {
+                        Box(
+                            modifier = Modifier.fillMaxSize()
+                                .background(MaterialTheme.colorScheme.surfaceVariant),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            val heroImage = item?.imageUrl
+                            if (heroImage != null) {
+                                coil.compose.AsyncImage(
+                                    model = heroImage,
+                                    contentDescription = resolved.title,
+                                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            } else {
+                                Icon(
+                                    Icons.Default.Person,
+                                    contentDescription = null,
+                                    tint = PrimaryTeal,
+                                    modifier = Modifier.size(48.dp)
+                                )
+                            }
+                        }
+                        IconButton(
+                            onClick = {
+                                isFavorite = !isFavorite
+                                if (isFavorite) {
+                                    scope.launch { snackbarHost.showSnackbar("Saved to Collection") }
+                                }
+                            },
+                            modifier = Modifier.align(Alignment.TopEnd)
+                                .statusBarsPadding()
+                                .padding(top = 8.dp, end = 16.dp)
+                                .size(40.dp)
+                                .background(Color.Black.copy(alpha = 0.2f), CircleShape)
+                        ) {
                             Icon(
-                                Icons.Default.Person,
-                                contentDescription = null,
-                                tint = PrimaryTeal,
-                                modifier = Modifier.size(48.dp)
+                                if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                contentDescription = if (isFavorite) "Remove from favorites" else "Save to favorites",
+                                tint = Color.White,
+                                modifier = Modifier.size(18.dp)
                             )
                         }
                     }
-                    IconButton(
-                        onClick = onBackClick,
-                        modifier = Modifier.align(Alignment.TopStart)
-                            .statusBarsPadding()
-                            .padding(top = 8.dp, start = 16.dp)
-                            .size(40.dp)
-                            .background(Color.Black.copy(alpha = 0.2f), CircleShape)
+                }
+                item {
+                    // White sheet overlapping hero by -30dp, 40dp top rounding
+                    Surface(
+                        modifier = Modifier.fillMaxWidth()
+                            .offset(y = (-30).dp)
+                            .clip(RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp)),
+                        color = MaterialTheme.colorScheme.surface
                     ) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = Color.White,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                    IconButton(
-                        onClick = {
-                            isFavorite = !isFavorite
-                            if (isFavorite) {
-                                scope.launch { snackbarHost.showSnackbar("Saved to Collection") }
-                            }
-                        },
-                        modifier = Modifier.align(Alignment.TopEnd)
-                            .statusBarsPadding()
-                            .padding(top = 8.dp, end = 16.dp)
-                            .size(40.dp)
-                            .background(Color.Black.copy(alpha = 0.2f), CircleShape)
-                    ) {
-                        Icon(
-                            if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                            contentDescription = if (isFavorite) "Remove from favorites" else "Save to favorites",
-                            tint = Color.White,
-                            modifier = Modifier.size(18.dp)
+                        StoryBody(
+                            story = resolved,
+                            modifier = Modifier.padding(horizontal = 24.dp)
+                                .padding(top = 24.dp)
                         )
                     }
                 }
             }
-            item {
-                // White sheet overlapping hero by -30dp, 40dp top rounding
-                Surface(
-                    modifier = Modifier.fillMaxWidth()
-                        .offset(y = (-30).dp)
-                        .clip(RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp)),
-                    color = MaterialTheme.colorScheme.surface
-                ) {
-                    StoryBody(
-                        story = resolved,
-                        modifier = Modifier.padding(horizontal = 24.dp)
-                            .padding(top = 24.dp)
-                    )
-                }
+            IconButton(
+                onClick = onBackClick,
+                modifier = Modifier.align(Alignment.TopStart)
+                    .statusBarsPadding()
+                    .padding(top = 8.dp, start = 16.dp)
+                    .size(40.dp)
+                    .background(Color.Black.copy(alpha = 0.2f), CircleShape)
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Color.White,
+                    modifier = Modifier.size(18.dp)
+                )
             }
         }
     }

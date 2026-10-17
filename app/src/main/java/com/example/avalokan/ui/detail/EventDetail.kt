@@ -167,140 +167,145 @@ private fun EventDetailContent(
             }
         }
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(innerPadding),
-            contentPadding = PaddingValues(bottom = 24.dp)
-        ) {
-            item {
-                // 350dp hero; the white sheet below slides 30dp over it.
-                Box(modifier = Modifier.fillMaxWidth().height(350.dp)) {
-                    Box(
-                        modifier = Modifier.fillMaxSize()
-                            .background(MaterialTheme.colorScheme.surfaceVariant),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (imageUrl != null) {
-                            coil.compose.AsyncImage(
-                                model = imageUrl,
-                                contentDescription = title,
-                                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        } else {
-                            Icon(
-                                Icons.Default.CalendarMonth,
-                                contentDescription = null,
-                                tint = PrimaryTeal,
-                                modifier = Modifier.size(48.dp)
-                            )
-                        }
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth()
-                            .statusBarsPadding()
-                            .padding(top = 8.dp, start = 16.dp, end = 16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        IconButton(
-                            onClick = onBackClick,
-                            modifier = Modifier.size(40.dp)
-                                .background(HeroScrim, CircleShape)
+        Box(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().padding(innerPadding),
+                contentPadding = PaddingValues(bottom = 24.dp)
+            ) {
+                item {
+                    // 350dp hero; the white sheet below slides 30dp over it.
+                    Box(modifier = Modifier.fillMaxWidth().height(350.dp)) {
+                        Box(
+                            modifier = Modifier.fillMaxSize()
+                                .background(MaterialTheme.colorScheme.surfaceVariant),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
-                                tint = Color.White,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            IconButton(
-                                onClick = onShareClick,
-                                modifier = Modifier.size(40.dp)
-                                    .background(HeroScrim, CircleShape)
-                            ) {
+                            if (imageUrl != null) {
+                                coil.compose.AsyncImage(
+                                    model = imageUrl,
+                                    contentDescription = title,
+                                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            } else {
                                 Icon(
-                                    Icons.Default.Share,
-                                    contentDescription = "Share",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(18.dp)
+                                    Icons.Default.CalendarMonth,
+                                    contentDescription = null,
+                                    tint = PrimaryTeal,
+                                    modifier = Modifier.size(48.dp)
                                 )
                             }
-                            IconButton(
-                                onClick = onFavoriteClick,
-                                modifier = Modifier.size(40.dp)
-                                    .background(HeroScrim, CircleShape)
-                            ) {
-                                Icon(
-                                    if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                    contentDescription = if (isFavorite) "Remove from favorites" else "Save to favorites",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(18.dp)
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth()
+                                .statusBarsPadding()
+                                .padding(top = 8.dp, start = 16.dp, end = 16.dp),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                IconButton(
+                                    onClick = onShareClick,
+                                    modifier = Modifier.size(40.dp)
+                                        .background(HeroScrim, CircleShape)
+                                ) {
+                                    Icon(
+                                        Icons.Default.Share,
+                                        contentDescription = "Share",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                                IconButton(
+                                    onClick = onFavoriteClick,
+                                    modifier = Modifier.size(40.dp)
+                                        .background(HeroScrim, CircleShape)
+                                ) {
+                                    Icon(
+                                        if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                        contentDescription = if (isFavorite) "Remove from favorites" else "Save to favorites",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+                item {
+                    // Layered sheet overlapping the hero by 30dp, 40dp top rounding.
+                    Surface(
+                        modifier = Modifier.fillMaxWidth()
+                            .offset(y = (-30).dp)
+                            .clip(RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp)),
+                        color = MaterialTheme.colorScheme.surface
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(horizontal = 24.dp)
+                                .padding(top = 24.dp, bottom = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                DetailBadge(
+                                    text = if (date.isBlank()) "Festival" else "$date • Festival",
+                                    containerColor = accent.copy(alpha = 0.12f),
+                                    contentColor = accent,
+                                    icon = eventBadgeIcon(eventType)
+                                )
+                                Text(
+                                    text = title,
+                                    style = MaterialTheme.typography.headlineLarge,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                            // Date / Time / Location metadata list
+                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                MetaRow(
+                                    icon = Icons.Default.CalendarMonth,
+                                    label = "Date",
+                                    value = "Sept 17, 2024"
+                                )
+                                MetaRow(
+                                    icon = Icons.Default.Schedule,
+                                    label = "Time",
+                                    value = "10:00 AM onwards"
+                                )
+                                MetaRow(
+                                    icon = Icons.Default.LocationOn,
+                                    label = "Location",
+                                    value = location
+                                )
+                            }
+                            // About the festival: full Firestore description.
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text(
+                                    text = "About the Festival",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Text(
+                                    text = description,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
                                 )
                             }
                         }
                     }
                 }
             }
-            item {
-                // Layered sheet overlapping the hero by 30dp, 40dp top rounding.
-                Surface(
-                    modifier = Modifier.fillMaxWidth()
-                        .offset(y = (-30).dp)
-                        .clip(RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp)),
-                    color = MaterialTheme.colorScheme.surface
-                ) {
-                    Column(
-                        modifier = Modifier.padding(horizontal = 24.dp)
-                            .padding(top = 24.dp, bottom = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            DetailBadge(
-                                text = if (date.isBlank()) "Festival" else "$date • Festival",
-                                containerColor = accent.copy(alpha = 0.12f),
-                                contentColor = accent,
-                                icon = eventBadgeIcon(eventType)
-                            )
-                            Text(
-                                text = title,
-                                style = MaterialTheme.typography.headlineLarge,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                        // Date / Time / Location metadata list
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            MetaRow(
-                                icon = Icons.Default.CalendarMonth,
-                                label = "Date",
-                                value = "Sept 17, 2024"
-                            )
-                            MetaRow(
-                                icon = Icons.Default.Schedule,
-                                label = "Time",
-                                value = "10:00 AM onwards"
-                            )
-                            MetaRow(
-                                icon = Icons.Default.LocationOn,
-                                label = "Location",
-                                value = location
-                            )
-                        }
-                        // About the festival: full Firestore description.
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text(
-                                text = "About the Festival",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            Text(
-                                text = description,
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
-                            )
-                        }
-                    }
-                }
+            IconButton(
+                onClick = onBackClick,
+                modifier = Modifier.align(Alignment.TopStart)
+                    .statusBarsPadding()
+                    .padding(top = 8.dp, start = 16.dp)
+                    .size(40.dp)
+                    .background(HeroScrim, CircleShape)
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Color.White,
+                    modifier = Modifier.size(18.dp)
+                )
             }
         }
     }
