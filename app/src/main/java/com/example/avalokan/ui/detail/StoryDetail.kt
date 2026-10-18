@@ -1,14 +1,17 @@
 package com.example.avalokan.ui.detail
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -18,10 +21,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -45,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -52,6 +59,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import com.example.avalokan.ui.theme.AccentMarigold
 import com.example.avalokan.ui.theme.AvalokanTheme
+import com.example.avalokan.ui.theme.DangerRed
 import com.example.avalokan.ui.theme.PrimaryTeal
 import com.example.avalokan.ui.theme.Spacing
 
@@ -105,11 +113,42 @@ fun StoryDetailScreen(
     )
     val snackbarHost = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    var isFavorite by rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
+    var isLiked by rememberSaveable { mutableStateOf(false) }
+    var isSaved by rememberSaveable { mutableStateOf(false) }
+    val onShareClick = {
+        val send = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(
+                Intent.EXTRA_TEXT,
+                "“${resolved.title}” — a story by ${resolved.author} (${resolved.readTime}) on Avalokan, a Nepal Heritage Explorer."
+            )
+        }
+        context.startActivity(Intent.createChooser(send, "Share story"))
+    }
     Scaffold(
         containerColor = Color.White,
         contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
-        snackbarHost = { SnackbarHost(hostState = snackbarHost) }
+        snackbarHost = { SnackbarHost(hostState = snackbarHost) },
+        bottomBar = {
+            StoryBottomBar(
+                isLiked = isLiked,
+                isSaved = isSaved,
+                onLike = {
+                    isLiked = !isLiked
+                    if (isLiked) scope.launch { snackbarHost.showSnackbar("Thanks for the love!") }
+                },
+                onShare = onShareClick,
+                onSave = {
+                    isSaved = !isSaved
+                    scope.launch {
+                        snackbarHost.showSnackbar(
+                            if (isSaved) "Saved to Collection" else "Removed from Collection"
+                        )
+                    }
+                }
+            )
+        }
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
@@ -140,26 +179,6 @@ fun StoryDetailScreen(
                                     modifier = Modifier.size(48.dp)
                                 )
                             }
-                        }
-                        IconButton(
-                            onClick = {
-                                isFavorite = !isFavorite
-                                if (isFavorite) {
-                                    scope.launch { snackbarHost.showSnackbar("Saved to Collection") }
-                                }
-                            },
-                            modifier = Modifier.align(Alignment.TopEnd)
-                                .statusBarsPadding()
-                                .padding(top = 8.dp, end = 16.dp)
-                                .size(40.dp)
-                                .background(Color.Black.copy(alpha = 0.2f), CircleShape)
-                        ) {
-                            Icon(
-                                if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                contentDescription = if (isFavorite) "Remove from favorites" else "Save to favorites",
-                                tint = Color.White,
-                                modifier = Modifier.size(18.dp)
-                            )
                         }
                     }
                 }
@@ -195,6 +214,85 @@ fun StoryDetailScreen(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun StoryBottomBar(
+    isLiked: Boolean,
+    isSaved: Boolean,
+    onLike: () -> Unit,
+    onShare: () -> Unit,
+    onSave: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = 16.dp,
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = Spacing.medium, vertical = Spacing.small)
+                .padding(top = 4.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            StoryBarAction(
+                icon = if (isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                label = if (isLiked) "Liked" else "Like",
+                tint = if (isLiked) DangerRed else MaterialTheme.colorScheme.onSurfaceVariant,
+                onClick = onLike
+            )
+            StoryBarAction(
+                icon = Icons.Default.Share,
+                label = "Share",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                onClick = onShare
+            )
+            StoryBarAction(
+                icon = if (isSaved) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                label = if (isSaved) "Saved" else "Save",
+                tint = if (isSaved) PrimaryTeal else MaterialTheme.colorScheme.onSurfaceVariant,
+                onClick = onSave
+            )
+        }
+    }
+}
+
+@Composable
+private fun StoryBarAction(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    tint: Color,
+    onClick: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.clip(RoundedCornerShape(16.dp))
+    ) {
+        IconButton(onClick = onClick) {
+            Box(
+                modifier = Modifier.size(44.dp)
+                    .background(tint.copy(alpha = 0.12f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = label,
+                    tint = tint,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+        }
+        Spacer(Modifier.height(2.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = tint
+        )
     }
 }
 
