@@ -21,7 +21,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.ExploreOff
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Card
@@ -52,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
 import com.example.avalokan.data.place.PlaceItem
+import com.example.avalokan.ui.components.StateMessage
 import com.example.avalokan.ui.theme.AccentMarigold
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
@@ -88,7 +91,8 @@ fun DiscoverScreen(
             sites = sites,
             savedIds = savedIds,
             onToggleSave = { viewModel.toggleSave(it) },
-            onPlaceClick = onPlaceClick
+            onPlaceClick = onPlaceClick,
+            onRetry = viewModel::refresh
         )
     }
 }
@@ -103,7 +107,8 @@ private fun DiscoverContent(
     sites: List<PlaceItem>,
     savedIds: Set<String>,
     onToggleSave: (String) -> Unit,
-    onPlaceClick: (String) -> Unit
+    onPlaceClick: (String) -> Unit,
+    onRetry: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxSize()
@@ -148,10 +153,12 @@ private fun DiscoverContent(
         Suggestions(
             filters = filters, selected = selected,
             onSelect = onSelect,
+            query = query,
             sites = sites,
             savedIds = savedIds,
             onToggleSave = onToggleSave,
-            onPlaceClick = onPlaceClick
+            onPlaceClick = onPlaceClick,
+            onRetry = onRetry
         )
     }
 }
@@ -201,10 +208,12 @@ private fun Suggestions(
     filters: List<String>,
     selected: Int,
     onSelect: (Int) -> Unit,
+    query: String,
     sites: List<PlaceItem>,
     savedIds: Set<String>,
     onToggleSave: (String) -> Unit,
     onPlaceClick: (String) -> Unit,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ){
     Column(
@@ -240,21 +249,35 @@ private fun Suggestions(
                 )
             }
         }
-        Column(
-            modifier = Modifier.padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            sites.forEach { site ->
-                SearchPlaceCard(
-                    title = site.name,
-                    meta = site.meta,
-                    rating = site.rating,
-                    desc = site.description,
-                    imageUrl = site.imageUrl,
-                    isSaved = savedIds.contains(site.id),
-                    onSaveClick = { onToggleSave(site.id) },
-                    onCardClick = { onPlaceClick(site.id) }
-                )
+        if (sites.isEmpty()) {
+            StateMessage(
+                icon = if (query.isBlank()) Icons.Default.ExploreOff else Icons.Default.SearchOff,
+                title = if (query.isBlank()) "Nothing to show yet" else "No matches found",
+                message = if (query.isBlank()) {
+                    "We couldn’t load places right now. Check your connection and try again."
+                } else {
+                    "We couldn’t find anything for “$query”. Try a different search or category."
+                },
+                actionLabel = if (query.isBlank()) "Retry" else null,
+                onAction = if (query.isBlank()) onRetry else null
+            )
+        } else {
+            Column(
+                modifier = Modifier.padding(horizontal = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                sites.forEach { site ->
+                    SearchPlaceCard(
+                        title = site.name,
+                        meta = site.meta,
+                        rating = site.rating,
+                        desc = site.description,
+                        imageUrl = site.imageUrl,
+                        isSaved = savedIds.contains(site.id),
+                        onSaveClick = { onToggleSave(site.id) },
+                        onCardClick = { onPlaceClick(site.id) }
+                    )
+                }
             }
         }
     }
@@ -318,7 +341,8 @@ private fun DiscoverPreview(){
             ),
             savedIds = emptySet(),
             onToggleSave = {},
-            onPlaceClick = {}
+            onPlaceClick = {},
+            onRetry = {}
         )
     }
 }

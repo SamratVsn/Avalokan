@@ -104,26 +104,32 @@ fun PlaceDetailScreen(
         val query = Uri.encode("$placeTitle, $placeLocation, Nepal")
         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=$query")))
     }
-    PlaceDetailContent(
-        title = placeTitle,
-        rating = place?.rating.orEmpty(),
-        description = place?.description.orEmpty(),
-        badge = place?.badge.orEmpty(),
-        entryFee = place?.entryFee.orEmpty(),
-        bestTime = place?.bestTime.orEmpty(),
-        hours = place?.hours.orEmpty(),
-        imageUrl = place?.imageUrl,
-        isSaved = isSaved,
-        onSaveClick = {
-            if (viewModel.toggleSave()) {
-                scope.launch { snackbarHost.showSnackbar("Saved to Collection") }
-            }
-        },
-        onBackClick = onBackClick,
-        onShareClick = onShareClick,
-        onDirectionsClick = onDirectionsClick,
-        snackbarHost = snackbarHost
-    )
+    DetailBody(
+        itemPresent = place != null,
+        kind = "place",
+        onBackClick = onBackClick
+    ) {
+        PlaceDetailContent(
+            title = placeTitle,
+            rating = place?.rating.orEmpty(),
+            description = place?.description.orEmpty(),
+            badge = place?.badge.orEmpty(),
+            entryFee = place?.entryFee.orEmpty(),
+            bestTime = place?.bestTime.orEmpty(),
+            hours = place?.hours.orEmpty(),
+            imageUrl = place?.imageUrl,
+            isSaved = isSaved,
+            onSaveClick = {
+                if (viewModel.toggleSave()) {
+                    scope.launch { snackbarHost.showSnackbar("Saved to Collection") }
+                }
+            },
+            onBackClick = onBackClick,
+            onShareClick = onShareClick,
+            onDirectionsClick = onDirectionsClick,
+            snackbarHost = snackbarHost
+        )
+    }
 }
 
 @Composable

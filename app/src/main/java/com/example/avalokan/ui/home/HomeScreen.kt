@@ -22,6 +22,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.ExploreOff
 import androidx.compose.material.icons.filled.Landscape
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Button
@@ -51,6 +52,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
 import com.example.avalokan.data.place.PlaceItem
+import com.example.avalokan.ui.components.StateMessage
 import com.example.avalokan.ui.theme.AccentMarigold
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
@@ -89,7 +91,8 @@ fun AvalokanHome(
         places = places,
         onStoryClick = onStoryClick,
         onPlaceClick = onPlaceClick,
-        onExploreEventsClick = onExploreEventsClick
+        onExploreEventsClick = onExploreEventsClick,
+        onRetry = viewModel::refresh
     )
 }
 }
@@ -104,6 +107,7 @@ private fun HomeContent(
     onStoryClick: (String) -> Unit,
     onPlaceClick: (String) -> Unit,
     onExploreEventsClick: () -> Unit,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -124,16 +128,28 @@ private fun HomeContent(
             imageUrl = heroImageUrl,
             onReadClick = { onStoryClick(heroStoryId) }
         )
-        HistoricalGems(places = places, onPlaceClick = onPlaceClick)
+        if (places.isEmpty()) {
+            StateMessage(
+                icon = Icons.Default.ExploreOff,
+                title = "We couldn’t load places",
+                message = "Your connection may be off. Reconnect and refresh to explore heritage sites across Nepal.",
+                actionLabel = "Retry",
+                onAction = onRetry
+            )
+        } else {
+            HistoricalGems(places = places, onPlaceClick = onPlaceClick)
+        }
         EventSuggestion(
             modifier = Modifier.padding(horizontal = 24.dp),
             onExploreClick = onExploreEventsClick
         )
-        RecentDiscoveries(
-            modifier = Modifier.padding(horizontal = 24.dp),
-            places = places,
-            onPlaceClick = onPlaceClick
-        )
+        if (places.any { it.featured }) {
+            RecentDiscoveries(
+                modifier = Modifier.padding(horizontal = 24.dp),
+                places = places,
+                onPlaceClick = onPlaceClick
+            )
+        }
     }
 }
 
@@ -417,7 +433,8 @@ private fun HomeScreenPreview(){
             ),
             onStoryClick = {},
             onPlaceClick = {},
-            onExploreEventsClick = {}
+            onExploreEventsClick = {},
+            onRetry = {}
         )
     }
 }

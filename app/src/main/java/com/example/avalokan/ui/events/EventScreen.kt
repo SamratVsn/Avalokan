@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.EventBusy
 import androidx.compose.material.icons.filled.Landscape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -50,6 +51,7 @@ import coil.compose.AsyncImage
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
 import com.example.avalokan.data.event.EventItem
+import com.example.avalokan.ui.components.StateMessage
 import com.example.avalokan.ui.theme.AccentMarigold
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
@@ -75,7 +77,8 @@ fun EventScreen(
     ) {
         EventContent(
             events = events,
-            onEventClick = onEventClick
+            onEventClick = onEventClick,
+            onRetry = viewModel::refresh
         )
     }
 }
@@ -83,7 +86,8 @@ fun EventScreen(
 @Composable
 private fun EventContent(
     events: List<EventItem>,
-    onEventClick: (String) -> Unit
+    onEventClick: (String) -> Unit,
+    onRetry: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxSize()
@@ -95,19 +99,29 @@ private fun EventContent(
     ) {
         Spacer(Modifier.height(Spacing.small))
         TopTexts(modifier = Modifier.padding(horizontal = 24.dp))
-        val featured = events.find { it.featured } ?: events.firstOrNull()
-        if (featured != null) {
-            FeaturedEvent(
-                event = featured,
-                modifier = Modifier.padding(horizontal = 24.dp),
-                onRemindClick = { onEventClick(featured.id) }
+        if (events.isEmpty()) {
+            StateMessage(
+                icon = Icons.Default.EventBusy,
+                title = "No events right now",
+                message = "There’s nothing scheduled at the moment. Check your connection and refresh to see what’s coming up.",
+                actionLabel = "Retry",
+                onAction = onRetry
+            )
+        } else {
+            val featured = events.find { it.featured } ?: events.firstOrNull()
+            if (featured != null) {
+                FeaturedEvent(
+                    event = featured,
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    onRemindClick = { onEventClick(featured.id) }
+                )
+            }
+            UpcomingEvents(
+                events = events,
+                modifier = Modifier.padding(horizontal = 24.dp).padding(top = 20.dp),
+                onEventClick = onEventClick
             )
         }
-        UpcomingEvents(
-            events = events,
-            modifier = Modifier.padding(horizontal = 24.dp).padding(top = 20.dp),
-            onEventClick = onEventClick
-        )
     }
 }
 
@@ -382,7 +396,8 @@ private fun EventsPreview() {
                 EventItem("samay-baji", "Alla & Samay Baji Festival", "", "Patan Square • 5:00 PM", "$15 ENTRY", "Join >"),
                 EventItem("thangka-demo", "Live Thangka Art Demo", "", "Boudha • 11:00 AM", "DONATION BASED", "Join >")
             ),
-            onEventClick = {}
+            onEventClick = {},
+            onRetry = {}
         )
     }
 }

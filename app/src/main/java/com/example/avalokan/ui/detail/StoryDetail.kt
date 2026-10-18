@@ -83,6 +83,14 @@ fun StoryDetailScreen(
         readTime = "6 min read"
     )
     val item = viewModel.story.collectAsState().value
+    if (item == null) {
+        if (isStillMissing(itemPresent = false)) {
+            DetailMissing(kind = "story", onBackClick = onBackClick)
+        } else {
+            DetailLoading(kind = "story", onBackClick = onBackClick)
+        }
+        return
+    }
     val resolved = story.copy(
         badge = item?.badge?.ifBlank { story.badge } ?: story.badge,
         title = item?.title?.ifBlank { story.title } ?: story.title,

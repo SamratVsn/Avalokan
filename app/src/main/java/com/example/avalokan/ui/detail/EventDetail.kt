@@ -88,22 +88,28 @@ fun EventDetailScreen(
         }
         context.startActivity(Intent.createChooser(intent, "Share event"))
     }
-    EventDetailContent(
-        title = event?.title.orEmpty(),
-        location = event?.meta?.substringBefore("•")?.trim()
-            ?.ifBlank { "Nepal" } ?: "Nepal",
-        eventType = eventType,
-        date = event?.date.orEmpty(),
-        description = event?.description.orEmpty(),
-        fee = event?.fee?.ifBlank { "Rs. 500" } ?: "Rs. 500",
-        imageUrl = event?.imageUrl,
-        isFavorite = isFavorite,
-        onFavoriteClick = { isFavorite = !isFavorite },
-        onShareClick = onShareClick,
-        onBookClick = { scope.launch { snackbarHost.showSnackbar("Booked! See you there.") } },
-        snackbarHost = snackbarHost,
+    DetailBody(
+        itemPresent = event != null,
+        kind = "event",
         onBackClick = onBackClick
-    )
+    ) {
+        EventDetailContent(
+            title = event?.title.orEmpty(),
+            location = event?.meta?.substringBefore("•")?.trim()
+                ?.ifBlank { "Nepal" } ?: "Nepal",
+            eventType = eventType,
+            date = event?.date.orEmpty(),
+            description = event?.description.orEmpty(),
+            fee = event?.fee?.ifBlank { "Rs. 500" } ?: "Rs. 500",
+            imageUrl = event?.imageUrl,
+            isFavorite = isFavorite,
+            onFavoriteClick = { isFavorite = !isFavorite },
+            onShareClick = onShareClick,
+            onBookClick = { scope.launch { snackbarHost.showSnackbar("Booked! See you there.") } },
+            snackbarHost = snackbarHost,
+            onBackClick = onBackClick
+        )
+    }
 }
 
 @Composable
