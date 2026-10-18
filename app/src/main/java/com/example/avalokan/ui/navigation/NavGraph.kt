@@ -75,6 +75,7 @@ fun AvalokanNavHost(
             SettingsScreen(
                 onBackClick = { navController.navigateUp() },
                 onEditProfileClick = { navController.navigate(EditProfile.route) },
+                onLoginClick = { navController.navigate(Login.route) },
                 onLogoutClick = {
                     settingsViewModel.signOut()
                     navController.navigate(Login.route) {

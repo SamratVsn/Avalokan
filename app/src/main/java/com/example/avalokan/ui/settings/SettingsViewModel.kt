@@ -16,7 +16,8 @@ import javax.inject.Inject
 
 data class SettingsUiState(
     val notificationsEnabled: Boolean = true,
-    val themeChoice: String = PreferencesStore.THEME_SYSTEM
+    val themeChoice: String = PreferencesStore.THEME_SYSTEM,
+    val isLoggedIn: Boolean = false
 )
 
 @HiltViewModel
@@ -29,11 +30,13 @@ class SettingsViewModel @Inject constructor(
 
     val uiState: StateFlow<SettingsUiState> = combine(
         userPreferences.notificationsEnabled,
-        userPreferences.themeChoice
-    ) { notifications, theme ->
+        userPreferences.themeChoice,
+        authRepository.currentUser
+    ) { notifications, theme, user ->
         SettingsUiState(
             notificationsEnabled = notifications,
-            themeChoice = theme
+            themeChoice = theme,
+            isLoggedIn = user?.isAnonymous == false
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsUiState())
 
