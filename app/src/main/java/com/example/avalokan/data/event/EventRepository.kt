@@ -48,7 +48,11 @@ class FirestoreEventRepository @Inject constructor(
         send(eventDao.observeAll().first())
         val registration = firestore.collection(EVENTS_COLLECTION)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) Log.w("AvalokanRepo", "Firestore listen failed", error)
+                if (error != null) {
+                    // Keep the last good emission rather than blanking the UI.
+                    Log.w("AvalokanRepo", "Firestore listen failed", error)
+                    return@addSnapshotListener
+                }
                 val items = snapshot?.documents.orEmpty().map { doc ->
                     doc.toEventItem()
                 }
@@ -62,10 +66,14 @@ class FirestoreEventRepository @Inject constructor(
         send(eventDao.observeById(id).first())
         val registration = firestore.collection(EVENTS_COLLECTION).document(id)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) Log.w("AvalokanRepo", "Firestore listen failed", error)
-                val item = snapshot?.let { doc ->
-                    doc.toEventItem()
+                if (error != null) {
+                    // Keep the last good emission rather than reporting "not found".
+                    Log.w("AvalokanRepo", "Firestore listen failed", error)
+                    return@addSnapshotListener
                 }
+                // A document that does not exist must resolve to null, otherwise
+                // the detail screen renders a blank entity instead of its not-found state.
+                val item = snapshot?.takeIf { it.exists() }?.toEventItem()
                 if (item != null) {
                     launch { eventDao.upsertAll(listOf(item)) }
                     trySend(item)

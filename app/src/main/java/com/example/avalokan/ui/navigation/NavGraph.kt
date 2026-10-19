@@ -86,9 +86,11 @@ fun AvalokanNavHost(
                 }
             )
         }
-        composable(route = EditProfile.route){
+        composable(route = EditProfile.route){ entry ->
             // Shared with Profile so edits reflect immediately on return.
-            val profileEntry = remember {
+            // Keyed on this destination's back stack entry so the reference is
+            // created once per entry and stays valid across recompositions.
+            val profileEntry = remember(entry) {
                 navController.getBackStackEntry(Profile.route)
             }
             EditProfileScreen(

@@ -45,7 +45,11 @@ class FirestoreStoryRepository @Inject constructor(
         send(storyDao.observeAll().first())
         val registration = firestore.collection(STORIES_COLLECTION)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) Log.w("AvalokanRepo", "Firestore listen failed", error)
+                if (error != null) {
+                    // Keep the last good emission rather than blanking the UI.
+                    Log.w("AvalokanRepo", "Firestore listen failed", error)
+                    return@addSnapshotListener
+                }
                 val items = snapshot?.documents.orEmpty().map { it.toStoryItem() }
                 launch { storyDao.upsertAll(items) }
                 trySend(items)
@@ -57,8 +61,15 @@ class FirestoreStoryRepository @Inject constructor(
         send(storyDao.observeById(id).first())
         val registration = firestore.collection(STORIES_COLLECTION).document(id)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) Log.w("AvalokanRepo", "Firestore listen failed", error)
-                val item = snapshot?.let { it.toStoryItem() }
+                if (error != null) {
+                    // Keep the last good emission rather than reporting "not found".
+                    Log.w("AvalokanRepo", "Firestore listen failed", error)
+                    return@addSnapshotListener
+                }
+                // A document that does not exist must resolve to null, otherwise
+                // the story screen falls back to placeholder copy for a story
+                // that does not exist.
+                val item = snapshot?.takeIf { it.exists() }?.toStoryItem()
                 if (item != null) {
                     launch { storyDao.upsertAll(listOf(item)) }
                     trySend(item)

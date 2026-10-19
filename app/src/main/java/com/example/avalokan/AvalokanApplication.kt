@@ -9,7 +9,11 @@ import dagger.hilt.android.HiltAndroidApp
 class AvalokanApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        FirebaseAuth.getInstance().signInAnonymously()
+        val auth = FirebaseAuth.getInstance()
+        // Bootstrap only when signed out. Starting a sign-in over an existing
+        // session would replace a user who has already signed in.
+        if (auth.currentUser != null) return
+        auth.signInAnonymously()
             .addOnSuccessListener { result ->
                 Log.i("AvalokanRepo", "Anonymous auth UID: ${result.user?.uid}")
             }

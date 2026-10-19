@@ -1,15 +1,10 @@
 package com.example.avalokan
 
 import app.cash.turbine.test
-import com.example.avalokan.data.local.PreferencesStore
-import com.example.avalokan.data.place.PlaceItem
-import com.example.avalokan.data.place.PlaceRepository
+import com.example.avalokan.ui.discover.DiscoverCategories
 import com.example.avalokan.ui.discover.DiscoverViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -20,53 +15,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-
-private val TestSites = listOf(
-    PlaceItem(
-        id = "kathmandu-durbar",
-        name = "Kathmandu Durbar Square",
-        description = "desc",
-        meta = "Kathmandu • Historical Site",
-        category = "Historical",
-        rating = "4.8"
-    ),
-    PlaceItem(
-        id = "lumbini-garden",
-        name = "Lumbini Garden",
-        description = "desc",
-        meta = "Lumbini • Spiritual Site",
-        category = "Cultural",
-        rating = "4.9"
-    )
-)
-
-private class FakePlaceRepository : PlaceRepository {
-    override fun observePlaces(): Flow<List<PlaceItem>> = flowOf(TestSites)
-    override fun observePlace(id: String): Flow<PlaceItem?> =
-        flowOf(TestSites.find { it.id == id })
-
-    override suspend fun clearCache() = Unit
-
-    override suspend fun refresh() = Unit
-}
-
-private class FakePreferencesStore : PreferencesStore {
-    private val saved = MutableStateFlow(emptySet<String>())
-    override val notificationsEnabled: Flow<Boolean> = flowOf(true)
-    override val themeChoice: Flow<String> = flowOf(PreferencesStore.THEME_SYSTEM)
-    override val avatarUri: Flow<String?> = flowOf(null)
-    override val savedPlaceIds: Flow<Set<String>> = saved
-    override suspend fun setNotificationsEnabled(enabled: Boolean) = Unit
-    override suspend fun setThemeChoice(choice: String) = Unit
-    override suspend fun setAvatarUri(uri: String?) = Unit
-    override suspend fun setSavedPlaceIds(ids: Set<String>) {
-        saved.value = ids
-    }
-
-    override suspend fun clearAll() {
-        saved.value = emptySet()
-    }
-}
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DiscoverViewModelTest {
@@ -114,6 +62,46 @@ class DiscoverViewModelTest {
         vm.savedIds.test {
             skipItems(1) // stateIn replays its initial value first
             assertEquals(setOf("kathmandu-durbar"), awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `totalPlaces counts every place the repository loaded`() = runTest {
+        val vm = DiscoverViewModel(FakePlaceRepository(), FakePreferencesStore())
+        vm.totalPlaces.test {
+            skipItems(1) // stateIn replays its zero initial value first
+            assertEquals(2, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `a filter with no matches empties sites but still counts loaded places`() = runTest {
+        val vm = DiscoverViewModel(FakePlaceRepository(), FakePreferencesStore())
+        vm.sites.test {
+            skipItems(1)
+            assertEquals(2, awaitItem().size) // All
+            vm.onCategorySelect(DiscoverCategories.indexOf("Adventure"))
+            assertEquals(emptyList<String>(), awaitItem().map { it.id })
+            // Nothing matched, yet the repository did load both places — the
+            // screen needs this to avoid claiming a connection failure.
+            vm.totalPlaces.test {
+                skipItems(1)
+                assertEquals(2, awaitItem())
+                cancelAndIgnoreRemainingEvents()
+            }
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `totalPlaces does not shrink when a query filters everything out`() = runTest {
+        val vm = DiscoverViewModel(FakePlaceRepository(), FakePreferencesStore())
+        vm.totalPlaces.test {
+            skipItems(1)
+            assertEquals(2, awaitItem())
+            vm.onQueryChange("no such place at all")
             cancelAndIgnoreRemainingEvents()
         }
     }

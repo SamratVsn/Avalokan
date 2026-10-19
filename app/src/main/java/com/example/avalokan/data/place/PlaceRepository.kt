@@ -3,7 +3,7 @@ package com.example.avalokan.data.place
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Source
-import jakarta.inject.Inject
+import javax.inject.Inject
 import android.util.Log
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -51,23 +51,12 @@ class FirestorePlaceRepository @Inject constructor(
         send(placeDao.observeAll().first())
         val registration = firestore.collection(PLACES_COLLECTION)
             .addSnapshotListener { snapshots, error ->
-                if (error != null) Log.w("AvalokanRepo", "Firestore listen failed", error)
-                val items = snapshots?.documents.orEmpty().map { doc ->
-                    PlaceItem(
-                        id = doc.id,
-                        name = doc.textField("name"),
-                        description = doc.textField("description"),
-                        meta = doc.textField("meta"),
-                        category = doc.textField("category"),
-                        rating = doc.textField("rating"),
-                        featured = doc.getBoolean("featured") == true,
-                        badge = doc.textField("badge"),
-                        entryFee = doc.textField("entryFee"),
-                        bestTime = doc.textField("bestTime"),
-                        hours = doc.textField("hours"),
-                        imageUrl = doc.textField("imageUrl").ifBlank { null }
-                    )
+                if (error != null) {
+                    // Keep the last good emission rather than blanking the UI.
+                    Log.w("AvalokanRepo", "Firestore listen failed", error)
+                    return@addSnapshotListener
                 }
+                val items = snapshots?.documents.orEmpty().map { it.toPlaceItem() }
                 launch { placeDao.upsertAll(items)}
                 trySend(items)
             }
@@ -78,8 +67,14 @@ class FirestorePlaceRepository @Inject constructor(
         send(placeDao.observeById(id).first())
         val registration = firestore.collection(PLACES_COLLECTION).document(id)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) Log.w("AvalokanRepo", "Firestore listen failed", error)
-                val item = snapshot?.let { it.toPlaceItem() }
+                if (error != null) {
+                    // Keep the last good emission rather than reporting "not found".
+                    Log.w("AvalokanRepo", "Firestore listen failed", error)
+                    return@addSnapshotListener
+                }
+                // A document that does not exist must resolve to null, otherwise
+                // detail screens render a blank entity instead of their not-found state.
+                val item = snapshot?.takeIf { it.exists() }?.toPlaceItem()
                 if (item != null) {
                     launch { placeDao.upsertAll(listOf(item)) }
                     trySend(item)

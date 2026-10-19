@@ -74,6 +74,7 @@ fun DiscoverScreen(
     val query by viewModel.query.collectAsState()
     val selectedChip by viewModel.selectedCategory.collectAsState()
     val sites by viewModel.sites.collectAsState()
+    val totalPlaces by viewModel.totalPlaces.collectAsState()
     val savedIds by viewModel.savedIds.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
 
@@ -89,6 +90,7 @@ fun DiscoverScreen(
             selected = selectedChip,
             onSelect = viewModel::onCategorySelect,
             sites = sites,
+            totalPlaces = totalPlaces,
             savedIds = savedIds,
             onToggleSave = { viewModel.toggleSave(it) },
             onPlaceClick = onPlaceClick,
@@ -105,6 +107,7 @@ private fun DiscoverContent(
     selected: Int,
     onSelect: (Int) -> Unit,
     sites: List<PlaceItem>,
+    totalPlaces: Int,
     savedIds: Set<String>,
     onToggleSave: (String) -> Unit,
     onPlaceClick: (String) -> Unit,
@@ -155,6 +158,7 @@ private fun DiscoverContent(
             onSelect = onSelect,
             query = query,
             sites = sites,
+            totalPlaces = totalPlaces,
             savedIds = savedIds,
             onToggleSave = onToggleSave,
             onPlaceClick = onPlaceClick,
@@ -210,6 +214,7 @@ private fun Suggestions(
     onSelect: (Int) -> Unit,
     query: String,
     sites: List<PlaceItem>,
+    totalPlaces: Int,
     savedIds: Set<String>,
     onToggleSave: (String) -> Unit,
     onPlaceClick: (String) -> Unit,
@@ -250,17 +255,31 @@ private fun Suggestions(
             }
         }
         if (sites.isEmpty()) {
-            StateMessage(
-                icon = if (query.isBlank()) Icons.Default.ExploreOff else Icons.Default.SearchOff,
-                title = if (query.isBlank()) "Nothing to show yet" else "No matches found",
-                message = if (query.isBlank()) {
-                    "We couldn’t load places right now. Check your connection and try again."
-                } else {
-                    "We couldn’t find anything for “$query”. Try a different search or category."
-                },
-                actionLabel = if (query.isBlank()) "Retry" else null,
-                onAction = if (query.isBlank()) onRetry else null
-            )
+            val activeFilter = filters.getOrNull(selected) ?: filters.firstOrNull() ?: "All"
+            when {
+                // A search term is what excluded everything — talk about the query.
+                query.isNotBlank() -> StateMessage(
+                    icon = Icons.Default.SearchOff,
+                    title = "No matches found",
+                    message = "We couldn’t find anything for “$query”. Try a different search or category."
+                )
+                // Nothing arrived from the repository at all — this really is a load failure.
+                totalPlaces == 0 -> StateMessage(
+                    icon = Icons.Default.ExploreOff,
+                    title = "We couldn’t load places",
+                    message = "Your connection may be off. Reconnect and refresh to explore heritage sites across Nepal.",
+                    actionLabel = "Retry",
+                    onAction = onRetry
+                )
+                // Places loaded fine; this filter simply has none.
+                else -> StateMessage(
+                    icon = Icons.Default.ExploreOff,
+                    title = "Nothing in $activeFilter yet",
+                    message = "No places are tagged $activeFilter right now — pick another category to keep exploring.",
+                    actionLabel = "Show all",
+                    onAction = { onSelect(0) }
+                )
+            }
         } else {
             Column(
                 modifier = Modifier.padding(horizontal = 24.dp),
@@ -339,6 +358,7 @@ private fun DiscoverPreview(){
                     rating = "4.9"
                 )
             ),
+            totalPlaces = 2,
             savedIds = emptySet(),
             onToggleSave = {},
             onPlaceClick = {},

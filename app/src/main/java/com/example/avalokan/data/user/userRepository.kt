@@ -21,7 +21,11 @@ class FirestoreUserRepository @Inject constructor(
     override fun observeUser(uid: String): Flow<UserProfile?> = callbackFlow {
         val registration = firestore.collection("users").document(uid)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) Log.w("AvalokanRepo", "User listen failed", error)
+                if (error != null) {
+                    // Keep the last good emission rather than dropping the profile.
+                    Log.w("AvalokanRepo", "User listen failed", error)
+                    return@addSnapshotListener
+                }
                 val profile = snapshot?.takeIf { it.exists() }?.let { doc ->
                     UserProfile(
                         uid = doc.id,

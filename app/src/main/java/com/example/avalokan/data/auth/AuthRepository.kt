@@ -29,38 +29,50 @@ sealed interface AuthResult {
 }
 
 /**
+ * Maps a Firebase auth error code to copy. Returns null for codes we don't
+ * recognise so the caller can fall back to a generic message.
+ *
+ * `internal` so unit tests can cover the mapping directly — building the
+ * exceptions themselves needs Android APIs that plain JVM tests don't mock.
+ */
+internal fun authErrorMessageFor(code: String?): String? = when (code) {
+    "ERROR_INVALID_EMAIL" ->
+        "That email address doesn’t look right. Please check it and try again."
+    "ERROR_WRONG_PASSWORD", "ERROR_INVALID_CREDENTIAL" ->
+        "Incorrect email or password. Please double-check and try again."
+    "ERROR_USER_NOT_FOUND" ->
+        "We couldn’t find an account with that email. Try creating one instead."
+    "ERROR_USER_DISABLED" ->
+        "This account has been disabled. Please contact support for help."
+    "ERROR_EMAIL_ALREADY_IN_USE", "ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL" ->
+        "That email is already registered. Try logging in instead."
+    "ERROR_WEAK_PASSWORD" ->
+        "Your password is too weak. Use at least 6 characters."
+    "ERROR_NETWORK_REQUEST_FAILED" ->
+        "No internet connection. Check your network and try again."
+    "ERROR_TOO_MANY_REQUESTS" ->
+        "Too many attempts. Please wait a few minutes and try again."
+    "ERROR_OPERATION_NOT_ALLOWED" ->
+        "This sign-in method isn’t available right now. Please try another."
+    else -> null
+}
+
+/**
  * Turns low-level Firebase / Google exceptions into short, human, actionable
  * messages. Anything unrecognised falls back to a neutral apology so the UI
  * never shows a raw stack-trace style string.
+ *
+ * `internal` so unit tests can cover it directly.
  */
-private fun friendlyMessage(e: Throwable): String {
+internal fun friendlyMessage(e: Throwable): String {
     if (e is GetCredentialCancellationException) {
         return "Google sign-in was cancelled. You can try again anytime."
     }
-    return when ((e as? FirebaseAuthException)?.errorCode) {
-        "ERROR_INVALID_EMAIL" ->
-            "That email address doesn’t look right. Please check it and try again."
-        "ERROR_WRONG_PASSWORD", "ERROR_INVALID_CREDENTIAL" ->
-            "Incorrect email or password. Please double-check and try again."
-        "ERROR_USER_NOT_FOUND" ->
-            "We couldn’t find an account with that email. Try creating one instead."
-        "ERROR_USER_DISABLED" ->
-            "This account has been disabled. Please contact support for help."
-        "ERROR_EMAIL_ALREADY_IN_USE", "ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL" ->
-            "That email is already registered. Try logging in instead."
-        "ERROR_WEAK_PASSWORD" ->
-            "Your password is too weak. Use at least 6 characters."
-        "ERROR_NETWORK_REQUEST_FAILED" ->
+    authErrorMessageFor((e as? FirebaseAuthException)?.errorCode)?.let { return it }
+    return when (e) {
+        is java.net.UnknownHostException, is java.io.IOException ->
             "No internet connection. Check your network and try again."
-        "ERROR_TOO_MANY_REQUESTS" ->
-            "Too many attempts. Please wait a few minutes and try again."
-        "ERROR_OPERATION_NOT_ALLOWED" ->
-            "This sign-in method isn’t available right now. Please try another."
-        else -> when (e) {
-            is java.net.UnknownHostException, is java.io.IOException ->
-                "No internet connection. Check your network and try again."
-            else -> "Something went wrong while signing you in. Please try again."
-        }
+        else -> "Something went wrong while signing you in. Please try again."
     }
 }
 
