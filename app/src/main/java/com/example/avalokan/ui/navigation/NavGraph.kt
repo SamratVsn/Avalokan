@@ -114,7 +114,8 @@ fun AvalokanNavHost(
             arguments = listOf(navArgument(PlaceDetail.ARG) { type = NavType.StringType })
         ) {
             PlaceDetailScreen(
-                onBackClick = { navController.navigateUp() }
+                onBackClick = { navController.navigateUp() },
+                onNavigateToLogin = { navController.navigate(Login.route) }
             )
         }
 
@@ -123,7 +124,8 @@ fun AvalokanNavHost(
             arguments = listOf(navArgument(EventDetail.ARG) { type = NavType.StringType })
         ) {
             EventDetailScreen(
-                onBackClick = { navController.navigateUp() }
+                onBackClick = { navController.navigateUp() },
+                onNavigateToLogin = { navController.navigate(Login.route) }
             )
         }
 

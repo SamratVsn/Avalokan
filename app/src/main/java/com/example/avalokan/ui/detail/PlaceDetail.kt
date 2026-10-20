@@ -47,11 +47,15 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.avalokan.ui.components.AuthPromptDialog
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -77,6 +81,7 @@ private data class StatUi(val icon: ImageVector, val label: String, val value: S
 fun PlaceDetailScreen(
     placeId: String = "preview",
     onBackClick: () -> Unit = {},
+    onNavigateToLogin: () -> Unit = {},
     viewModel: PlaceDetailViewModel = hiltViewModel()
 ) {
     val place by viewModel.place.collectAsState()
@@ -85,6 +90,26 @@ fun PlaceDetailScreen(
     val scope = rememberCoroutineScope()
     val savedIds by viewModel.savedIds.collectAsState()
     val isSaved = savedIds.contains(place?.id)
+    var showAuthPrompt by remember { mutableStateOf(false) }
+
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                PlaceDetailEvent.NavigateBack -> onBackClick()
+                PlaceDetailEvent.AuthRequired -> showAuthPrompt = true
+            }
+        }
+    }
+
+    AuthPromptDialog(
+        visible = showAuthPrompt,
+        onDismiss = { showAuthPrompt = false },
+        onSignIn = {
+            showAuthPrompt = false
+            onNavigateToLogin()
+        },
+    )
+
     val placeTitle = place?.name.orEmpty()
     // Location comes from the place itself ("Lalitpur • Historical Site"),
     // never a hardcoded city — places can be anywhere in Nepal.

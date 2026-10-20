@@ -41,6 +41,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -51,6 +52,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.avalokan.ui.components.AuthPromptDialog
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.HeroScrim
 import com.example.avalokan.ui.theme.PrimaryTeal
@@ -72,6 +74,7 @@ import kotlinx.coroutines.launch
 fun EventDetailScreen(
     eventId: String = "preview",
     onBackClick: () -> Unit = {},
+    onNavigateToLogin: () -> Unit = {},
     viewModel: EventDetailViewModel = hiltViewModel()
 ) {
     val event by viewModel.event.collectAsState()
@@ -79,6 +82,29 @@ fun EventDetailScreen(
     val snackbarHost = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var isFavorite by rememberSaveable { mutableStateOf(false) }
+    var showAuthPrompt by remember { mutableStateOf(false) }
+
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                EventDetailEvent.NavigateBack -> onBackClick()
+                EventDetailEvent.AuthRequired -> showAuthPrompt = true
+                EventDetailEvent.Booked -> scope.launch {
+                    snackbarHost.showSnackbar("Booked! See you there.")
+                }
+            }
+        }
+    }
+
+    AuthPromptDialog(
+        visible = showAuthPrompt,
+        onDismiss = { showAuthPrompt = false },
+        onSignIn = {
+            showAuthPrompt = false
+            onNavigateToLogin()
+        },
+    )
+
     val eventTitle = event?.title.orEmpty()
     val eventType = EventType.from(event?.type)
     val onShareClick = {
@@ -105,7 +131,7 @@ fun EventDetailScreen(
             isFavorite = isFavorite,
             onFavoriteClick = { isFavorite = !isFavorite },
             onShareClick = onShareClick,
-            onBookClick = { scope.launch { snackbarHost.showSnackbar("Booked! See you there.") } },
+            onBookClick = { viewModel.onBookEvent() },
             snackbarHost = snackbarHost,
             onBackClick = onBackClick
         )
