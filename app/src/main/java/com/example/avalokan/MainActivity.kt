@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.collectAsState
@@ -18,6 +19,11 @@ class MainActivity : ComponentActivity() {
     private val settingsViewModel: SettingsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
+        var keepSplash = true
+        splashScreen.setKeepOnScreenCondition { keepSplash }
+        // Keep splash visible for a preferred time before proceeding
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({ keepSplash = false }, 1500L)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
