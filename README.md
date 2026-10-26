@@ -80,12 +80,12 @@ Suggested layout:
 
 ## 🎨 Design System
 
-Avalokan uses a custom visual language inspired by Nepal's landscapes, heritage, and cultural warmth.
+Avalokan uses a custom visual language inspired by Nepal's landscapes, heritage, and cultural warmth — earthy, minimal, and production-ready.
 
 | Element              | Implementation                                                             |
 | -------------------- | -------------------------------------------------------------------------- |
 | **Visual direction** | Editorial layouts with heritage-inspired presentation                      |
-| **Color palette**    | Himalayan Fresh — teal `#00796B`, marigold `#FF6F00`, and supporting tones |
+| **Color palette**    | Forest green `#1B4332`, sage `#6B8F7A`, sand `#E8D7B7`, terracotta `#C86F4A`, warm ivory `#F5F3ED` |
 | **Typography**       | Montserrat for headings, Inter for body text                               |
 | **UI framework**     | Jetpack Compose + Material 3                                               |
 | **Layout system**    | 8dp spacing grid, reusable components, and consistent shapes               |

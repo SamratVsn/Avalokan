@@ -55,16 +55,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
 import com.example.avalokan.data.place.PlaceItem
 import com.example.avalokan.ui.components.StateMessage
-import com.example.avalokan.ui.theme.AccentMarigold
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
 import com.example.avalokan.ui.theme.GreyLight
-import com.example.avalokan.ui.theme.PrimaryLight
-import com.example.avalokan.ui.theme.PrimaryTeal
 import com.example.avalokan.ui.theme.Spacing
 import com.example.avalokan.ui.theme.StandardCardShape
 import com.example.avalokan.ui.theme.TextPrimary
 import com.example.avalokan.ui.theme.TextSecondary
+import com.example.avalokan.ui.theme.discoverCategoryAccent
+import com.example.avalokan.ui.theme.discoverCategoryOnAccent
 
 @Composable
 fun DiscoverScreen(
@@ -177,7 +176,7 @@ private fun SearchField(
         value = query,
         onValueChange = onQuery,
         modifier = modifier.fillMaxWidth()
-            .height(48.dp),
+            .height(56.dp),
         placeholder = {
             Text(
                 text = stringResource(R.string.search),
@@ -231,6 +230,7 @@ private fun Suggestions(
         ){
             itemsIndexed(filters) { index, label ->
                 val isSelected = index == selected
+                val chipAccent = discoverCategoryAccent(label)
                 FilterChip(
                     selected = isSelected,
                     onClick = { onSelect(index) },
@@ -241,8 +241,10 @@ private fun Suggestions(
                         else Modifier
                     ),
                     colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = PrimaryTeal, selectedLabelColor = Color.White,
-                        containerColor = Color.Transparent, labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        selectedContainerColor = chipAccent,
+                        selectedLabelColor = discoverCategoryOnAccent(label),
+                        containerColor = Color.Transparent,
+                        labelColor = MaterialTheme.colorScheme.onSurfaceVariant
                     ),
                     border = FilterChipDefaults.filterChipBorder(
                         enabled = true,

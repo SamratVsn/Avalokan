@@ -14,7 +14,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Login
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -29,6 +28,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -39,7 +39,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
 import com.example.avalokan.ui.theme.AvalokanTheme
-import com.example.avalokan.ui.theme.PrimaryTeal
 import com.example.avalokan.ui.theme.Spacing
 import com.example.avalokan.ui.theme.StandardButtonShape
 import com.example.avalokan.ui.theme.StandardCardShape
@@ -93,10 +92,10 @@ private fun LoginContent(
     ) {
         Spacer(Modifier.height(48.dp))
         Icon(
-            Icons.Default.Login,
-            contentDescription = null,
-            tint = PrimaryTeal,
-            modifier = Modifier.size(48.dp)
+            painter = painterResource(R.drawable.avalokansplash),
+            contentDescription = stringResource(R.string.app_name),
+            modifier = Modifier.size(72.dp),
+            tint = androidx.compose.ui.graphics.Color.Unspecified
         )
         Text(
             text = stringResource(
@@ -140,7 +139,9 @@ private fun LoginContent(
             onClick = onEmailSubmit,
             enabled = !isLoading && email.isNotBlank() && password.length >= 6,
             shape = StandardButtonShape,
-            colors = ButtonDefaults.buttonColors(containerColor = PrimaryTeal),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary
+            ),
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
             if (isLoading) {
@@ -172,7 +173,7 @@ private fun LoginContent(
                 text = stringResource(
                     if (isSignUpMode) R.string.haveAccount else R.string.noAccount
                 ),
-                color = PrimaryTeal,
+                color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.SemiBold
             )
         }

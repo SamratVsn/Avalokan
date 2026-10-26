@@ -61,6 +61,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -70,17 +71,17 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
 import com.example.avalokan.data.local.PreferencesStore
-import com.example.avalokan.ui.theme.AccentMarigold
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.DangerBg
 import com.example.avalokan.ui.theme.DangerRed
 import com.example.avalokan.ui.theme.NeutralBg
-import com.example.avalokan.ui.theme.PrimaryLight
-import com.example.avalokan.ui.theme.PrimaryTeal
+import com.example.avalokan.ui.theme.PrimaryGreen
+import com.example.avalokan.ui.theme.SageSoft
+import com.example.avalokan.ui.theme.SandContainer
 import com.example.avalokan.ui.theme.Spacing
 import com.example.avalokan.ui.theme.StandardCardShape
+import com.example.avalokan.ui.theme.Terracotta
 import com.example.avalokan.ui.theme.TextSecondary
-import com.example.avalokan.ui.theme.WarmBg
 
 @Composable
 fun SettingsScreen(
@@ -312,13 +313,13 @@ private fun LockedSettings(
     ) {
         Box(
             modifier = Modifier.size(72.dp)
-                .background(color = PrimaryLight, shape = CircleShape),
+                .background(color = SageSoft, shape = CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 Icons.Default.Lock,
                 contentDescription = null,
-                tint = PrimaryTeal,
+                tint = PrimaryGreen,
                 modifier = Modifier.size(30.dp)
             )
         }
@@ -412,8 +413,8 @@ private fun AccountSetting(
             Column {
                 SettingRow(
                     icon = Icons.Default.Person,
-                    iconBg = PrimaryLight,
-                    iconTint = PrimaryTeal,
+                    iconBg = SageSoft,
+                    iconTint = PrimaryGreen,
                     name = stringResource(R.string.editProfile),
                     onClick = onEditProfileClick
                 )
@@ -423,8 +424,8 @@ private fun AccountSetting(
                 )
                 SettingRow(
                     icon = Icons.Default.Shield,
-                    iconBg = PrimaryLight,
-                    iconTint = PrimaryTeal,
+                    iconBg = SageSoft,
+                    iconTint = PrimaryGreen,
                     name = stringResource(R.string.security)
                 )
                 HorizontalDivider(
@@ -439,13 +440,13 @@ private fun AccountSetting(
                 ) {
                     Box(
                         modifier = Modifier.size(32.dp)
-                            .background(color = PrimaryLight, shape = RoundedCornerShape(8.dp)),
+                            .background(color = SageSoft, shape = RoundedCornerShape(8.dp)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             Icons.Default.Notifications,
                             contentDescription = null,
-                            tint = PrimaryTeal,
+                            tint = PrimaryGreen,
                             modifier = Modifier.size(16.dp)
                         )
                     }
@@ -495,13 +496,13 @@ private fun AppearanceSection(
             ) {
                 Box(
                     modifier = Modifier.size(32.dp)
-                        .background(color = PrimaryLight, shape = RoundedCornerShape(8.dp)),
+                        .background(color = SageSoft, shape = RoundedCornerShape(8.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         Icons.Default.Palette,
                         contentDescription = null,
-                        tint = PrimaryTeal,
+                        tint = PrimaryGreen,
                         modifier = Modifier.size(16.dp)
                     )
                 }
@@ -545,8 +546,8 @@ private fun SuppNFeed(
             Column {
                 SettingRow(
                     icon = Icons.Default.Lightbulb,
-                    iconBg = WarmBg,
-                    iconTint = AccentMarigold,
+                    iconBg = SandContainer,
+                    iconTint = Terracotta,
                     name = stringResource(R.string.sendSugRep),
                     onClick = onSendSuggestions
                 )
@@ -661,7 +662,16 @@ private fun AboutDialog(onDismiss: () -> Unit) {
         onDismissRequest = onDismiss,
         title = { Text(text = "Avalokan") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.avalokansplash),
+                    contentDescription = null,
+                    modifier = Modifier.size(56.dp),
+                    tint = Color.Unspecified
+                )
                 Text(
                     text = "Nepal Heritage Explorer",
                     style = MaterialTheme.typography.bodyMedium,

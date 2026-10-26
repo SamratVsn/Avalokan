@@ -25,8 +25,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.avalokan.ui.theme.DangerBg
 import com.example.avalokan.ui.theme.DangerRed
-import com.example.avalokan.ui.theme.PrimaryLight
-import com.example.avalokan.ui.theme.PrimaryTeal
+import com.example.avalokan.ui.theme.PrimaryGreen
+import com.example.avalokan.ui.theme.SageSoft
 import com.example.avalokan.ui.theme.Spacing
 
 /**
@@ -38,8 +38,8 @@ fun StateMessage(
     title: String,
     message: String,
     modifier: Modifier = Modifier,
-    iconTint: Color = PrimaryTeal,
-    iconBackground: Color = PrimaryLight,
+    iconTint: Color = PrimaryGreen,
+    iconBackground: Color = SageSoft,
     actionLabel: String? = null,
     onAction: (() -> Unit)? = null
 ) {

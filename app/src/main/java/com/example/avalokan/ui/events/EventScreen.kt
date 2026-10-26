@@ -52,15 +52,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
 import com.example.avalokan.data.event.EventItem
 import com.example.avalokan.ui.components.StateMessage
-import com.example.avalokan.ui.theme.AccentMarigold
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
 import com.example.avalokan.ui.theme.GreyBorder
-import com.example.avalokan.ui.theme.PrimaryLight
-import com.example.avalokan.ui.theme.PrimaryTeal
+import com.example.avalokan.ui.theme.PrimaryGreen
+import com.example.avalokan.ui.theme.PrimaryGreenDark
+import com.example.avalokan.ui.theme.SageSoft
 import com.example.avalokan.ui.theme.Spacing
 import com.example.avalokan.ui.theme.StandardCardShape
-import com.example.avalokan.ui.theme.TealDark
+import com.example.avalokan.ui.theme.Terracotta
+import com.example.avalokan.ui.theme.TextOnDark
 
 @Composable
 fun EventScreen(
@@ -187,7 +188,7 @@ private fun FeaturedEvent(
                 // Image container; AsyncImage fills it when the event has a URL.
                 Box(
                     modifier = Modifier.fillMaxWidth().height(180.dp)
-                        .background(PrimaryLight)
+                        .background(SageSoft)
                         .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)),
                     contentAlignment = Alignment.Center
                 ) {
@@ -202,19 +203,19 @@ private fun FeaturedEvent(
                         Icon(
                             Icons.Default.Landscape,
                             contentDescription = null,
-                            tint = PrimaryTeal,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(32.dp)
                         )
                     }
                     Surface(
                         modifier = Modifier.align(Alignment.TopStart).padding(12.dp),
                         shape = BadgeShape,
-                        color = AccentMarigold
+                        color = Terracotta
                     ) {
                         Text(
                             text = "COMING SOON",
                             style = MaterialTheme.typography.labelSmall,
-                            color = Color.White,
+                            color = TextOnDark,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         )
                     }
@@ -224,7 +225,7 @@ private fun FeaturedEvent(
                         .clip(RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp))
                         .background(
                             Brush.verticalGradient(
-                                listOf(PrimaryTeal, TealDark)
+                                listOf(PrimaryGreen, PrimaryGreenDark)
                             )
                         )
                         .padding(horizontal = 16.dp, vertical = 14.dp),
@@ -268,8 +269,8 @@ private fun FeaturedEvent(
                         onClick = onRemindClick,
                         shape = BadgeShape,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.White,
-                            contentColor = PrimaryTeal
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.primary
                         ),
                         modifier = Modifier.fillMaxWidth().height(40.dp)
                     ) {
@@ -332,7 +333,7 @@ private fun EventCards(
         ) {
             Card(shape = StandardCardShape, modifier = Modifier.size(56.dp)) {
                 Box(
-                    modifier = Modifier.fillMaxSize().background(PrimaryLight),
+                    modifier = Modifier.fillMaxSize().background(SageSoft),
                     contentAlignment = Alignment.Center
                 ) {
                     if (imageUrl != null) {
@@ -346,7 +347,7 @@ private fun EventCards(
                         Icon(
                             Icons.Default.Landscape,
                             null,
-                            tint = PrimaryTeal,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -372,7 +373,7 @@ private fun EventCards(
                 Text(
                     text = fee,
                     style = MaterialTheme.typography.labelSmall,
-                    color = AccentMarigold
+                    color = MaterialTheme.colorScheme.tertiary
                 )
             }
             Text(

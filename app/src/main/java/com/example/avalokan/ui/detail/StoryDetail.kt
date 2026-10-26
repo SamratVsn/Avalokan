@@ -127,7 +127,7 @@ fun StoryDetailScreen(
         context.startActivity(Intent.createChooser(send, "Share story"))
     }
     Scaffold(
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
         contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
         snackbarHost = { SnackbarHost(hostState = snackbarHost) },
         bottomBar = {
@@ -360,7 +360,7 @@ private fun StoryBody(story: StoryUi, modifier: Modifier = Modifier) {
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
             )
         }
-        // Interesting-fact callout, light teal
+        // Interesting-fact callout on primary container
         Card(
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(

@@ -53,16 +53,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
 import com.example.avalokan.data.place.PlaceItem
 import com.example.avalokan.ui.components.StateMessage
-import com.example.avalokan.ui.theme.AccentMarigold
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
 import com.example.avalokan.ui.theme.EditorialLargeCardShape
-import com.example.avalokan.ui.theme.MintSoft
-import com.example.avalokan.ui.theme.PrimaryLight
-import com.example.avalokan.ui.theme.PrimaryTeal
+import com.example.avalokan.ui.theme.HeroScrim
+import com.example.avalokan.ui.theme.PrimaryGreen
 import com.example.avalokan.ui.theme.Spacing
 import com.example.avalokan.ui.theme.StandardButtonShape
 import com.example.avalokan.ui.theme.StandardCardShape
+import com.example.avalokan.ui.theme.Terracotta
 import com.example.avalokan.ui.theme.TextPrimary
 import com.example.avalokan.ui.theme.TextSecondary
 
@@ -212,7 +211,7 @@ private fun StoryCard(
             // Hero image from the story stream; gradient placeholder until it loads.
             Box(
                 modifier = Modifier.fillMaxSize()
-                    .background(Brush.verticalGradient(listOf(PrimaryTeal, TextPrimary))),
+                    .background(Brush.verticalGradient(listOf(PrimaryGreen, TextPrimary))),
                 contentAlignment = Alignment.Center
             ) {
                 if (imageUrl != null) {
@@ -227,16 +226,17 @@ private fun StoryCard(
             // Dark scrim so badge/title/button stay legible over any future photo
             Box(
                 modifier = Modifier.fillMaxSize()
-                    .background(Brush.verticalGradient(0f to Color.Transparent, 0.4f to Color.Black.copy(0.7f)))
+                    .background(Brush.verticalGradient(0f to Color.Transparent, 0.45f to HeroScrim, 1f to Color.Black.copy(0.65f)))
             )
             Surface(
                 modifier = Modifier.align(Alignment.TopStart).padding(12.dp),
-                shape = BadgeShape, color = AccentMarigold
+                shape = BadgeShape, color = Terracotta
             ) {
                 Text(
                     text = stringResource(R.string.storyOfTheDay).uppercase(),
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color.White, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    color = MaterialTheme.colorScheme.onTertiary,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                 )
             }
             Column(
@@ -255,7 +255,10 @@ private fun StoryCard(
                 Button(
                     onClick = onReadClick,
                     shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = PrimaryTeal),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.primary
+                    ),
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
                 ) {
                     Text(
@@ -377,7 +380,7 @@ private fun EventSuggestion(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = StandardCardShape,
-        colors = CardDefaults.cardColors(containerColor = MintSoft)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
     ) {
         Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -397,7 +400,10 @@ private fun EventSuggestion(
                 Button(
                     onClick = onExploreClick,
                     shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = PrimaryTeal),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ),
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
                 ) {
                     Text(
@@ -409,8 +415,13 @@ private fun EventSuggestion(
                     Icon(Icons.AutoMirrored.Filled.ArrowForward, null, Modifier.size(12.dp))
                 }
             }
-            Surface(shape = StandardCardShape, color = Color.White, shadowElevation = 8.dp) {
-                Icon(Icons.Default.CalendarMonth, null, tint = PrimaryTeal, modifier = Modifier.padding(12.dp).size(28.dp))
+            Surface(shape = StandardCardShape, color = MaterialTheme.colorScheme.surface, shadowElevation = 8.dp) {
+                Icon(
+                    Icons.Default.CalendarMonth,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.tertiary,
+                    modifier = Modifier.padding(12.dp).size(28.dp)
+                )
             }
         }
     }

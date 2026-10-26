@@ -38,10 +38,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.example.avalokan.ui.theme.AccentMarigold
 import com.example.avalokan.ui.theme.BadgeShape
-import com.example.avalokan.ui.theme.PrimaryLight
-import com.example.avalokan.ui.theme.PrimaryTeal
+import com.example.avalokan.ui.theme.SageSoft
 
 @Composable
 fun HeritageCard(
@@ -138,7 +136,7 @@ private fun HeritageImage(
     // AsyncImage fills this exact container when the Data layer supplies a URL.
     Box(
         modifier = Modifier.fillMaxWidth().height(imageHeight)
-            .background(PrimaryLight),
+            .background(SageSoft),
         contentAlignment = Alignment.Center
     ) {
         if (imageUrl != null) {
@@ -152,7 +150,7 @@ private fun HeritageImage(
             Icon(
                 Icons.Default.Landscape,
                 contentDescription = null,
-                tint = PrimaryTeal
+                tint = MaterialTheme.colorScheme.primary
             )
         }
         if (showSave && onSaveClick != null) {
@@ -166,7 +164,7 @@ private fun HeritageImage(
                         if (isSaved) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
                         contentDescription = if (isSaved) "Remove $title from collection"
                         else "Save $title to collection",
-                        tint = PrimaryTeal,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(16.dp)
                     )
                 }
@@ -229,14 +227,14 @@ private fun HeritageTexts(
                 Icon(
                     Icons.Default.Star,
                     contentDescription = "Rated $rating out of 5",
-                    tint = AccentMarigold,
+                    tint = MaterialTheme.colorScheme.tertiary,
                     modifier = Modifier.size(14.dp)
                 )
                 Text(
                     text = rating,
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
-                    color = AccentMarigold
+                    color = MaterialTheme.colorScheme.tertiary
                 )
             }
         }

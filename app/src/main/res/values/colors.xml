@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary_teal">#00796B</color>
-    <color name="primary_light">#E0F2F1</color>
-    <color name="accent_marigold">#FF6F00</color>
-    <color name="text_primary">#333333</color>
-    <color name="text_secondary">#757575</color>
-    <color name="app_background">#F5F5F5</color>
-    <color name="app_surface">#FFFFFF</color>
+    <color name="primary_green">#1B4332</color>
+    <color name="sage">#6B8F7A</color>
+    <color name="sand">#E8D7B7</color>
+    <color name="terracotta">#C86F4A</color>
+    <color name="text_primary">#24312B</color>
+    <color name="text_secondary">#66736A</color>
+    <color name="app_background">#F5F3ED</color>
+    <color name="app_surface">#FFFEFA</color>
+    <color name="surface_dark">#172D25</color>
+    <!-- Legacy names kept for any external references -->
+    <color name="primary_teal">#1B4332</color>
+    <color name="primary_light">#EDF3EC</color>
+    <color name="accent_marigold">#C86F4A</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 </resources>

@@ -7,13 +7,14 @@ import androidx.compose.material.icons.filled.Palette
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.example.avalokan.ui.theme.PrimaryTeal
-import com.example.avalokan.ui.theme.TechBlue
+import com.example.avalokan.ui.theme.CulturalAccent
+import com.example.avalokan.ui.theme.HistoricalAccent
+import com.example.avalokan.ui.theme.InfoBlue
 
 enum class EventType(val accent: Color) {
-    CULTURAL(PrimaryTeal),
-    RELIGIOUS(PrimaryTeal),
-    TECH(TechBlue);
+    CULTURAL(CulturalAccent),
+    RELIGIOUS(HistoricalAccent),
+    TECH(InfoBlue);
 
     companion object {
         fun from(value: String?): EventType = when (value?.uppercase()) {

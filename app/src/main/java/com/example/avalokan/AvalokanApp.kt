@@ -108,8 +108,9 @@ fun AvalokanBottomNavigation(
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
-        tonalElevation = 8.dp,
-        shadowElevation = 16.dp
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 2.dp,
+        shadowElevation = 12.dp
     ){
         NavigationBar(
             containerColor = Color.Transparent,
@@ -148,7 +149,7 @@ fun AvalokanBottomNavigation(
                         unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         selectedTextColor = MaterialTheme.colorScheme.primary,
                         unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        indicatorColor = Color.Transparent
+                        indicatorColor = MaterialTheme.colorScheme.secondaryContainer
                     )
                 )
             }
