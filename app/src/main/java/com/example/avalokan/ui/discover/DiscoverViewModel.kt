@@ -20,6 +20,7 @@ val DiscoverCategories = listOf(
     "All",
     "Historical",
     "Spiritual",
+    "Cultural",
     "Nature",
     "Adventure",
 )
