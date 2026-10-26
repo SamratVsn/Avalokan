@@ -15,7 +15,6 @@ data class AuthState(
      * Real, named account only (not anonymous/guest). Used to gate features
      * that must belong to a durable account (saving places, joining events).
      */
-    val canSaveOrJoin: Boolean get() = isAuthenticated && !isAnonymous
 }
 
 fun FirebaseAuth.observeAuthState(): Flow<AuthState> = callbackFlow {

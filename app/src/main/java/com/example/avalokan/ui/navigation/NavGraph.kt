@@ -115,7 +115,6 @@ fun AvalokanNavHost(
         ) {
             PlaceDetailScreen(
                 onBackClick = { navController.navigateUp() },
-                onNavigateToLogin = { navController.navigate(Login.route) }
             )
         }
 
@@ -125,7 +124,6 @@ fun AvalokanNavHost(
         ) {
             EventDetailScreen(
                 onBackClick = { navController.navigateUp() },
-                onNavigateToLogin = { navController.navigate(Login.route) }
             )
         }
 

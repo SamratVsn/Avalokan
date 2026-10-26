@@ -44,8 +44,4 @@
     <string name="haveAccount">Already have an account? Log in</string>
     <string name="noAccount">New here? Create an account</string>
     <string name="google_server_client_id">964901244379-0lbac9ivikkeq9bvvhdprfvqu77nk54b.apps.googleusercontent.com</string>
-    <string name="auth_required_title">Sign in to continue</string>
-    <string name="auth_required_message">To save places or join events, you’ll need to log in or create an account.</string>
-    <string name="auth_sign_in_up">Log in or sign up</string>
-    <string name="auth_not_now">Not now</string>
 </resources>

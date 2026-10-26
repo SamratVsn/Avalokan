@@ -82,7 +82,8 @@ internal fun friendlyMessage(e: Throwable): String {
  */
 @Singleton
 class AuthRepository @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val loginAttemptLimiter: LoginAttemptLimiter,
 ) {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
@@ -100,15 +101,28 @@ class AuthRepository @Inject constructor(
     val isSignedInWithAccount: Boolean
         get() = auth.currentUser?.let { !it.isAnonymous } ?: false
 
-    suspend fun signInEmail(email: String, password: String): AuthResult =
-        runCatching {
+    suspend fun signInEmail(email: String, password: String): AuthResult {
+        loginAttemptLimiter.blockReasonIfLocked(email)?.let {
+            return AuthResult.Error(it)
+        }
+        return runCatching {
             suspendCancellableCoroutine { cont ->
                 auth.signInWithEmailAndPassword(email.trim(), password)
                     .addOnSuccessListener { cont.resume(Unit) {} }
                     .addOnFailureListener { cont.resumeWithException(it) }
             }
+            loginAttemptLimiter.clearAttempts(email)
             AuthResult.Success
-        }.getOrElse { AuthResult.Error(friendlyMessage(it)) }
+        }.getOrElse { error ->
+            if (isCredentialFailure(error)) {
+                loginAttemptLimiter.recordFailedAttempt(email)
+                loginAttemptLimiter.blockReasonIfLocked(email)?.let { locked ->
+                    return AuthResult.Error(locked)
+                }
+            }
+            AuthResult.Error(friendlyMessage(error))
+        }
+    }
 
     suspend fun signUpEmail(email: String, password: String): AuthResult =
         runCatching {
