@@ -17,7 +17,7 @@ Built with **Kotlin, Jetpack Compose, and Material 3**.
 
 <br/>
 
-**Project Status:** UI & navigation implemented · Data layer in progress
+**Project Status:** Feature-complete beta · Firestore-backed content · Local saves & auth
 
 </div>
 
@@ -29,18 +29,19 @@ Nepal is home to centuries of history, living traditions, sacred places, archite
 
 **Avalokan aims to bring these experiences together in one place.**
 
-The application is being designed as a heritage explorer where people can discover noteworthy destinations, learn their stories, explore cultural and religious landmarks, and find local events.
+The app is a heritage explorer where people can discover destinations, read editorial stories, browse events, save places to a personal collection, and optionally sign in to sync a profile with Firestore.
 
-The current implementation focuses on the user interface, navigation, and design system. Screens use curated sample content while the Room and Firebase/Firestore data integrations are being developed.
+Content is loaded from **Cloud Firestore** (`places`, `events`, `stories`, `users`) with an **offline-first** cache in **Room**. Saved place IDs, theme, notifications, and avatar preferences live in **DataStore**.
 
 ### ✨ Core Experience
 
-* 🏛️ **Explore Heritage** — Discover historical landmarks, cultural destinations, and religious sites.
-* 📖 **Discover Stories** — Explore editorial-style stories and featured heritage highlights.
-* 🎉 **Find Local Events** — Browse festivals, celebrations, and upcoming community events.
-* 🔎 **Discover Places** — Browse destination cards and explore categories.
-* 🔖 **Save & Collect** — Planned bookmarking and personalized place collections.
-* 👤 **Your Profile** — A dedicated space for saved places, visits, event activity, and settings.
+* 🏛️ **Explore Heritage** — Discover historical landmarks, cultural destinations, and religious sites from Firestore.
+* 📖 **Discover Stories** — Story of the Day and story detail screens backed by the `stories` collection.
+* 🎉 **Find Local Events** — Festivals and upcoming events from the `events` collection.
+* 🔎 **Discover Places** — Search and category-aware heritage cards on the Discover tab.
+* 🔖 **Save & Collect** — Bookmark places locally; collections appear on Profile (no sign-in required).
+* 👤 **Your Profile** — Display name, bio, avatar, saved places, and stats; editable profile syncs to `users/{uid}` when signed in.
+* 🔐 **Account (optional)** — Anonymous session by default; upgrade via email/password or Google Sign-In.
 
 ---
 
@@ -48,18 +49,17 @@ The current implementation focuses on the user interface, navigation, and design
 
 | Screen            | Experience                                                                                        |
 | ----------------- | ------------------------------------------------------------------------------------------------- |
-| **Home**          | Personalized greeting, Story of the Day, Historical Gems, event promotion, and recent discoveries |
-| **Discover**      | Search, category filters, heritage cards, and save controls                                       |
-| **Events**        | Featured festival and upcoming events                                                             |
-| **Profile**       | Profile overview, activity statistics, collections, registrations, and settings access            |
-| **Settings**      | Account and support options, logout, and app version                                              |
-| **Story Details** | Editorial layouts for heritage stories                                                            |
-| **Place Details** | Destination-focused information and guide layouts                                                 |
-| **Event Details** | Event and festival experience layouts                                                             |
+| **Home**          | Greeting, Story of the Day, Historical Gems, event promotion, recent discoveries                  |
+| **Discover**      | Search, category filters, heritage cards, save toggles                                            |
+| **Events**        | Featured festival and upcoming events list                                                        |
+| **Profile**       | Overview, activity stats, saved collection, settings entry, edit profile                          |
+| **Settings**      | Theme, notifications, login/logout, support links, app version                                    |
+| **Login**         | Email sign-in/sign-up and Google Sign-In                                                          |
+| **Story Details** | Editorial layout for a story document                                                             |
+| **Place Details** | Place info, gallery hooks, directions/share, save to collection                                   |
+| **Event Details** | Event layout, share, book CTA (confirmation UI; backend registration not yet implemented)         |
 
-Navigation is centralized in `ui/navigation/` through a sealed `NavDestination` interface and `AvalokanNavHost`. Detail routes already accept string IDs, allowing screens to navigate using stable identifiers while the data integration is developed.
-
-> **Note:** These screens currently render curated hardcoded content. Data-driven rendering, persistence, and live Firestore integration are still in progress.
+Navigation lives in `ui/navigation/` (`NavDestination`, `AvalokanNavHost`). Detail routes take string IDs that match Firestore document IDs.
 
 ### Screenshots
 
@@ -88,7 +88,7 @@ Avalokan uses a custom visual language inspired by Nepal's landscapes, heritage,
 | **Color palette**    | Forest green `#1B4332`, sage `#6B8F7A`, sand `#E8D7B7`, terracotta `#C86F4A`, warm ivory `#F5F3ED` |
 | **Typography**       | Montserrat for headings, Inter for body text                               |
 | **UI framework**     | Jetpack Compose + Material 3                                               |
-| **Layout system**    | 8dp spacing grid, reusable components, and consistent shapes               |
+| **Layout system**    | 8dp spacing grid, reusable components, category accent colors              |
 | **Navigation**       | Centralized navigation with a floating bottom bar                          |
 | **Window handling**  | Edge-to-edge layouts and appropriate system-bar insets                     |
 
@@ -98,57 +98,53 @@ The goal is a modern, readable interface that makes heritage content feel engagi
 
 ## 🧱 Architecture & Technology
 
-Avalokan is being developed with a modern Android stack, with a focus on separating the UI from data access and keeping the application maintainable as it grows.
+The UI talks to **ViewModels**, which consume **repository interfaces** implemented with Firestore snapshot listeners and Room caches. **Hilt** wires dependencies app-wide.
 
 ### Technology Stack
 
 | Layer                    | Technologies                                  |
 | ------------------------ | --------------------------------------------- |
 | **Language**             | Kotlin 2.2.10                                 |
-| **UI**                   | Jetpack Compose, Material 3                   |
+| **UI**                   | Jetpack Compose, Material 3, Coil             |
 | **Navigation**           | Navigation Compose 2.10.1                     |
 | **Dependency Injection** | Hilt 2.60.1, KSP                              |
-| **Local Database**       | Room 3  | DataStore                           |
-| **Cloud Data**           | Firebase Firestore                            |
-| **Analytics**            | Firebase Analytics                            |
+| **Local persistence**    | Room 3 (places, events, stories), DataStore (prefs & saves) |
+| **Cloud**                | Firebase Auth, Firestore, Analytics           |
+| **Auth UX**              | Credential Manager + Google ID                |
 | **Build**                | Android Gradle Plugin 9.4.1, Java 11          |
-| **Design System**        | Custom theme, typography, shapes, and spacing |
+| **Testing**              | JUnit, Turbine, coroutines-test (unit tests)  |
 
-### Current Architecture
+### Architecture Overview
 
 ```text
 ┌─────────────────────────────────────┐
 │             UI Layer                │
 │  Home · Discover · Events · Profile │
-│  Settings · Story/Place/Event Detail│
+│  Settings · Login · Detail screens  │
 └──────────────────┬──────────────────┘
-                   │
+                   │ ViewModels
                    ▼
 ┌─────────────────────────────────────┐
-│        Navigation & UI State        │
-│   NavDestination · AvalokanNavHost  │
+│           Repository layer          │
+│  Place · Event · Story · User       │
 └──────────────────┬──────────────────┘
                    │
-                   ▼
+         ┌─────────┴─────────┐
+         ▼                   ▼
+┌─────────────────┐  ┌─────────────────┐
+│  Room (cache)   │  │ Firestore (live) │
+│  offline reads  │  │ snapshot listeners│
+└─────────────────┘  └─────────────────┘
+
 ┌─────────────────────────────────────┐
-│       Data Layer — In Progress      │
-│  Repositories · ViewModels · Hilt   │
-│                                     │
-│   Room (local) ↔ Firestore (cloud)  │
+│  AuthRepository · PreferencesStore  │
+│  Firebase Auth · DataStore            │
 └─────────────────────────────────────┘
 ```
 
-The data layer shown above is the **planned architecture**, not a claim that synchronization or repository-backed UI is already implemented.
+**Offline-first flow:** Repositories emit the Room cache immediately, then merge updates from Firestore listeners into the DAO. Listeners log errors and keep the last good UI state when the network fails.
 
-### Data Layer Plan
-
-* **Room:** Local persistence using `AvalokanDatabase`, `PlaceItem`, `EventItem`, and their DAOs.
-* **Firestore:** Cloud-backed heritage places and events, using stable document IDs aligned with navigation identifiers.
-* **Repositories:** A consistent access layer between the UI and local/cloud data sources.
-* **Hilt:** Dependency injection for repositories, database access, and ViewModels.
-* **ViewModels:** UI state management to replace hardcoded screen content.
-
-The intended architecture will allow the UI to consume data through repositories rather than depending directly on Firestore or database implementations.
+**Authentication:** `AvalokanApplication` signs in anonymously on first launch so Firestore reads work out of the box. Email/password and Google sign-in link credentials to the anonymous user when possible. Failed email sign-in attempts are rate-limited on-device (hashed email identifier; passwords are never stored — Firebase hashes them server-side).
 
 ---
 
@@ -161,17 +157,16 @@ app/src/main/java/com/example/avalokan/
 ├── AvalokanApplication.kt
 │
 ├── data/
-│   ├── AppContainer.kt
-│   ├── AvalokanDatabase.kt
-│   ├── place/
-│   └── event/
+│   ├── di/                 # Hilt modules
+│   ├── local/              # DataStore preferences & saved place IDs
+│   ├── auth/               # Firebase Auth, login rate limiting
+│   ├── place/ · event/ · story/
+│   ├── user/
+│   └── AvalokanDatabase.kt
 │
 └── ui/
-    ├── home/
-    ├── discover/
-    ├── events/
-    ├── profile/
-    ├── settings/
+    ├── home/ · discover/ · events/ · profile/
+    ├── settings/ · auth/
     ├── detail/
     ├── components/
     ├── navigation/
@@ -180,8 +175,8 @@ app/src/main/java/com/example/avalokan/
 
 * `MainActivity.kt` — Activity entry point, edge-to-edge setup, and theme initialization.
 * `AvalokanApp.kt` — Main scaffold, floating bottom navigation, and navigation host.
-* `AvalokanApplication.kt` — Hilt application entry point.
-* `data/` — Database and entity/DAO definitions; integration is in progress.
+* `AvalokanApplication.kt` — Hilt application entry; anonymous Firebase Auth bootstrap.
+* `data/` — Repositories, Room entities/DAOs, Firestore mapping, auth, and user profile sync.
 * `ui/` — Feature screens, detail layouts, shared components, navigation, and design system.
 
 ---
@@ -205,47 +200,46 @@ cd Avalokan
 
 Open the project in Android Studio and allow Gradle synchronization to complete.
 
-### 3. Configure Firebase if needed
+### 3. Configure Firebase
 
-The repository currently includes `app/google-services.json`.
+The repository includes `app/google-services.json` for development.
 
-If you use your own Firebase project:
+For your own Firebase project:
 
-1. Register the Android app with the matching application ID.
-2. Download its `google-services.json`.
-3. Place the file in the `app/` directory.
-4. Configure Firestore if you want to work on the planned cloud integration.
+1. Register the Android app (update `applicationId` in `app/build.gradle.kts` if you change the package name).
+2. Download `google-services.json` into `app/`.
+3. Enable **Authentication** (Email/Password, Google, Anonymous).
+4. Create Firestore collections **`places`**, **`events`**, **`stories`**, and **`users`** with document fields matching the mappers in `*Repository.kt`.
+5. Define and deploy **Firestore security rules** appropriate for production (the app expects read access for heritage content and scoped writes for user profiles).
 
-The current sample UI does not yet depend on live Firestore content. A configured Firestore database with the expected collections will be needed when the integration is implemented.
+Google Sign-In requires a **Web client ID** in `strings.xml` (`google_server_client_id`) aligned with your Firebase OAuth client.
 
-### 4. Build the application
+### 4. Build and test
 
 ```bash
 ./gradlew :app:assembleDebug
+./gradlew :app:testDebugUnitTest
 ```
 
-Install the generated debug APK on a compatible emulator or device, or run the application directly from Android Studio.
+Install the debug APK on a device or emulator, or run from Android Studio.
 
 ---
 
 ## 🗺️ Roadmap
 
-* [x] Build the main UI screens and shared components
-* [x] Implement tab navigation and detail routes
-* [x] Establish the custom theme and design system
-* [x] Add initial Room entities and DAO definitions
-* [x] Add Hilt and Firebase SDK dependencies
-* [ ] Configure Hilt modules and dependency injection
-* [ ] Implement repository interfaces and data sources
-* [ ] Connect Firestore and Room to the application
-* [ ] Introduce ViewModels and observable UI state
-* [ ] Replace hardcoded content with data-driven screens
-* [ ] Implement persistent bookmarks and saved collections
-* [ ] Add authentication and account flows
-* [ ] Configure and verify Firestore security rules
-* [ ] Add real destination imagery and richer heritage content
-
-The roadmap reflects the current development plan; completed infrastructure setup does not necessarily mean the corresponding feature is fully integrated into the UI.
+* [x] Main UI screens, design system, and navigation
+* [x] Hilt DI and ViewModels
+* [x] Firestore repositories with Room offline cache
+* [x] Data-driven Home, Discover, Events, and detail screens
+* [x] Local saved-place collections (DataStore)
+* [x] Firebase Auth (anonymous, email/password, Google)
+* [x] User profile read/write to Firestore
+* [ ] Event registration persisted to Firestore (book/join is UI-only today)
+* [ ] Cloud sync for saved places across devices
+* [ ] Discover filters, calendar export, notification center (UI placeholders exist)
+* [ ] Production Firestore rules review and monitoring
+* [ ] Release package ID, R8/ProGuard, Play Store listing assets
+* [ ] Privacy policy and Data safety disclosure for Play Console
 
 ---
 
@@ -258,7 +252,7 @@ If you'd like to contribute:
 1. Fork the repository.
 2. Create a feature branch.
 3. Make your changes.
-4. Test the application.
+4. Run unit tests and smoke-test on a device.
 5. Open a pull request describing the changes.
 
 ---
