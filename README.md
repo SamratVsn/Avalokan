@@ -202,17 +202,19 @@ Open the project in Android Studio and allow Gradle synchronization to complete.
 
 ### 3. Configure Firebase
 
-The repository includes `app/google-services.json` for development.
+API keys and OAuth client IDs are **not** committed. Set them up locally:
+
+1. Copy `secrets.properties.example` to `secrets.properties` at the repo root and set `GOOGLE_SERVER_CLIENT_ID` to your Firebase **Web client** OAuth ID.
+2. Download `google-services.json` from Firebase Console into `app/`, or copy `app/google-services.json.example` and replace placeholders (downloading from Firebase is recommended).
 
 For your own Firebase project:
 
 1. Register the Android app (update `applicationId` in `app/build.gradle.kts` if you change the package name).
-2. Download `google-services.json` into `app/`.
-3. Enable **Authentication** (Email/Password, Google, Anonymous).
-4. Create Firestore collections **`places`**, **`events`**, **`stories`**, and **`users`** with document fields matching the mappers in `*Repository.kt`.
-5. Define and deploy **Firestore security rules** appropriate for production (the app expects read access for heritage content and scoped writes for user profiles).
+2. Enable **Authentication** (Email/Password, Google, Anonymous).
+3. Create Firestore collections **`places`**, **`events`**, **`stories`**, and **`users`** with document fields matching the mappers in `*Repository.kt`.
+4. Define and deploy **Firestore security rules** appropriate for production (the app expects read access for heritage content and scoped writes for user profiles).
 
-Google Sign-In requires a **Web client ID** in `strings.xml` (`google_server_client_id`) aligned with your Firebase OAuth client.
+If keys were ever pushed to a public remote, rotate them in [Google Cloud Console](https://console.cloud.google.com/) / Firebase and restrict API key usage (Android app + APIs).
 
 ### 4. Build and test
 

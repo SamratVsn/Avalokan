@@ -1,9 +1,36 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
     alias(libs.plugins.google.services)
+}
+
+val secretsPropertiesFile = rootProject.file("secrets.properties")
+val secretsProperties = Properties().apply {
+    if (secretsPropertiesFile.exists()) {
+        FileInputStream(secretsPropertiesFile).use { load(it) }
+    }
+}
+
+fun requireSecret(key: String): String {
+    val value = secretsProperties.getProperty(key)?.trim().orEmpty()
+    if (value.isEmpty()) {
+        throw GradleException(
+            "Missing $key. Copy secrets.properties.example to secrets.properties and set your Firebase Web client ID.",
+        )
+    }
+    return value
+}
+
+val googleServicesJson = file("google-services.json")
+if (!googleServicesJson.exists()) {
+    throw GradleException(
+        "Missing app/google-services.json. Copy app/google-services.json.example as a template or download from Firebase Console.",
+    )
 }
 
 android {
@@ -20,6 +47,12 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        resValue(
+            "string",
+            "google_server_client_id",
+            requireSecret("GOOGLE_SERVER_CLIENT_ID"),
+        )
     }
 
     buildTypes {
