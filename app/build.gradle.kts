@@ -39,6 +39,10 @@ android {
         version = release(37)
     }
 
+    buildFeatures {
+        resValues = true
+    }
+
     defaultConfig {
         applicationId = "com.example.avalokan"
         minSdk = 24
