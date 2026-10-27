@@ -17,3 +17,6 @@ secrets.properties
 app/google-services.json
 /.idea/assetWizardSettings.xml
 .idea/
+
+# brag-generated launch video output
+/brag-output/
