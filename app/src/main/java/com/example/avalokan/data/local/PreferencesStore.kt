@@ -14,10 +14,12 @@ interface PreferencesStore {
     val themeChoice: Flow<String>
     val avatarUri: Flow<String?>
     val savedPlaceIds: Flow<Set<String>>
+    val favoriteEventIds: Flow<Set<String>>
 
     suspend fun setNotificationsEnabled(enabled: Boolean)
     suspend fun setThemeChoice(choice: String)
     suspend fun setAvatarUri(uri: String?)
     suspend fun setSavedPlaceIds(ids: Set<String>)
+    suspend fun setFavoriteEventIds(ids: Set<String>)
     suspend fun clearAll()
 }

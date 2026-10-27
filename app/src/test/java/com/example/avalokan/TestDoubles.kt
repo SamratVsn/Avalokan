@@ -1,5 +1,7 @@
 package com.example.avalokan
 
+import com.example.avalokan.data.event.EventItem
+import com.example.avalokan.data.event.EventRepository
 import com.example.avalokan.data.local.PreferencesStore
 import com.example.avalokan.data.place.PlaceItem
 import com.example.avalokan.data.place.PlaceRepository
@@ -29,6 +31,34 @@ internal val TestPlaces = listOf(
     )
 )
 
+internal val TestEvents = listOf(
+    EventItem(
+        id = "dashain-festival",
+        title = "Dashain Festival",
+        description = "desc",
+        meta = "Kathmandu • Cultural",
+        date = "Oct 12, 2026"
+    ),
+    EventItem(
+        id = "heritage-walk",
+        title = "Heritage Walk",
+        description = "desc",
+        meta = "Bhaktapur • Tour",
+        date = "Nov 3, 2026"
+    )
+)
+
+internal class FakeEventRepository(
+    private val events: List<EventItem> = TestEvents
+) : EventRepository {
+    override fun observeEvents(): Flow<List<EventItem>> = flowOf(events)
+    override fun observeEvent(id: String): Flow<EventItem?> =
+        flowOf(events.find { it.id == id })
+
+    override suspend fun clearCache() = Unit
+    override suspend fun refresh() = Unit
+}
+
 internal class FakePlaceRepository(
     private val places: List<PlaceItem> = TestPlaces
 ) : PlaceRepository {
@@ -43,12 +73,14 @@ internal class FakePlaceRepository(
 
 internal class FakePreferencesStore : PreferencesStore {
     private val saved = MutableStateFlow(emptySet<String>())
+    private val favorites = MutableStateFlow(emptySet<String>())
     private val avatar = MutableStateFlow<String?>(null)
 
     override val notificationsEnabled: Flow<Boolean> = flowOf(true)
     override val themeChoice: Flow<String> = flowOf(PreferencesStore.THEME_SYSTEM)
     override val avatarUri: Flow<String?> = avatar
     override val savedPlaceIds: Flow<Set<String>> = saved
+    override val favoriteEventIds: Flow<Set<String>> = favorites
 
     override suspend fun setNotificationsEnabled(enabled: Boolean) = Unit
     override suspend fun setThemeChoice(choice: String) = Unit
@@ -61,8 +93,13 @@ internal class FakePreferencesStore : PreferencesStore {
         saved.value = ids
     }
 
+    override suspend fun setFavoriteEventIds(ids: Set<String>) {
+        favorites.value = ids
+    }
+
     override suspend fun clearAll() {
         saved.value = emptySet()
+        favorites.value = emptySet()
         avatar.value = null
     }
 }

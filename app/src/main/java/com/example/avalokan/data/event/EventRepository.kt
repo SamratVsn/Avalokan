@@ -1,5 +1,6 @@
 package com.example.avalokan.data.event
 
+import com.example.avalokan.data.security.isSafeDocumentId
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Source
@@ -8,6 +9,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
@@ -36,7 +38,8 @@ private fun DocumentSnapshot.toEventItem() = EventItem(
     type = textField("type").ifBlank { "CULTURAL" },
     featured = getBoolean("featured") == true,
     date = textField("date"),
-    imageUrl = textField("imageUrl").ifBlank { null }
+    imageUrl = textField("imageUrl").ifBlank { null },
+    joinLink = textField("joinLink").ifBlank { textField("onJoinClick") }
 )
 
 class FirestoreEventRepository @Inject constructor(
@@ -62,7 +65,9 @@ class FirestoreEventRepository @Inject constructor(
         awaitClose { registration.remove() }
     }
 
-    override fun observeEvent(id: String): Flow<EventItem?> = callbackFlow {
+    override fun observeEvent(id: String): Flow<EventItem?> {
+        if (!isSafeDocumentId(id)) return flowOf(null)
+        return callbackFlow {
         send(eventDao.observeById(id).first())
         val registration = firestore.collection(EVENTS_COLLECTION).document(id)
             .addSnapshotListener { snapshot, error ->
@@ -82,6 +87,7 @@ class FirestoreEventRepository @Inject constructor(
                 }
             }
         awaitClose { registration.remove() }
+        }
     }
 
     override suspend fun clearCache() {

@@ -52,6 +52,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.avalokan.ui.common.openUrlInBrowser
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.HeroScrim
 import com.example.avalokan.ui.theme.PrimaryTeal
@@ -61,11 +62,8 @@ import android.net.Uri
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.launch
 
@@ -76,10 +74,11 @@ fun EventDetailScreen(
     viewModel: EventDetailViewModel = hiltViewModel()
 ) {
     val event by viewModel.event.collectAsState()
+    val favoriteIds by viewModel.favoriteIds.collectAsState()
     val context = LocalContext.current
     val snackbarHost = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    var isFavorite by rememberSaveable { mutableStateOf(false) }
+    val isFavorite = event?.id?.let { favoriteIds.contains(it) } == true
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when (event) {
@@ -115,9 +114,14 @@ fun EventDetailScreen(
             fee = event?.fee?.ifBlank { "Rs. 500" } ?: "Rs. 500",
             imageUrl = event?.imageUrl,
             isFavorite = isFavorite,
-            onFavoriteClick = { isFavorite = !isFavorite },
+            onFavoriteClick = { viewModel.toggleFavorite() },
             onShareClick = onShareClick,
-            onBookClick = { viewModel.onBookEvent() },
+            onBookClick = {
+                val link = event?.joinLink.orEmpty()
+                if (!context.openUrlInBrowser(link)) {
+                    viewModel.onBookEvent()
+                }
+            },
             snackbarHost = snackbarHost,
             onBackClick = onBackClick
         )

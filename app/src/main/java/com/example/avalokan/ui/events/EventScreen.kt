@@ -2,6 +2,7 @@ package com.example.avalokan.ui.events
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +38,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.Brush
@@ -51,6 +53,7 @@ import coil.compose.AsyncImage
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
 import com.example.avalokan.data.event.EventItem
+import com.example.avalokan.ui.common.openUrlInBrowser
 import com.example.avalokan.ui.components.StateMessage
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
@@ -90,6 +93,7 @@ private fun EventContent(
     onEventClick: (String) -> Unit,
     onRetry: () -> Unit
 ) {
+    val context = LocalContext.current
     Column(
         modifier = Modifier.fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
@@ -114,7 +118,11 @@ private fun EventContent(
                 FeaturedEvent(
                     event = featured,
                     modifier = Modifier.padding(horizontal = 24.dp),
-                    onRemindClick = { onEventClick(featured.id) }
+                    onRemindClick = {
+                        if (!context.openUrlInBrowser(featured.joinLink)) {
+                            onEventClick(featured.id)
+                        }
+                    }
                 )
             }
             UpcomingEvents(
@@ -275,7 +283,7 @@ private fun FeaturedEvent(
                         modifier = Modifier.fillMaxWidth().height(40.dp)
                     ) {
                         Text(
-                            text = "Remind Me & Get Tickets",
+                            text = "Book the Event Now",
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -292,6 +300,7 @@ private fun UpcomingEvents(
     modifier: Modifier = Modifier,
     onEventClick: (String) -> Unit = {}
 ) {
+    val context = LocalContext.current
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = "Upcoming in Your Locality",
@@ -303,8 +312,10 @@ private fun UpcomingEvents(
                 name = event.title,
                 meta = event.meta,
                 fee = event.fee,
+                action = event.action,
                 imageUrl = event.imageUrl,
-                onCardClick = { onEventClick(event.id) }
+                onCardClick = { onEventClick(event.id) },
+                onJoinClick = { context.openUrlInBrowser(event.joinLink) }
             )
         }
     }
@@ -315,9 +326,11 @@ private fun EventCards(
     name: String,
     meta: String,
     fee: String,
+    action: String,
     // API-ready: pass remote image URL/model here later; null = placeholder below
     imageUrl: String? = null,
-    onCardClick: () -> Unit = {}
+    onCardClick: () -> Unit = {},
+    onJoinClick: () -> Unit = {}
 ) {
     Card(
         onClick = onCardClick,
@@ -377,11 +390,12 @@ private fun EventCards(
                 )
             }
             Text(
-                text = "Join >",
+                text = action.ifBlank { "Join >" },
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
-                maxLines = 1
+                maxLines = 1,
+                modifier = Modifier.clickable(onClick = onJoinClick)
             )
         }
     }

@@ -21,11 +21,12 @@
     <string name="search">Search places, temples, events…</string>
     <string name="localEvents">Locality Events</string>
     <string name="discoverEventsDesc">Discover and join events happening around you.</string>
-    <string name="kathmanduValley">KATHMANDU VALLEY</string>
+    <string name="kathmanduValley">All Over Nepal</string>
     <string name="myHeritageColl">My Place Collection</string>
     <string name="savedPlaces">Saved Places</string>
     <string name="manage">See all</string>
-    <string name="upcomingReg">Upcoming Registrations</string>
+    <string name="favoriteEvents">Favorite Events</string>
+    <string name="favoriteEventsEmpty">No favorite events yet — tap the heart on any event.</string>
     <string name="privacy">Privacy and Security</string>
     <string name="account">Account</string>
     <string name="editProfile">Edit Profile</string>
@@ -37,7 +38,9 @@
     <string name="logOut">Log Out</string>
     <string name="signUp">Sign Up</string>
     <string name="email">Email</string>
-    <string name="password">Password (6+ characters)</string>
+    <string name="password">Password</string>
+    <string name="password_hint_sign_in">At least 6 characters</string>
+    <string name="password_hint_sign_up">8+ characters with letters and numbers</string>
     <string name="continueWithGoogle">Continue with Google</string>
     <string name="welcomeBack">Welcome back</string>
     <string name="joinHeritage">Join Nepal Heritage Explorer</string>

@@ -32,7 +32,7 @@ class ProfileViewModelTest {
     fun `saved stat matches the saved places list`() = runTest {
         val prefs = FakePreferencesStore()
         prefs.setSavedPlaceIds(setOf("kathmandu-durbar"))
-        val vm = ProfileViewModel(prefs, FakePlaceRepository(), FakeUserRepository())
+        val vm = ProfileViewModel(prefs, FakePlaceRepository(), FakeEventRepository(), FakeUserRepository())
 
         vm.savedPlaces.test {
             skipItems(1) // stateIn replays its empty initial value first
@@ -50,7 +50,7 @@ class ProfileViewModelTest {
     @Test
     fun `stats follow changes to the saved places list`() = runTest {
         val prefs = FakePreferencesStore()
-        val vm = ProfileViewModel(prefs, FakePlaceRepository(), FakeUserRepository())
+        val vm = ProfileViewModel(prefs, FakePlaceRepository(), FakeEventRepository(), FakeUserRepository())
 
         vm.stats.test {
             prefs.setSavedPlaceIds(setOf("kathmandu-durbar", "lumbini-garden"))
@@ -67,7 +67,7 @@ class ProfileViewModelTest {
     fun `saved ids that match no place are not counted`() = runTest {
         val prefs = FakePreferencesStore()
         prefs.setSavedPlaceIds(setOf("kathmandu-durbar", "a-place-that-was-deleted"))
-        val vm = ProfileViewModel(prefs, FakePlaceRepository(), FakeUserRepository())
+        val vm = ProfileViewModel(prefs, FakePlaceRepository(), FakeEventRepository(), FakeUserRepository())
 
         vm.stats.test {
             skipItems(1)

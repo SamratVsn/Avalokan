@@ -1,5 +1,6 @@
 package com.example.avalokan.data.story
 
+import com.example.avalokan.data.security.isSafeDocumentId
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Source
@@ -8,6 +9,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
@@ -57,7 +59,9 @@ class FirestoreStoryRepository @Inject constructor(
         awaitClose { registration.remove() }
     }
 
-    override fun observeStory(id: String): Flow<StoryItem?> = callbackFlow {
+    override fun observeStory(id: String): Flow<StoryItem?> {
+        if (!isSafeDocumentId(id)) return flowOf(null)
+        return callbackFlow {
         send(storyDao.observeById(id).first())
         val registration = firestore.collection(STORIES_COLLECTION).document(id)
             .addSnapshotListener { snapshot, error ->
@@ -78,6 +82,7 @@ class FirestoreStoryRepository @Inject constructor(
                 }
             }
         awaitClose { registration.remove() }
+        }
     }
 
     override suspend fun refresh() {

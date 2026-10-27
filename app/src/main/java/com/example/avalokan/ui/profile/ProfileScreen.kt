@@ -45,7 +45,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.avalokan.R
+import com.example.avalokan.data.event.EventItem
 import com.example.avalokan.data.place.PlaceItem
+import androidx.compose.material.icons.filled.CalendarMonth
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.GreyLight
 import com.example.avalokan.ui.theme.PrimaryLight
@@ -65,6 +67,7 @@ fun ProfileScreen(
     val stats by viewModel.stats.collectAsState()
     val avatarUri by viewModel.avatarUri.collectAsState()
     val savedPlaces by viewModel.savedPlaces.collectAsState()
+    val favoriteEvents by viewModel.favoriteEvents.collectAsState()
 
     ProfileContent(
         userName = userName,
@@ -72,6 +75,7 @@ fun ProfileScreen(
         stats = stats,
         avatarUri = avatarUri,
         savedPlaces = savedPlaces,
+        favoriteEvents = favoriteEvents,
         onSettingsClick = onSettingsClick
     )
 }
@@ -83,6 +87,7 @@ private fun ProfileContent(
     stats: ProfileStats,
     avatarUri: String?,
     savedPlaces: List<PlaceItem>,
+    favoriteEvents: List<EventItem>,
     onSettingsClick: () -> Unit
 ) {
     Column(
@@ -128,7 +133,10 @@ private fun ProfileContent(
             modifier = Modifier.padding(horizontal = 24.dp)
         )
         HeritageCollection(savedPlaces = savedPlaces)
-        UpcomingRegistrations(modifier = Modifier.padding(horizontal = 24.dp))
+        FavoriteEvents(
+            favoriteEvents = favoriteEvents,
+            modifier = Modifier.padding(horizontal = 24.dp)
+        )
     }
 }
 
@@ -316,17 +324,73 @@ private fun CollectionCards(place: String, loc: String, modifier: Modifier = Mod
 }
 
 @Composable
-private fun UpcomingRegistrations(modifier: Modifier = Modifier) {
+private fun FavoriteEvents(
+    favoriteEvents: List<EventItem>,
+    modifier: Modifier = Modifier
+) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
-            text = stringResource(R.string.upcomingReg),
+            text = stringResource(R.string.favoriteEvents),
             style = MaterialTheme.typography.titleMedium
         )
-        Text(
-            text = "No registrations yet — book an event to see it here.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        if (favoriteEvents.isEmpty()) {
+            Text(
+                text = stringResource(R.string.favoriteEventsEmpty),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else {
+            favoriteEvents.forEach { event ->
+                FavoriteEventRow(event)
+            }
+        }
+    }
+}
+
+@Composable
+private fun FavoriteEventRow(event: EventItem) {
+    Card(
+        shape = StandardCardShape,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(PrimaryLight),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(Icons.Default.CalendarMonth, null, tint = PrimaryTeal)
+            }
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    text = event.title,
+                    style = MaterialTheme.typography.titleMedium.copy(fontSize = 14.sp),
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = event.meta.substringBefore("•").trim().ifBlank { "Nepal" },
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 12.sp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (event.date.isNotBlank()) {
+                    Text(
+                        text = event.date,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -340,6 +404,7 @@ private fun ProfilePreview() {
             stats = ProfileStats(),
             avatarUri = null,
             savedPlaces = emptyList(),
+            favoriteEvents = emptyList(),
             onSettingsClick = {}
         )
     }

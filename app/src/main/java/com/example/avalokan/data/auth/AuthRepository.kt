@@ -13,6 +13,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
+import com.example.avalokan.data.security.isValidEmail
+import com.example.avalokan.data.security.signUpPasswordError
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,7 +49,7 @@ internal fun authErrorMessageFor(code: String?): String? = when (code) {
     "ERROR_EMAIL_ALREADY_IN_USE", "ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL" ->
         "That email is already registered. Try logging in instead."
     "ERROR_WEAK_PASSWORD" ->
-        "Your password is too weak. Use at least 6 characters."
+        "Your password is too weak. Use at least 8 characters with letters and numbers."
     "ERROR_NETWORK_REQUEST_FAILED" ->
         "No internet connection. Check your network and try again."
     "ERROR_TOO_MANY_REQUESTS" ->
@@ -102,6 +104,12 @@ class AuthRepository @Inject constructor(
         get() = auth.currentUser?.let { !it.isAnonymous } ?: false
 
     suspend fun signInEmail(email: String, password: String): AuthResult {
+        if (!isValidEmail(email)) {
+            return AuthResult.Error(
+                authErrorMessageFor("ERROR_INVALID_EMAIL")
+                    ?: "That email address doesn’t look right. Please check it and try again.",
+            )
+        }
         loginAttemptLimiter.blockReasonIfLocked(email)?.let {
             return AuthResult.Error(it)
         }
@@ -124,8 +132,15 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    suspend fun signUpEmail(email: String, password: String): AuthResult =
-        runCatching {
+    suspend fun signUpEmail(email: String, password: String): AuthResult {
+        if (!isValidEmail(email)) {
+            return AuthResult.Error(
+                authErrorMessageFor("ERROR_INVALID_EMAIL")
+                    ?: "That email address doesn’t look right. Please check it and try again.",
+            )
+        }
+        signUpPasswordError(password)?.let { return AuthResult.Error(it) }
+        return runCatching {
             suspendCancellableCoroutine { cont ->
                 auth.createUserWithEmailAndPassword(email.trim(), password)
                     .addOnSuccessListener { cont.resume(Unit) {} }
@@ -133,6 +148,7 @@ class AuthRepository @Inject constructor(
             }
             AuthResult.Success
         }.getOrElse { AuthResult.Error(friendlyMessage(it)) }
+    }
 
     suspend fun signInGoogle(serverClientId: String): AuthResult =
         runCatching {

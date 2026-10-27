@@ -59,6 +59,7 @@ fun LoginScreen(
         password = password,
         isSignUpMode = isSignUpMode,
         isLoading = isLoading,
+        canSubmitEmail = viewModel.canSubmitEmailAuth,
         error = error,
         onEmailChange = viewModel::onEmailChange,
         onPasswordChange = viewModel::onPasswordChange,
@@ -74,6 +75,7 @@ private fun LoginContent(
     password: String,
     isSignUpMode: Boolean,
     isLoading: Boolean,
+    canSubmitEmail: Boolean,
     error: String?,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
@@ -120,6 +122,14 @@ private fun LoginContent(
             value = password,
             onValueChange = onPasswordChange,
             label = { Text(text = stringResource(R.string.password)) },
+            supportingText = {
+                Text(
+                    text = stringResource(
+                        if (isSignUpMode) R.string.password_hint_sign_up
+                        else R.string.password_hint_sign_in
+                    )
+                )
+            },
             leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -137,7 +147,7 @@ private fun LoginContent(
         }
         Button(
             onClick = onEmailSubmit,
-            enabled = !isLoading && email.isNotBlank() && password.length >= 6,
+            enabled = !isLoading && canSubmitEmail,
             shape = StandardButtonShape,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary
@@ -189,6 +199,7 @@ private fun LoginPreview() {
             password = "",
             isSignUpMode = false,
             isLoading = false,
+            canSubmitEmail = false,
             error = null,
             onEmailChange = {},
             onPasswordChange = {},

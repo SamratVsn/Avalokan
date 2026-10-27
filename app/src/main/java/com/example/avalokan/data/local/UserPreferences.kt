@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.example.avalokan.data.security.isSafeDocumentId
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -16,6 +17,7 @@ import java.io.IOException
 private const val PREFS_NAME = "user_prefs"
 private val AVATAR_URI = stringPreferencesKey("avatar_uri")
 private val SAVED_PLACE_IDS = stringPreferencesKey("saved_place_ids")
+private val FAVORITE_EVENT_IDS = stringPreferencesKey("favorite_event_ids")
 private val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
 private val THEME_CHOICE = stringPreferencesKey("theme_choice")
 
@@ -39,6 +41,14 @@ class UserPreferences(private val context: Context) : PreferencesStore {
     }
 
     override suspend fun setThemeChoice(choice: String) {
+        if (choice !in setOf(
+                PreferencesStore.THEME_SYSTEM,
+                PreferencesStore.THEME_LIGHT,
+                PreferencesStore.THEME_DARK,
+            )
+        ) {
+            return
+        }
         context.userPrefsStore.edit { prefs -> prefs[THEME_CHOICE] = choice }
     }
 
@@ -58,8 +68,27 @@ class UserPreferences(private val context: Context) : PreferencesStore {
         }
 
     override suspend fun setSavedPlaceIds(ids: Set<String>) {
+        val safe = ids.filter { isSafeDocumentId(it) }.toSet()
         context.userPrefsStore.edit { prefs ->
-            prefs[SAVED_PLACE_IDS] = ids.joinToString(",")
+            prefs[SAVED_PLACE_IDS] = safe.joinToString(",")
+        }
+    }
+
+    override val favoriteEventIds: Flow<Set<String>> = context.userPrefsStore.data
+        .catch { e -> if (e is IOException) emit(emptyPreferences()) else throw e }
+        .map { prefs ->
+            prefs[FAVORITE_EVENT_IDS]
+                ?.split(",")
+                ?.map { it.trim() }
+                ?.filter { it.isNotEmpty() }
+                ?.toSet()
+                .orEmpty()
+        }
+
+    override suspend fun setFavoriteEventIds(ids: Set<String>) {
+        val safe = ids.filter { isSafeDocumentId(it) }.toSet()
+        context.userPrefsStore.edit { prefs ->
+            prefs[FAVORITE_EVENT_IDS] = safe.joinToString(",")
         }
     }
 

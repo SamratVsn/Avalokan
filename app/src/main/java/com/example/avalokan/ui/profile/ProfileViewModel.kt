@@ -2,6 +2,8 @@ package com.example.avalokan.ui.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.avalokan.data.event.EventItem
+import com.example.avalokan.data.event.EventRepository
 import com.example.avalokan.data.local.PreferencesStore
 import com.example.avalokan.data.place.PlaceItem
 import com.example.avalokan.data.place.PlaceRepository
@@ -36,6 +38,7 @@ data class ProfileStats(
 class ProfileViewModel @Inject constructor(
     private val userPreferences: PreferencesStore,
     placeRepository: PlaceRepository,
+    eventRepository: EventRepository,
     private val userRepository: UserRepository
 ) : ViewModel() {
 
@@ -82,14 +85,20 @@ class ProfileViewModel @Inject constructor(
         ids.mapNotNull { id -> remote.find { it.id == id } }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    val favoriteEvents: StateFlow<List<EventItem>> = combine(
+        eventRepository.observeEvents(),
+        userPreferences.favoriteEventIds
+    ) { remote, ids ->
+        ids.mapNotNull { id -> remote.find { it.id == id } }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     /**
-     * Derived from [savedPlaces] so the SAVED counter always agrees with the
-     * list shown below it. VISITED and EVENTS stay at 0 until the app tracks
-     * visits and event registrations.
+     * Derived from [savedPlaces] and [favoriteEvents] so counters match the lists below.
+     * VISITED stays at 0 until the app tracks visits.
      */
-    val stats: StateFlow<ProfileStats> = savedPlaces
-        .map { places -> ProfileStats(visited = 0, saved = places.size, events = 0) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProfileStats())
+    val stats: StateFlow<ProfileStats> = combine(savedPlaces, favoriteEvents) { places, events ->
+        ProfileStats(visited = 0, saved = places.size, events = events.size)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProfileStats())
 
     fun setAvatarUri(uri: String?) {
         viewModelScope.launch { userPreferences.setAvatarUri(uri) }

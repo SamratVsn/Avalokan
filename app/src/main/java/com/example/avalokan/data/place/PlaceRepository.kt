@@ -1,5 +1,6 @@
 package com.example.avalokan.data.place
 
+import com.example.avalokan.data.security.isSafeDocumentId
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Source
@@ -9,6 +10,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resumeWithException
@@ -63,7 +65,9 @@ class FirestorePlaceRepository @Inject constructor(
         awaitClose { registration.remove() }
     }
 
-    override fun observePlace(id: String): Flow<PlaceItem?> = callbackFlow {
+    override fun observePlace(id: String): Flow<PlaceItem?> {
+        if (!isSafeDocumentId(id)) return flowOf(null)
+        return callbackFlow {
         send(placeDao.observeById(id).first())
         val registration = firestore.collection(PLACES_COLLECTION).document(id)
             .addSnapshotListener { snapshot, error ->
@@ -83,6 +87,7 @@ class FirestorePlaceRepository @Inject constructor(
                 }
             }
         awaitClose { registration.remove() }
+        }
     }
 
     override suspend fun refresh() {

@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.avalokan.data.auth.AuthRepository
 import com.example.avalokan.data.auth.AuthResult
+import com.example.avalokan.data.security.canSubmitSignIn
+import com.example.avalokan.data.security.canSubmitSignUp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -45,15 +47,24 @@ class AuthViewModel @Inject constructor(
         _error.value = null
     }
 
+    val canSubmitEmailAuth: Boolean
+        get() = if (_isSignUpMode.value) {
+            canSubmitSignUp(_email.value, _password.value)
+        } else {
+            canSubmitSignIn(_email.value, _password.value)
+        }
+
     fun onEmailSubmit(onSuccess: () -> Unit) {
-        if (_isLoading.value) return
+        if (_isLoading.value || !canSubmitEmailAuth) return
         viewModelScope.launch {
             _isLoading.value = true
+            val password = _password.value
             val result = if (_isSignUpMode.value) {
-                authRepository.signUpEmail(_email.value, _password.value)
+                authRepository.signUpEmail(_email.value, password)
             } else {
-                authRepository.signInEmail(_email.value, _password.value)
+                authRepository.signInEmail(_email.value, password)
             }
+            _password.value = ""
             _isLoading.value = false
             when (result) {
                 AuthResult.Success -> onSuccess()
