@@ -22,11 +22,6 @@ private val Context.loginAttemptStore by preferencesDataStore(
     corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() },
 )
 
-/**
- * Tracks failed email/password sign-in attempts per account identifier (SHA-256
- * of normalized email). Passwords are never stored — Firebase Auth hashes them
- * on the server; this only rate-limits brute-force attempts on the device.
- */
 @Singleton
 class LoginAttemptLimiter @Inject constructor(
     @ApplicationContext private val context: Context,

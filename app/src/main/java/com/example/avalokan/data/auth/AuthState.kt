@@ -10,12 +10,7 @@ data class AuthState(
     val isAuthenticated: Boolean = false,
     val isAnonymous: Boolean = true,
     val uid: String? = null,
-) {
-    /**
-     * Real, named account only (not anonymous/guest). Used to gate features
-     * that must belong to a durable account (saving places, joining events).
-     */
-}
+)
 
 fun FirebaseAuth.observeAuthState(): Flow<AuthState> = callbackFlow {
     val listener = FirebaseAuth.AuthStateListener { auth ->

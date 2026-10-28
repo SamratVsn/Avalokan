@@ -24,19 +24,11 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resumeWithException
 
-/** Result surface for auth operations; errors carry user-readable messages. */
 sealed interface AuthResult {
     data object Success : AuthResult
     data class Error(val message: String) : AuthResult
 }
 
-/**
- * Maps a Firebase auth error code to copy. Returns null for codes we don't
- * recognise so the caller can fall back to a generic message.
- *
- * `internal` so unit tests can cover the mapping directly — building the
- * exceptions themselves needs Android APIs that plain JVM tests don't mock.
- */
 internal fun authErrorMessageFor(code: String?): String? = when (code) {
     "ERROR_INVALID_EMAIL" ->
         "That email address doesn’t look right. Please check it and try again."
@@ -59,34 +51,22 @@ internal fun authErrorMessageFor(code: String?): String? = when (code) {
     else -> null
 }
 
-/**
- * Turns low-level Firebase / Google exceptions into short, human, actionable
- * messages. Anything unrecognised falls back to a neutral apology so the UI
- * never shows a raw stack-trace style string.
- *
- * `internal` so unit tests can cover it directly.
- */
-internal fun friendlyMessage(e: Throwable): String {
-    if (e is GetCredentialCancellationException) {
+internal fun friendlyMessage(e: Throwable) : String {
+    if(e is GetCredentialCancellationException){
         return "Google sign-in was cancelled. You can try again anytime."
     }
     authErrorMessageFor((e as? FirebaseAuthException)?.errorCode)?.let { return it }
-    return when (e) {
-        is java.net.UnknownHostException, is java.io.IOException ->
-            "No internet connection. Check your network and try again."
-        else -> "Something went wrong while signing you in. Please try again."
+    return when(e){
+        is java.net.UnknownHostException, is java.io.IOException -> "No internet connection. Check your network and try again."
+        else -> "Something went wrong. Please try again later."
     }
 }
 
-/**
- * Email + Google auth over Firebase. Anonymous installs upgrade via account
- * linking, so existing users/{uid} data follows the new login.
- */
 @Singleton
 class AuthRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     private val loginAttemptLimiter: LoginAttemptLimiter,
-) {
+){
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
     private val _currentUser = MutableStateFlow(auth.currentUser)
@@ -103,8 +83,8 @@ class AuthRepository @Inject constructor(
     val isSignedInWithAccount: Boolean
         get() = auth.currentUser?.let { !it.isAnonymous } ?: false
 
-    suspend fun signInEmail(email: String, password: String): AuthResult {
-        if (!isValidEmail(email)) {
+    suspend fun signInEmail(email: String, password: String) : AuthResult {
+        if(!isValidEmail(email)){
             return AuthResult.Error(
                 authErrorMessageFor("ERROR_INVALID_EMAIL")
                     ?: "That email address doesn’t look right. Please check it and try again.",
@@ -187,7 +167,6 @@ class AuthRepository @Inject constructor(
 
     fun signOut() {
         auth.signOut()
-        // Re-enter anonymously so Firestore reads keep working.
         auth.signInAnonymously()
             .addOnFailureListener { e ->
                 Log.w("AvalokanRepo", "Anonymous re-sign-in failed", e)
