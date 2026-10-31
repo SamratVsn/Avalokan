@@ -2,7 +2,6 @@ package com.example.avalokan.ui.discover
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -13,21 +12,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ExploreOff
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SearchOff
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -35,7 +30,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -47,19 +41,18 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
 import com.example.avalokan.data.place.PlaceItem
+import com.example.avalokan.ui.components.DiscoverLoadingState
 import com.example.avalokan.ui.components.StateMessage
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
 import com.example.avalokan.ui.theme.GreyLight
 import com.example.avalokan.ui.theme.Spacing
-import com.example.avalokan.ui.theme.StandardCardShape
 import com.example.avalokan.ui.theme.TextPrimary
 import com.example.avalokan.ui.theme.TextSecondary
 import com.example.avalokan.ui.theme.discoverCategoryAccent
@@ -68,6 +61,7 @@ import com.example.avalokan.ui.theme.discoverCategoryOnAccent
 @Composable
 fun DiscoverScreen(
     onPlaceClick: (String) -> Unit = {},
+    onExploreEventsClick: () -> Unit = {},
     viewModel: DiscoverViewModel = hiltViewModel()
 ) {
     val query by viewModel.query.collectAsState()
@@ -76,6 +70,9 @@ fun DiscoverScreen(
     val totalPlaces by viewModel.totalPlaces.collectAsState()
     val savedIds by viewModel.savedIds.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val availableCategories by viewModel.availableCategories.collectAsState()
+    val recommended by viewModel.recommended.collectAsState()
 
     PullToRefreshBox(
         isRefreshing = isRefreshing,
@@ -93,7 +90,13 @@ fun DiscoverScreen(
             savedIds = savedIds,
             onToggleSave = { viewModel.toggleSave(it) },
             onPlaceClick = onPlaceClick,
-            onRetry = viewModel::refresh
+            onRetry = viewModel::refresh,
+            isLoading = isLoading,
+            availableCategories = availableCategories,
+            recommended = recommended,
+            onClearQuery = viewModel::clearQuery,
+            onSuggestionSelect = viewModel::onSuggestionSelect,
+            onExploreEventsClick = onExploreEventsClick
         )
     }
 }
@@ -110,7 +113,13 @@ private fun DiscoverContent(
     savedIds: Set<String>,
     onToggleSave: (String) -> Unit,
     onPlaceClick: (String) -> Unit,
-    onRetry: () -> Unit
+    onRetry: () -> Unit,
+    isLoading: Boolean,
+    availableCategories: List<String>,
+    recommended: List<PlaceItem>,
+    onClearQuery: () -> Unit,
+    onSuggestionSelect: (String) -> Unit,
+    onExploreEventsClick: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxSize()
@@ -161,7 +170,13 @@ private fun DiscoverContent(
             savedIds = savedIds,
             onToggleSave = onToggleSave,
             onPlaceClick = onPlaceClick,
-            onRetry = onRetry
+            onRetry = onRetry,
+            isLoading = isLoading,
+            availableCategories = availableCategories,
+            recommended = recommended,
+            onClearQuery = onClearQuery,
+            onSuggestionSelect = onSuggestionSelect,
+            onExploreEventsClick = onExploreEventsClick
         )
     }
 }
@@ -189,6 +204,20 @@ private fun SearchField(
                 contentDescription =  null,
                 modifier = Modifier.size(18.dp)
             )
+        },
+        trailingIcon = {
+            if (query.isNotEmpty()) {
+                IconButton(
+                    onClick = { onQuery("") },
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = stringResource(R.string.clear_search),
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
         },
         singleLine = true,
         shape = CircleShape,
@@ -218,8 +247,19 @@ private fun Suggestions(
     onToggleSave: (String) -> Unit,
     onPlaceClick: (String) -> Unit,
     onRetry: () -> Unit,
+    isLoading: Boolean,
+    availableCategories: List<String>,
+    recommended: List<PlaceItem>,
+    onClearQuery: () -> Unit,
+    onSuggestionSelect: (String) -> Unit,
+    onExploreEventsClick: () -> Unit,
     modifier: Modifier = Modifier
 ){
+    val activeFilter = filters.getOrNull(selected) ?: filters.firstOrNull() ?: "All"
+    val suggestionCategories = availableCategories
+        .filter { it != "All" && it != activeFilter }
+        .take(4)
+
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -256,34 +296,11 @@ private fun Suggestions(
                 )
             }
         }
-        if (sites.isEmpty()) {
-            val activeFilter = filters.getOrNull(selected) ?: filters.firstOrNull() ?: "All"
-            when {
-                // A search term is what excluded everything — talk about the query.
-                query.isNotBlank() -> StateMessage(
-                    icon = Icons.Default.SearchOff,
-                    title = "No matches found",
-                    message = "We couldn’t find anything for “$query”. Try a different search or category."
-                )
-                // Nothing arrived from the repository at all — this really is a load failure.
-                totalPlaces == 0 -> StateMessage(
-                    icon = Icons.Default.ExploreOff,
-                    title = "We couldn’t load places",
-                    message = "Your connection may be off. Reconnect and refresh to explore heritage sites across Nepal.",
-                    actionLabel = "Retry",
-                    onAction = onRetry
-                )
-                // Places loaded fine; this filter simply has none.
-                else -> StateMessage(
-                    icon = Icons.Default.ExploreOff,
-                    title = "Nothing in $activeFilter yet",
-                    message = "No places are tagged $activeFilter right now — pick another category to keep exploring.",
-                    actionLabel = "Show all",
-                    onAction = { onSelect(0) }
-                )
-            }
-        } else {
-            Column(
+        when {
+            // First paint: the cache is empty but the network may still answer.
+            isLoading && sites.isEmpty() -> DiscoverLoadingState()
+
+            sites.isNotEmpty() -> Column(
                 modifier = Modifier.padding(horizontal = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
@@ -300,6 +317,87 @@ private fun Suggestions(
                     )
                 }
             }
+
+            // Nothing arrived from the repository at all — this really is a load failure.
+            totalPlaces == 0 -> StateMessage(
+                icon = Icons.Default.ExploreOff,
+                title = stringResource(R.string.load_places_error_title),
+                message = stringResource(R.string.load_places_error_message),
+                actionLabel = stringResource(R.string.retry),
+                onAction = onRetry,
+                secondaryActionLabel = stringResource(R.string.explore_events),
+                onSecondaryAction = onExploreEventsClick
+            )
+
+            // A search term is what excluded everything — offer a way forward.
+            query.isNotBlank() -> {
+                StateMessage(
+                    icon = Icons.Default.SearchOff,
+                    title = stringResource(R.string.no_results_title, query.trim()),
+                    message = stringResource(R.string.no_results_message),
+                    actionLabel = stringResource(R.string.clear_search),
+                    onAction = onClearQuery,
+                    secondaryActionLabel = stringResource(R.string.browse_all_places),
+                    onSecondaryAction = { onSuggestionSelect("All") },
+                    suggestions = suggestionCategories,
+                    suggestionsLabel = stringResource(R.string.try_these),
+                    onSuggestionClick = onSuggestionSelect
+                )
+                if (recommended.isNotEmpty()) {
+                    PopularNow(
+                        places = recommended,
+                        savedIds = savedIds,
+                        onToggleSave = onToggleSave,
+                        onPlaceClick = onPlaceClick
+                    )
+                }
+            }
+
+            // Places loaded fine; this filter simply has none.
+            else -> StateMessage(
+                icon = Icons.Default.ExploreOff,
+                title = stringResource(R.string.nothing_in_category_title, activeFilter),
+                message = stringResource(R.string.nothing_in_category_message, activeFilter),
+                actionLabel = stringResource(R.string.show_all_places),
+                onAction = { onSelect(0) },
+                suggestions = suggestionCategories,
+                suggestionsLabel = stringResource(R.string.try_these),
+                onSuggestionClick = onSuggestionSelect
+            )
+        }
+    }
+}
+
+/** Real content shown under a failed search, so the screen still leads somewhere. */
+@Composable
+private fun PopularNow(
+    places: List<PlaceItem>,
+    savedIds: Set<String>,
+    onToggleSave: (String) -> Unit,
+    onPlaceClick: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxWidth().padding(horizontal = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.popular_now),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(top = 4.dp)
+        )
+        places.forEach { place ->
+            SearchPlaceCard(
+                title = place.name,
+                meta = place.meta,
+                rating = place.rating,
+                desc = place.description,
+                imageUrl = place.imageUrl,
+                isSaved = savedIds.contains(place.id),
+                onSaveClick = { onToggleSave(place.id) },
+                onCardClick = { onPlaceClick(place.id) }
+            )
         }
     }
 }
@@ -364,7 +462,13 @@ private fun DiscoverPreview(){
             savedIds = emptySet(),
             onToggleSave = {},
             onPlaceClick = {},
-            onRetry = {}
+            onRetry = {},
+            isLoading = false,
+            availableCategories = listOf("All", "Historical", "Cultural"),
+            recommended = emptyList(),
+            onClearQuery = {},
+            onSuggestionSelect = {},
+            onExploreEventsClick = {}
         )
     }
 }

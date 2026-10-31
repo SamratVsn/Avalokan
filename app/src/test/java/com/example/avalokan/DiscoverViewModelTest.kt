@@ -12,6 +12,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -104,5 +105,25 @@ class DiscoverViewModelTest {
             vm.onQueryChange("no such place at all")
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    @Test
+    fun `loading stops once the first non-empty emission arrives`() = runTest {
+        val vm = DiscoverViewModel(FakePlaceRepository(), FakePreferencesStore())
+        vm.sites.test {
+            skipItems(1)
+            awaitItem()
+            assertFalse(vm.isLoading.value)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `suggestion select clears the query and switches category`() = runTest {
+        val vm = DiscoverViewModel(FakePlaceRepository(), FakePreferencesStore())
+        vm.onQueryChange("nothing matches this")
+        vm.onSuggestionSelect("Historical")
+        assertEquals("", vm.query.value)
+        assertEquals(DiscoverCategories.indexOf("Historical"), vm.selectedCategory.value)
     }
 }

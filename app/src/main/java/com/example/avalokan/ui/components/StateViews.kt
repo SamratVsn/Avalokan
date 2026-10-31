@@ -4,17 +4,22 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +36,10 @@ import com.example.avalokan.ui.theme.Spacing
 
 /**
  * Friendly, centred placeholder for empty / error / not-found screens.
+ *
+ * Besides the primary action, it can offer a secondary escape hatch and a row
+ * of suggestions, so an empty screen always has somewhere to go instead of
+ * being a dead end.
  */
 @Composable
 fun StateMessage(
@@ -41,7 +50,12 @@ fun StateMessage(
     iconTint: Color = PrimaryGreen,
     iconBackground: Color = SageSoft,
     actionLabel: String? = null,
-    onAction: (() -> Unit)? = null
+    onAction: (() -> Unit)? = null,
+    secondaryActionLabel: String? = null,
+    onSecondaryAction: (() -> Unit)? = null,
+    suggestions: List<String> = emptyList(),
+    suggestionsLabel: String? = null,
+    onSuggestionClick: ((String) -> Unit)? = null
 ) {
     Column(
         modifier = modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 40.dp),
@@ -80,6 +94,37 @@ fun StateMessage(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(text = actionLabel, fontWeight = FontWeight.SemiBold)
+            }
+        }
+        if (secondaryActionLabel != null && onSecondaryAction != null) {
+            TextButton(onClick = onSecondaryAction) {
+                Text(text = secondaryActionLabel, fontWeight = FontWeight.Medium)
+            }
+        }
+        if (suggestions.isNotEmpty() && onSuggestionClick != null) {
+            Spacer(Modifier.height(Spacing.small))
+            if (suggestionsLabel != null) {
+                Text(
+                    text = suggestionsLabel,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(Spacing.extraSmall))
+            }
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(
+                    8.dp,
+                    Alignment.CenterHorizontally
+                ),
+                contentPadding = PaddingValues(horizontal = 4.dp)
+            ) {
+                items(suggestions) { suggestion ->
+                    AssistChip(
+                        onClick = { onSuggestionClick(suggestion) },
+                        label = { Text(suggestion) }
+                    )
+                }
             }
         }
     }
