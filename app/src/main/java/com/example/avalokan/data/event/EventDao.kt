@@ -5,6 +5,7 @@ import androidx.room3.Query
 import androidx.room3.Upsert
 import kotlinx.coroutines.flow.Flow
 
+//Functions to get data from Database
 @Dao
 interface EventDao {
     @Query("SELECT * FROM events")

@@ -24,7 +24,7 @@ interface EventRepository {
 
 private const val EVENTS_COLLECTION = "events"
 
-/** Console fields may be stored as String or Number — coerce either. */
+// Console fields may be stored as String or Number — coerce either.
 private fun DocumentSnapshot.textField(name: String): String =
     get(name)?.toString().orEmpty()
 

@@ -16,5 +16,6 @@ data class PlaceItem(
     val hours: String = "",
     val badge: String = "",
     val featured: Boolean = false,
+    // Getting url to show the image, null if there's nothing in the database
     val imageUrl: String? = null
 )
