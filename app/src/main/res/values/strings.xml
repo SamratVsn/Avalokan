@@ -46,4 +46,31 @@
     <string name="joinHeritage">Join Nepal Heritage Explorer</string>
     <string name="haveAccount">Already have an account? Log in</string>
     <string name="noAccount">New here? Create an account</string>
+
+    <!-- Loading, empty and recovery states -->
+    <string name="clear_search">Clear search</string>
+    <string name="retry">Retry</string>
+    <string name="try_these">Try one of these</string>
+    <string name="popular_now">Popular right now</string>
+    <string name="browse_all_places">Browse all places</string>
+    <string name="show_all_places">Show all places</string>
+    <string name="explore_events">Explore events</string>
+    <string name="explore_places">Explore places</string>
+    <string name="browse_events">Browse events</string>
+    <string name="discover_places">Discover places</string>
+
+    <string name="no_results_title">No matches for “%1$s”</string>
+    <string name="no_results_message">We couldn’t find a place matching that. Check the spelling, try a broader term, or start from one of these.</string>
+    <string name="nothing_in_category_title">Nothing in %1$s yet</string>
+    <string name="nothing_in_category_message">No places are tagged %1$s right now. Try another category to keep exploring.</string>
+
+    <string name="load_places_error_title">We couldn’t load places</string>
+    <string name="load_places_error_message">Your connection may be off. Reconnect and try again to explore heritage sites across Nepal.</string>
+    <string name="no_events_title">No events right now</string>
+    <string name="no_events_message">There’s nothing scheduled at the moment. Check your connection, or explore heritage places while you wait.</string>
+
+    <string name="saved_places_empty">No saved places yet</string>
+    <string name="saved_places_empty_hint">Tap the bookmark on any heritage site to keep it here.</string>
+    <string name="favorite_events_empty_title">No favorite events yet</string>
+    <string name="favorite_events_empty_hint">Tap the heart on any event to keep it here.</string>
 </resources>

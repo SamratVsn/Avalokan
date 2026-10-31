@@ -18,6 +18,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Landscape
 import androidx.compose.material.icons.filled.Settings
@@ -35,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -49,6 +52,7 @@ import com.example.avalokan.data.event.EventItem
 import com.example.avalokan.data.place.PlaceItem
 import androidx.compose.material.icons.filled.CalendarMonth
 import com.example.avalokan.ui.theme.AvalokanTheme
+import com.example.avalokan.ui.theme.GreyBorder
 import com.example.avalokan.ui.theme.GreyLight
 import com.example.avalokan.ui.theme.PrimaryLight
 import com.example.avalokan.ui.theme.PrimaryTeal
@@ -60,6 +64,8 @@ import com.example.avalokan.ui.theme.TextSecondary
 @Composable
 fun ProfileScreen(
     onSettingsClick: () -> Unit = {},
+    onDiscoverClick: () -> Unit = {},
+    onEventsClick: () -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val userName by viewModel.userName.collectAsState()
@@ -76,7 +82,9 @@ fun ProfileScreen(
         avatarUri = avatarUri,
         savedPlaces = savedPlaces,
         favoriteEvents = favoriteEvents,
-        onSettingsClick = onSettingsClick
+        onSettingsClick = onSettingsClick,
+        onDiscoverClick = onDiscoverClick,
+        onEventsClick = onEventsClick
     )
 }
 
@@ -88,7 +96,9 @@ private fun ProfileContent(
     avatarUri: String?,
     savedPlaces: List<PlaceItem>,
     favoriteEvents: List<EventItem>,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
+    onDiscoverClick: () -> Unit,
+    onEventsClick: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxSize()
@@ -132,9 +142,10 @@ private fun ProfileContent(
             avatarUri = avatarUri,
             modifier = Modifier.padding(horizontal = 24.dp)
         )
-        HeritageCollection(savedPlaces = savedPlaces)
+        HeritageCollection(savedPlaces = savedPlaces, onDiscoverClick = onDiscoverClick)
         FavoriteEvents(
             favoriteEvents = favoriteEvents,
+            onEventsClick = onEventsClick,
             modifier = Modifier.padding(horizontal = 24.dp)
         )
     }
@@ -244,7 +255,10 @@ private fun UserSectionInfo(number: Int, text: String) {
 }
 
 @Composable
-private fun HeritageCollection(savedPlaces: List<PlaceItem>) {
+private fun HeritageCollection(
+    savedPlaces: List<PlaceItem>,
+    onDiscoverClick: () -> Unit
+) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
@@ -263,10 +277,12 @@ private fun HeritageCollection(savedPlaces: List<PlaceItem>) {
             )
         }
         if (savedPlaces.isEmpty()) {
-            Text(
-                text = "No saved places yet — tap the bookmark on any site.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            EmptyCollectionCard(
+                icon = Icons.Default.BookmarkBorder,
+                title = stringResource(R.string.saved_places_empty),
+                message = stringResource(R.string.saved_places_empty_hint),
+                actionLabel = stringResource(R.string.discover_places),
+                onAction = onDiscoverClick,
                 modifier = Modifier.padding(horizontal = 24.dp)
             )
         } else {
@@ -326,6 +342,7 @@ private fun CollectionCards(place: String, loc: String, modifier: Modifier = Mod
 @Composable
 private fun FavoriteEvents(
     favoriteEvents: List<EventItem>,
+    onEventsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -334,10 +351,12 @@ private fun FavoriteEvents(
             style = MaterialTheme.typography.titleMedium
         )
         if (favoriteEvents.isEmpty()) {
-            Text(
-                text = stringResource(R.string.favoriteEventsEmpty),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+            EmptyCollectionCard(
+                icon = Icons.Default.CalendarMonth,
+                title = stringResource(R.string.favorite_events_empty_title),
+                message = stringResource(R.string.favorite_events_empty_hint),
+                actionLabel = stringResource(R.string.browse_events),
+                onAction = onEventsClick
             )
         } else {
             favoriteEvents.forEach { event ->
@@ -394,6 +413,71 @@ private fun FavoriteEventRow(event: EventItem) {
     }
 }
 
+@Composable
+private fun EmptyCollectionCard(
+    icon: ImageVector,
+    title: String,
+    message: String,
+    actionLabel: String,
+    onAction: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        onClick = onAction,
+        modifier = modifier.fillMaxWidth(),
+        shape = StandardCardShape,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, GreyBorder)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier.size(44.dp).background(PrimaryLight, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = PrimaryTeal,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium.copy(fontSize = 14.sp),
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 12.sp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    text = actionLabel,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(14.dp)
+                )
+            }
+        }
+    }
+}
+
 @Preview
 @Composable
 private fun ProfilePreview() {
@@ -405,7 +489,9 @@ private fun ProfilePreview() {
             avatarUri = null,
             savedPlaces = emptyList(),
             favoriteEvents = emptyList(),
-            onSettingsClick = {}
+            onSettingsClick = {},
+            onDiscoverClick = {},
+            onEventsClick = {}
         )
     }
 }

@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
 import com.example.avalokan.data.place.PlaceItem
+import com.example.avalokan.ui.components.HomeLoadingState
 import com.example.avalokan.ui.components.StateMessage
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
@@ -76,6 +77,7 @@ fun AvalokanHome(
     val places by viewModel.places.collectAsState()
     val heroStory by viewModel.heroStory.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
 
     PullToRefreshBox(
         isRefreshing = isRefreshing,
@@ -91,7 +93,8 @@ fun AvalokanHome(
         onStoryClick = onStoryClick,
         onPlaceClick = onPlaceClick,
         onExploreEventsClick = onExploreEventsClick,
-        onRetry = viewModel::refresh
+        onRetry = viewModel::refresh,
+        isLoading = isLoading
     )
 }
 }
@@ -107,6 +110,7 @@ private fun HomeContent(
     onPlaceClick: (String) -> Unit,
     onExploreEventsClick: () -> Unit,
     onRetry: () -> Unit,
+    isLoading: Boolean,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -127,13 +131,17 @@ private fun HomeContent(
             imageUrl = heroImageUrl,
             onReadClick = { onStoryClick(heroStoryId) }
         )
-        if (places.isEmpty()) {
+        if (isLoading && places.isEmpty()) {
+            HomeLoadingState()
+        } else if (places.isEmpty()) {
             StateMessage(
                 icon = Icons.Default.ExploreOff,
-                title = "We couldn’t load places",
-                message = "Your connection may be off. Reconnect and refresh to explore heritage sites across Nepal.",
-                actionLabel = "Retry",
-                onAction = onRetry
+                title = stringResource(R.string.load_places_error_title),
+                message = stringResource(R.string.load_places_error_message),
+                actionLabel = stringResource(R.string.retry),
+                onAction = onRetry,
+                secondaryActionLabel = stringResource(R.string.explore_events),
+                onSecondaryAction = onExploreEventsClick
             )
         } else {
             HistoricalGems(places = places, onPlaceClick = onPlaceClick)
@@ -445,7 +453,8 @@ private fun HomeScreenPreview(){
             onStoryClick = {},
             onPlaceClick = {},
             onExploreEventsClick = {},
-            onRetry = {}
+            onRetry = {},
+            isLoading = false
         )
     }
 }

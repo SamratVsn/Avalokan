@@ -54,19 +54,23 @@ fun AvalokanNavHost(
 
         composable(route = Discover.route) {
             DiscoverScreen(
-                onPlaceClick = { id -> navController.navigate(PlaceDetail.createRoute(id)) }
+                onPlaceClick = { id -> navController.navigate(PlaceDetail.createRoute(id)) },
+                onExploreEventsClick = { navController.navigateTab(Events.route) }
             )
         }
 
         composable(route = Events.route){
             EventScreen(
-                onEventClick = { id -> navController.navigate(EventDetail.createRoute(id)) }
+                onEventClick = { id -> navController.navigate(EventDetail.createRoute(id)) },
+                onExplorePlacesClick = { navController.navigateTab(Discover.route) }
             )
         }
 
         composable(route = Profile.route){
             ProfileScreen(
-                onSettingsClick = { navController.navigate(Settings.route) }
+                onSettingsClick = { navController.navigate(Settings.route) },
+                onDiscoverClick = { navController.navigateTab(Discover.route) },
+                onEventsClick = { navController.navigateTab(Events.route) }
             )
         }
 

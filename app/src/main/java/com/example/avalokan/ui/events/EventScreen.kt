@@ -54,6 +54,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
 import com.example.avalokan.data.event.EventItem
 import com.example.avalokan.ui.common.openUrlInBrowser
+import com.example.avalokan.ui.components.EventsLoadingState
 import com.example.avalokan.ui.components.StateMessage
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
@@ -69,10 +70,12 @@ import com.example.avalokan.ui.theme.TextOnDark
 @Composable
 fun EventScreen(
     onEventClick: (String) -> Unit = {},
+    onExplorePlacesClick: () -> Unit = {},
     viewModel: EventsViewModel = hiltViewModel()
 ) {
     val events by viewModel.events.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
 
     PullToRefreshBox(
         isRefreshing = isRefreshing,
@@ -82,7 +85,9 @@ fun EventScreen(
         EventContent(
             events = events,
             onEventClick = onEventClick,
-            onRetry = viewModel::refresh
+            onRetry = viewModel::refresh,
+            isLoading = isLoading,
+            onExplorePlacesClick = onExplorePlacesClick
         )
     }
 }
@@ -91,7 +96,9 @@ fun EventScreen(
 private fun EventContent(
     events: List<EventItem>,
     onEventClick: (String) -> Unit,
-    onRetry: () -> Unit
+    onRetry: () -> Unit,
+    isLoading: Boolean,
+    onExplorePlacesClick: () -> Unit
 ) {
     val context = LocalContext.current
     Column(
@@ -104,13 +111,17 @@ private fun EventContent(
     ) {
         Spacer(Modifier.height(Spacing.small))
         TopTexts(modifier = Modifier.padding(horizontal = 24.dp))
-        if (events.isEmpty()) {
+        if (isLoading && events.isEmpty()) {
+            EventsLoadingState()
+        } else if (events.isEmpty()) {
             StateMessage(
                 icon = Icons.Default.EventBusy,
-                title = "No events right now",
-                message = "There’s nothing scheduled at the moment. Check your connection and refresh to see what’s coming up.",
-                actionLabel = "Retry",
-                onAction = onRetry
+                title = stringResource(R.string.no_events_title),
+                message = stringResource(R.string.no_events_message),
+                actionLabel = stringResource(R.string.retry),
+                onAction = onRetry,
+                secondaryActionLabel = stringResource(R.string.explore_places),
+                onSecondaryAction = onExplorePlacesClick
             )
         } else {
             val featured = events.find { it.featured } ?: events.firstOrNull()
@@ -412,7 +423,9 @@ private fun EventsPreview() {
                 EventItem("thangka-demo", "Live Thangka Art Demo", "", "Boudha • 11:00 AM", "DONATION BASED", "Join >")
             ),
             onEventClick = {},
-            onRetry = {}
+            onRetry = {},
+            isLoading = false,
+            onExplorePlacesClick = {}
         )
     }
 }
