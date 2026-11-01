@@ -37,6 +37,11 @@ object AppModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AvalokanDatabase =
         Room.databaseBuilder(context, AvalokanDatabase::class.java, "avalokan.db")
+            // CONTRACT: this database is a disposable cache of Firestore
+            // content (places, events, stories). Wiping it on a schema change
+            // is safe and self-heals from the next snapshot. If user-created
+            // data is ever stored here, remove this fallback and register real
+            // migrations. Schemas are exported to app/schemas/ for that case.
             .fallbackToDestructiveMigration()
             .build()
 

@@ -9,7 +9,22 @@ import com.example.avalokan.data.place.PlaceItem
 import com.example.avalokan.data.story.StoryDao
 import com.example.avalokan.data.story.StoryItem
 
-@Database(entities = [PlaceItem::class, EventItem::class, StoryItem::class], version = 8)
+/**
+ * Disposable, Firestore-backed content cache.
+ *
+ * CONTRACT: every table here is derived from Firestore and can be rebuilt from
+ * the next snapshot. Destructive migrations are therefore acceptable while that
+ * remains true. If user-created data is ever stored in this database, remove
+ * `fallbackToDestructiveMigration()` and add real `Migration`s instead.
+ *
+ * Schemas are exported to `app/schemas/` so future migrations can be written
+ * from the current version onward.
+ */
+@Database(
+    entities = [PlaceItem::class, EventItem::class, StoryItem::class],
+    version = 8,
+    exportSchema = true,
+)
 abstract class AvalokanDatabase : RoomDatabase() {
     abstract fun placeDao(): PlaceDao
     abstract fun eventDao(): EventDao

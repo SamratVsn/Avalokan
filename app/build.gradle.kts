@@ -72,6 +72,12 @@ android {
     }
 }
 
+ksp {
+    // Keep Room schemas in version control so real migrations can be written
+    // when the database stops being a disposable cache.
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 dependencies {
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.foundation.layout)

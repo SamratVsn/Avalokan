@@ -155,6 +155,8 @@ The UI talks to **ViewModels**, which consume **repository interfaces**. The pla
 
 **Offline-first flow:** Room is the single source of truth. Repositories expose the Room flow to the UI, while Firestore snapshot listeners only write into Room. A failed listener leaves the last good Room state in place, and a server refresh replaces the cache atomically.
 
+**Cache-only database contract:** the Room database holds only Firestore-derived content (places, events, stories), so a schema change may use `fallbackToDestructiveMigration()` and rebuild from the next snapshot. Schemas are exported to `app/schemas/`; if user-created data is ever stored in Room, replace the destructive fallback with real migrations.
+
 **Authentication:** `AvalokanApplication` signs in anonymously on first launch so Firestore reads work out of the box. Email/password and Google sign-in link credentials to the anonymous user when possible. Failed email sign-in attempts are rate-limited on-device (hashed email identifier; passwords are never stored — Firebase hashes them server-side).
 
 ---
