@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.avalokan.data.event.EventItem
 import com.example.avalokan.data.event.EventRepository
+import com.example.avalokan.data.local.AvatarStore
 import com.example.avalokan.data.local.PreferencesStore
 import com.example.avalokan.data.place.PlaceItem
 import com.example.avalokan.data.place.PlaceRepository
@@ -39,7 +40,8 @@ class ProfileViewModel @Inject constructor(
     private val userPreferences: PreferencesStore,
     placeRepository: PlaceRepository,
     eventRepository: EventRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val avatarStore: AvatarStore,
 ) : ViewModel() {
 
     /**
@@ -73,9 +75,14 @@ class ProfileViewModel @Inject constructor(
         remote?.takeIf { it.bio.isNotBlank() }?.bio ?: local
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "Exploring the heritage of Nepal")
 
+    /**
+     * Local avatars win: they are the only ones this device can actually read.
+     * [UserRepository] only exposes remote `http(s)` avatar URLs, so a legacy
+     * `content://` value in Firestore can never become the displayed avatar.
+     */
     val avatarUri: StateFlow<String?> = combine(
-        userPreferences.avatarUri, remoteProfile
-    ) { local, remote -> remote?.avatarUrl ?: local }
+        userPreferences.avatarLocalUri, remoteProfile
+    ) { local, remote -> local?.takeIf { it.isNotBlank() } ?: remote?.avatarUrl }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     val savedPlaces: StateFlow<List<PlaceItem>> = combine(
@@ -100,8 +107,20 @@ class ProfileViewModel @Inject constructor(
         ProfileStats(visited = 0, saved = places.size, events = events.size)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProfileStats())
 
-    fun setAvatarUri(uri: String?) {
-        viewModelScope.launch { userPreferences.setAvatarUri(uri) }
+    /**
+     * Copies a picked `content://` URI into private storage, then saves the
+     * resulting `file://` URI locally. A failed copy keeps the previous avatar.
+     */
+    fun setAvatar(uri: String?) {
+        viewModelScope.launch {
+            val localUri = if (uri == null) {
+                avatarStore.delete()
+                null
+            } else {
+                avatarStore.import(uri) ?: return@launch
+            }
+            userPreferences.setAvatarLocalUri(localUri)
+        }
     }
 
     fun updateName(name: String) {
@@ -125,7 +144,9 @@ class ProfileViewModel @Inject constructor(
                     uid = id,
                     displayName = displayName ?: userName.value,
                     bio = bio ?: this@ProfileViewModel.bio.value,
-                    avatarUrl = avatarUri.value
+                    // Avatars are device-local. Never send a file:// URI to
+                    // Firestore; the repository also rejects non-http(s) values.
+                    avatarUrl = null,
                 )
             )
         }

@@ -52,9 +52,11 @@ class UserPreferences(private val context: Context) : PreferencesStore {
         context.userPrefsStore.edit { prefs -> prefs[THEME_CHOICE] = choice }
     }
 
-    override val avatarUri: Flow<String?> = context.userPrefsStore.data
+    override val avatarLocalUri: Flow<String?> = context.userPrefsStore.data
         .catch { e -> if (e is IOException) emit(emptyPreferences()) else throw e }
-        .map { prefs -> prefs[AVATAR_URI] }
+        // Older builds stored the picker's content:// URI here. It is not
+        // readable after a process restart or on another device, so ignore it.
+        .map { prefs -> prefs[AVATAR_URI]?.takeIf { it.startsWith("file://") } }
 
     override val savedPlaceIds: Flow<Set<String>> = context.userPrefsStore.data
         .catch { e -> if (e is IOException) emit(emptyPreferences()) else throw e }
@@ -92,9 +94,10 @@ class UserPreferences(private val context: Context) : PreferencesStore {
         }
     }
 
-    override suspend fun setAvatarUri(uri: String?) {
+    override suspend fun setAvatarLocalUri(uri: String?) {
+        val local = uri?.takeIf { it.startsWith("file://") }
         context.userPrefsStore.edit { prefs ->
-            if (uri == null) prefs.remove(AVATAR_URI) else prefs[AVATAR_URI] = uri
+            if (local == null) prefs.remove(AVATAR_URI) else prefs[AVATAR_URI] = local
         }
     }
 

@@ -2,6 +2,7 @@ package com.example.avalokan
 
 import com.example.avalokan.data.event.EventItem
 import com.example.avalokan.data.event.EventRepository
+import com.example.avalokan.data.local.AvatarStore
 import com.example.avalokan.data.local.PreferencesStore
 import com.example.avalokan.data.place.PlaceItem
 import com.example.avalokan.data.place.PlaceRepository
@@ -78,14 +79,14 @@ internal class FakePreferencesStore : PreferencesStore {
 
     override val notificationsEnabled: Flow<Boolean> = flowOf(true)
     override val themeChoice: Flow<String> = flowOf(PreferencesStore.THEME_SYSTEM)
-    override val avatarUri: Flow<String?> = avatar
+    override val avatarLocalUri: Flow<String?> = avatar
     override val savedPlaceIds: Flow<Set<String>> = saved
     override val favoriteEventIds: Flow<Set<String>> = favorites
 
     override suspend fun setNotificationsEnabled(enabled: Boolean) = Unit
     override suspend fun setThemeChoice(choice: String) = Unit
 
-    override suspend fun setAvatarUri(uri: String?) {
+    override suspend fun setAvatarLocalUri(uri: String?) {
         avatar.value = uri
     }
 
@@ -107,4 +108,20 @@ internal class FakePreferencesStore : PreferencesStore {
 internal class FakeUserRepository : UserRepository {
     override fun observeUser(uid: String): Flow<UserProfile?> = flowOf(null)
     override suspend fun saveUser(profile: UserProfile) = Unit
+}
+
+internal class FakeAvatarStore(
+    var localUri: String? = null,
+) : AvatarStore {
+    var importedUri: String? = null
+    var deleted = false
+
+    override suspend fun import(uri: String): String? {
+        importedUri = uri
+        return localUri
+    }
+
+    override suspend fun delete() {
+        deleted = true
+    }
 }

@@ -6,6 +6,8 @@ import com.example.avalokan.data.AvalokanDatabase
 import com.example.avalokan.data.event.EventDao
 import com.example.avalokan.data.event.EventRepository
 import com.example.avalokan.data.event.FirestoreEventRepository
+import com.example.avalokan.data.local.AvatarStore
+import com.example.avalokan.data.local.LocalAvatarStore
 import com.example.avalokan.data.local.PreferencesStore
 import com.example.avalokan.data.local.UserPreferences
 import com.example.avalokan.data.place.PlaceDao
@@ -75,4 +77,12 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindStoryRepository(impl: FirestoreStoryRepository): StoryRepository
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class StorageModule {
+
+    @Binds
+    abstract fun bindAvatarStore(impl: LocalAvatarStore): AvatarStore
 }

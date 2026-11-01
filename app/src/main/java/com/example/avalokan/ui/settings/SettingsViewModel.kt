@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.avalokan.data.auth.AuthRepository
 import com.example.avalokan.data.event.EventRepository
+import com.example.avalokan.data.local.AvatarStore
 import com.example.avalokan.data.local.PreferencesStore
 import com.example.avalokan.data.place.PlaceRepository
 import com.example.avalokan.data.story.StoryRepository
@@ -27,7 +28,8 @@ class SettingsViewModel @Inject constructor(
     private val placeRepository: PlaceRepository,
     private val eventRepository: EventRepository,
     private val storyRepository: StoryRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val avatarStore: AvatarStore,
 ) : ViewModel() {
 
     val uiState: StateFlow<SettingsUiState> = combine(
@@ -65,6 +67,8 @@ class SettingsViewModel @Inject constructor(
     fun resetSettings() {
         viewModelScope.launch {
             userPreferences.clearAll()
+            // The local avatar is not part of DataStore; remove its file too.
+            avatarStore.delete()
         }
     }
 

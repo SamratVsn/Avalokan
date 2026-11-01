@@ -40,7 +40,7 @@ Nepal holds centuries of history, living traditions, sacred places, architectura
 
 **Avalokan brings those experiences together in one place.** It is a heritage explorer where people can discover destinations, read editorial stories, browse events, save places to a personal collection, and optionally sign in to sync a profile with Firestore.
 
-Content is loaded from **Cloud Firestore** (`places`, `events`, `stories`, `users`) with an **offline-first** cache in **Room**. Saved place IDs, theme, notifications, and avatar preferences live in **DataStore**.
+Content is loaded from **Cloud Firestore** (`places`, `events`, `stories`, `users`) with an **offline-first** cache in **Room**. Saved place IDs, theme, notifications, and the local avatar URI live in **DataStore**; the avatar image itself is copied into app-private storage.
 
 ### ✨ Core experience
 
@@ -49,7 +49,7 @@ Content is loaded from **Cloud Firestore** (`places`, `events`, `stories`, `user
 * 🎉 **Find events** — a featured festival card, upcoming events, and a Book CTA that opens the organizer's link (bookings are not persisted yet).
 * 🔎 **Discover places** — search and category-aware heritage cards on the Discover tab.
 * 🔖 **Save & collect** — bookmark places locally; collections appear on Profile (no sign-in required).
-* 👤 **Your profile** — display name, bio, avatar, saved places, and stats; edits sync to `users/{uid}` when signed in.
+* 👤 **Your profile** — display name, bio, local avatar, saved places, and stats; name and bio edits sync to `users/{uid}` when signed in.
 * 🔐 **Account (optional)** — anonymous session by default; upgrade via email/password or Google Sign-In.
 
 ---
@@ -269,7 +269,7 @@ Avalokan is a **working beta**, not a finished product. The sections below delib
 | **Screen states** | Loading skeletons, empty states, error states, and retry actions on list screens |
 | **Local collection** | Saved places and favorite events stored in DataStore |
 | **Auth** | Anonymous bootstrap, email/password, and Google Sign-In |
-| **Profile** | Display name, bio, avatar, and profile sync to `users/{uid}` |
+| **Profile** | Display name, bio, local avatar, and name/bio sync to `users/{uid}` |
 | **On-device safeguards** | Input validation, sign-in rate limiting, and safe URI/document-ID checks |
 | **Media** | 22-second launch film cut from real app captures |
 
@@ -281,8 +281,8 @@ Avalokan is a **working beta**, not a finished product. The sections below delib
 | **Notifications** | Settings toggle and Android 13+ permission request | No notification channel, scheduler, local reminders, or push service |
 | **Profile stats** | Saved and favorite counts are real | "Visited" is hardcoded to `0` |
 | **Calendar** | — | Calendar button is a placeholder; no export or notification center |
-| **Cross-device sync** | — | Saved places and favorites are not synced across devices and can be lost if app data is cleared |
-| **Avatar** | The picked image shows on the current device | It is stored as a device-local `content://` URI, which will not resolve on another device |
+| **Cross-device sync** | — | Saved places, favorites, and avatars are not synced across devices and can be lost if app data is cleared |
+| **Avatar** | The picked image is copied into app-private storage and displayed from a local `file://` URI | It is device-local and does not sync across devices; there is no remote upload/storage backend |
 
 ### 🏭 Unfinished production work — not in this repository
 

@@ -12,13 +12,15 @@ interface PreferencesStore {
 
     val notificationsEnabled: Flow<Boolean>
     val themeChoice: Flow<String>
-    val avatarUri: Flow<String?>
+
+    /** A `file://` URI inside app-private storage, never a `content://` picker URI. */
+    val avatarLocalUri: Flow<String?>
     val savedPlaceIds: Flow<Set<String>>
     val favoriteEventIds: Flow<Set<String>>
 
     suspend fun setNotificationsEnabled(enabled: Boolean)
     suspend fun setThemeChoice(choice: String)
-    suspend fun setAvatarUri(uri: String?)
+    suspend fun setAvatarLocalUri(uri: String?)
     suspend fun setSavedPlaceIds(ids: Set<String>)
     suspend fun setFavoriteEventIds(ids: Set<String>)
     suspend fun clearAll()

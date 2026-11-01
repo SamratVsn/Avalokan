@@ -15,6 +15,14 @@ interface UserRepository {
     suspend fun saveUser(profile: UserProfile)
 }
 
+/**
+ * Firestore may only hold an avatar URL that another device can load. Local
+ * avatars live in app-private storage and are stored in DataStore instead.
+ */
+private fun String?.isRemoteAvatarUrl(): Boolean =
+    this != null &&
+        (startsWith("http://", ignoreCase = true) || startsWith("https://", ignoreCase = true))
+
 class FirestoreUserRepository @Inject constructor(
     private val firestore: FirebaseFirestore
 ) : UserRepository {
@@ -31,7 +39,7 @@ class FirestoreUserRepository @Inject constructor(
                         uid = doc.id,
                         displayName = doc.getString("displayName").orEmpty().ifBlank { "Guest" },
                         bio = doc.getString("bio").orEmpty(),
-                        avatarUrl = doc.getString("avatarUrl"),
+                        avatarUrl = doc.getString("avatarUrl")?.takeIf { it.isRemoteAvatarUrl() },
                         updatedAt = doc.getLong("updatedAt") ?: 0L
                     )
                 }
@@ -41,16 +49,20 @@ class FirestoreUserRepository @Inject constructor(
     }
 
     override suspend fun saveUser(profile: UserProfile) {
-        val data = mapOf(
-            "displayName" to profile.displayName,
-            "bio" to profile.bio,
-            "avatarUrl" to profile.avatarUrl,
-            "updatedAt" to System.currentTimeMillis()
-        )
+        val data = buildMap {
+            put("displayName", profile.displayName)
+            put("bio", profile.bio)
+            // Omit local/legacy values entirely instead of overwriting a
+            // possible remote avatar with null or a file:// path.
+            profile.avatarUrl
+                ?.takeIf { it.isRemoteAvatarUrl() }
+                ?.let { put("avatarUrl", it) }
+            put("updatedAt", System.currentTimeMillis())
+        }
         suspendCancellableCoroutine { cont ->
             firestore.collection("users").document(profile.uid)
                 .set(data, SetOptions.merge())
-                .addOnSuccessListener { cont.resume(Unit) {} }
+                .addOnSuccessListener { cont.resume(Unit) { _, _, _ -> } }
                 .addOnFailureListener { cont.resumeWithException(it) }
         }
     }
