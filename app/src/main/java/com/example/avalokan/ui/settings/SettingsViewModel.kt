@@ -6,6 +6,7 @@ import com.example.avalokan.data.auth.AuthRepository
 import com.example.avalokan.data.event.EventRepository
 import com.example.avalokan.data.local.PreferencesStore
 import com.example.avalokan.data.place.PlaceRepository
+import com.example.avalokan.data.story.StoryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -25,6 +26,7 @@ class SettingsViewModel @Inject constructor(
     private val userPreferences: PreferencesStore,
     private val placeRepository: PlaceRepository,
     private val eventRepository: EventRepository,
+    private val storyRepository: StoryRepository,
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
@@ -56,6 +58,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             placeRepository.clearCache()
             eventRepository.clearCache()
+            storyRepository.clearCache()
         }
     }
 
