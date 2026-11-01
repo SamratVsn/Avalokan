@@ -18,7 +18,9 @@ Built with **Kotlin, Jetpack Compose, and Material 3**, backed by **Firebase** a
 
 <br/>
 
-**Project status:** Feature-complete beta · Firestore-backed content · Local saves & auth
+**Project status:** Working beta · core flows run end-to-end · **not production- or store-ready**
+
+Core discovery, reading, search, saving, and authentication work today. The production checklist in the roadmap — security rules, monitoring, release hardening, privacy — is still open.
 
 <br/>
 
@@ -44,7 +46,7 @@ Content is loaded from **Cloud Firestore** (`places`, `events`, `stories`, `user
 
 * 🏛️ **Explore heritage** — historical landmarks, cultural destinations, and religious sites from Firestore.
 * 📖 **Read stories** — Story of the Day and story detail screens backed by the `stories` collection.
-* 🎉 **Find events** — a featured festival card, upcoming events, and a Book CTA with in-app confirmation.
+* 🎉 **Find events** — a featured festival card, upcoming events, and a Book CTA that opens the organizer's link (bookings are not persisted yet).
 * 🔎 **Discover places** — search and category-aware heritage cards on the Discover tab.
 * 🔖 **Save & collect** — bookmark places locally; collections appear on Profile (no sign-in required).
 * 👤 **Your profile** — display name, bio, avatar, saved places, and stats; edits sync to `users/{uid}` when signed in.
@@ -62,7 +64,7 @@ Content is loaded from **Cloud Firestore** (`places`, `events`, `stories`, `user
 | Place details | Events |
 | :---: | :---: |
 | <img src="docs/screenshots/place-detail.png" width="300" alt="Bhaktapur Durbar Square place detail with facts and About this Place" /> | <img src="docs/screenshots/events.png" width="300" alt="Events screen with the featured Tihar card and upcoming events" /> |
-| Facts, story, gallery hook, and Save to Collection | Featured festival and upcoming events, with booking from the card |
+| Facts, story, gallery hook, and Save to Collection | Featured festival and upcoming events, with an external booking link |
 
 <sub>Captured from the running app on a 1080×2400 emulator — the same footage the launch film is cut from.</sub>
 
@@ -78,7 +80,7 @@ Content is loaded from **Cloud Firestore** (`places`, `events`, `stories`, `user
 | **Login** | Email sign-in/sign-up and Google Sign-In |
 | **Story details** | Editorial layout for a story document |
 | **Place details** | Place info, gallery hook, directions/share, save to collection |
-| **Event details** | Event layout, share, and a Book CTA with in-app confirmation |
+| **Event details** | Event layout, share, and a Book CTA that opens the organizer's link |
 
 Navigation lives in `ui/navigation/` (`NavDestination`, `AvalokanNavHost`). Detail routes take string IDs that match Firestore document IDs.
 
@@ -86,7 +88,7 @@ Navigation lives in `ui/navigation/` (`NavDestination`, `AvalokanNavHost`). Deta
 
 ## 🎨 Design system
 
-Avalokan uses a custom visual language inspired by Nepal's landscapes, heritage, and cultural warmth — earthy, minimal, and production-ready.
+Avalokan uses a custom visual language inspired by Nepal's landscapes, heritage, and cultural warmth — earthy, minimal, and consistently applied across every screen.
 
 | Element | Implementation |
 | --- | --- |
@@ -104,7 +106,7 @@ The goal is a modern, readable interface that makes heritage content feel engagi
 
 ## 🧱 Architecture & technology
 
-The UI talks to **ViewModels**, which consume **repository interfaces** implemented with Firestore snapshot listeners and Room caches. **Hilt** wires dependencies app-wide.
+The UI talks to **ViewModels**, which consume **repository interfaces**. The place, event, and story repositories share one `FirestoreCachedCollection<T>` helper for cache-first reads, live snapshot listeners, server refresh, and cache clearing. **Hilt** wires dependencies app-wide.
 
 ### Technology stack
 
@@ -177,6 +179,7 @@ app/src/main/java/com/example/avalokan/
 │   ├── di/                 # Hilt modules
 │   ├── local/              # DataStore preferences & saved place IDs
 │   ├── auth/               # Firebase Auth, login rate limiting
+│   ├── firestore/          # shared Firestore + Room cache helper
 │   ├── place/ · event/ · story/
 │   ├── user/
 │   └── AvalokanDatabase.kt
@@ -246,21 +249,54 @@ Install the debug APK on a device or emulator, or run from Android Studio.
 
 ## 🗺️ Roadmap
 
-* [x] Main UI screens, design system, and navigation
-* [x] Hilt DI and ViewModels
-* [x] Firestore repositories with Room offline cache
-* [x] Data-driven Home, Discover, Events, and detail screens
-* [x] Local saved-place collections (DataStore)
-* [x] Firebase Auth (anonymous, email/password, Google)
-* [x] User profile read/write to Firestore
-* [x] Search and category filtering on Discover
-* [x] 22-second launch film cut from real app captures
-* [ ] Persist event bookings to Firestore (in-app confirmation works today)
-* [ ] Cloud sync for saved places across devices
-* [ ] Calendar export and a notification center
-* [ ] Production Firestore rules review and monitoring
-* [ ] Release package ID, R8/ProGuard, Play Store listing assets
-* [ ] Privacy policy and Data safety disclosure for Play Console
+Avalokan is a **working beta**, not a finished product. The sections below deliberately separate three things: what the app does today, what exists but is incomplete, and what has not been done at all.
+
+### ✅ Implemented — works today
+
+| Area | What is actually in the app |
+| --- | --- |
+| **Screens & navigation** | Home, Discover, Events, Profile, Settings, Login, and place/event/story details |
+| **Design system** | Compose + Material 3 theme, typography, colors, reusable cards, and state views |
+| **Architecture** | Hilt DI, ViewModels, and repository interfaces |
+| **Data layer** | Firestore repositories backed by a Room cache, sharing one `FirestoreCachedCollection<T>` helper |
+| **Content** | Places, events, and stories rendered from Firestore |
+| **Search** | Discover search, category filters, clear-search, and suggestions when nothing matches |
+| **Screen states** | Loading skeletons, empty states, error states, and retry actions on list screens |
+| **Local collection** | Saved places and favorite events stored in DataStore |
+| **Auth** | Anonymous bootstrap, email/password, and Google Sign-In |
+| **Profile** | Display name, bio, avatar, and profile sync to `users/{uid}` |
+| **On-device safeguards** | Input validation, sign-in rate limiting, and safe URI/document-ID checks |
+| **Media** | 22-second launch film cut from real app captures |
+
+### 🚧 Partially implemented — present, but not finished
+
+| Feature | What works | What is missing |
+| --- | --- | --- |
+| **Event booking** | The Book CTA opens the event's `joinLink` when one exists | No booking is written to Firestore; the fallback snackbar does not register the user |
+| **Notifications** | Settings toggle and Android 13+ permission request | No notification channel, scheduler, local reminders, or push service |
+| **Profile stats** | Saved and favorite counts are real | "Visited" is hardcoded to `0` |
+| **Calendar** | — | Calendar button is a placeholder; no export or notification center |
+| **Cross-device sync** | — | Saved places and favorites are not synced across devices and can be lost if app data is cleared |
+| **Avatar** | The picked image shows on the current device | It is stored as a device-local `content://` URI, which will not resolve on another device |
+| **Cache correctness** | Reads are cache-first | Deleted Firestore documents are not removed from the Room cache |
+
+### 🏭 Unfinished production work — not in this repository
+
+These are release blockers, not features. None of them are implemented:
+
+- [ ] **Firestore security rules** — no `firestore.rules` is committed, and no rules are tested or deployed. Reads and scoped profile writes must be locked down per project.
+- [ ] **Monitoring and crash reporting** — no Crashlytics/Sentry, alerting, or error dashboards.
+- [ ] **Release identity and signing** — `applicationId` is still `com.example.avalokan`, `versionCode` is `1`, and no release signing config is checked in.
+- [ ] **Release build hardening** — release optimization is disabled; there are no R8/ProGuard rules or baseline profile.
+- [ ] **Privacy policy and Play Console data-safety disclosure** — not written.
+- [ ] **Store listing assets** — store screenshots, feature graphic, and listing copy.
+- [ ] **Backend validation and abuse controls** — profile writes come directly from the client with no server-side validation or moderation.
+- [ ] **Test coverage** — unit tests cover ViewModels and utilities; repositories, DAOs, and Compose UI behaviour are untested.
+- [ ] **Accessibility audit** — small text, undersized touch targets, and missing content descriptions still need review.
+- [ ] **Localization** — English only; no Nepali resource set.
+- [ ] **CI** — no automated build/test pipeline.
+
+> **Bottom line:** the client app is feature-rich enough to demo, dogfood, and review as a portfolio project — but the security, release, privacy, monitoring, and testing work above is what separates it from a production app. The checkmarks are not a claim of store readiness.
 
 ---
 
