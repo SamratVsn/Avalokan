@@ -41,7 +41,9 @@ class FirestorePlaceRepository @Inject constructor(
         collectionName = PLACES_COLLECTION,
         observeCached = placeDao::observeAll,
         observeCachedById = placeDao::observeById,
+        replaceAll = placeDao::replaceAll,
         upsert = placeDao::upsertAll,
+        deleteById = placeDao::deleteById,
         clear = placeDao::clearAll,
         mapper = { it.toPlaceItem() }
     )

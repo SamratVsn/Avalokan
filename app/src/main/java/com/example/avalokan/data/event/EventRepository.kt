@@ -39,7 +39,9 @@ class FirestoreEventRepository @Inject constructor(
         collectionName = EVENTS_COLLECTION,
         observeCached = eventDao::observeAll,
         observeCachedById = eventDao::observeById,
+        replaceAll = eventDao::replaceAll,
         upsert = eventDao::upsertAll,
+        deleteById = eventDao::deleteById,
         clear = eventDao::clearAll,
         mapper = { it.toEventItem() }
     )

@@ -2,13 +2,14 @@ package com.example.avalokan.data.event
 
 import androidx.room3.Dao
 import androidx.room3.Query
+import androidx.room3.Transaction
 import androidx.room3.Upsert
 import kotlinx.coroutines.flow.Flow
 
 //Functions to get data from Database
 @Dao
 interface EventDao {
-    @Query("SELECT * FROM events")
+    @Query("SELECT * FROM events ORDER BY id")
     fun observeAll(): Flow<List<EventItem>>
 
     @Query("SELECT * FROM events WHERE id = :id")
@@ -19,4 +20,14 @@ interface EventDao {
 
     @Query("DELETE FROM events")
     suspend fun clearAll()
+
+    @Query("DELETE FROM events WHERE id = :id")
+    suspend fun deleteById(id: String)
+
+    /** Replaces the whole cache in one Room transaction, so observers see one update. */
+    @Transaction
+    suspend fun replaceAll(items: List<EventItem>) {
+        clearAll()
+        upsertAll(items)
+    }
 }

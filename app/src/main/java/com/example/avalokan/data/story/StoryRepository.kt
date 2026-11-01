@@ -37,7 +37,9 @@ class FirestoreStoryRepository @Inject constructor(
         collectionName = STORIES_COLLECTION,
         observeCached = storyDao::observeAll,
         observeCachedById = storyDao::observeById,
+        replaceAll = storyDao::replaceAll,
         upsert = storyDao::upsertAll,
+        deleteById = storyDao::deleteById,
         clear = storyDao::clearAll,
         mapper = { it.toStoryItem() }
     )

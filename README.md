@@ -106,7 +106,7 @@ The goal is a modern, readable interface that makes heritage content feel engagi
 
 ## 🧱 Architecture & technology
 
-The UI talks to **ViewModels**, which consume **repository interfaces**. The place, event, and story repositories share one `FirestoreCachedCollection<T>` helper for cache-first reads, live snapshot listeners, server refresh, and cache clearing. **Hilt** wires dependencies app-wide.
+The UI talks to **ViewModels**, which consume **repository interfaces**. The place, event, and story repositories share one `FirestoreCachedCollection<T>` helper that keeps **Room as the single source of truth**: Firestore snapshot listeners only write into Room, and every read comes from the Room flow. The helper also handles server refresh and cache clearing. **Hilt** wires dependencies app-wide.
 
 ### Technology stack
 
@@ -136,13 +136,16 @@ The UI talks to **ViewModels**, which consume **repository interfaces**. The pla
 │           Repository layer          │
 │  Place · Event · Story · User       │
 └──────────────────┬──────────────────┘
-                   │
-         ┌─────────┴─────────┐
-         ▼                   ▼
-┌─────────────────┐  ┌─────────────────┐
-│  Room (cache)   │  │ Firestore (live) │
-│  offline reads  │  │ snapshot listeners│
-└─────────────────┘  └─────────────────┘
+                   │ observe / refresh
+                   ▼
+┌─────────────────────────────────────┐
+│       Room (single source of truth) │
+│  offline reads · one ordered stream │
+└──────────────────▲──────────────────┘
+                   │ snapshot write-through
+┌──────────────────┴──────────────────┐
+│     Firestore snapshot listeners    │
+└─────────────────────────────────────┘
 
 ┌─────────────────────────────────────┐
 │  AuthRepository · PreferencesStore  │
@@ -150,7 +153,7 @@ The UI talks to **ViewModels**, which consume **repository interfaces**. The pla
 └─────────────────────────────────────┘
 ```
 
-**Offline-first flow:** repositories emit the Room cache immediately, then merge updates from Firestore listeners into the DAO. Listeners log errors and keep the last good UI state when the network fails.
+**Offline-first flow:** Room is the single source of truth. Repositories expose the Room flow to the UI, while Firestore snapshot listeners only write into Room. A failed listener leaves the last good Room state in place, and a server refresh replaces the cache atomically.
 
 **Authentication:** `AvalokanApplication` signs in anonymously on first launch so Firestore reads work out of the box. Email/password and Google sign-in link credentials to the anonymous user when possible. Failed email sign-in attempts are rate-limited on-device (hashed email identifier; passwords are never stored — Firebase hashes them server-side).
 
@@ -278,7 +281,6 @@ Avalokan is a **working beta**, not a finished product. The sections below delib
 | **Calendar** | — | Calendar button is a placeholder; no export or notification center |
 | **Cross-device sync** | — | Saved places and favorites are not synced across devices and can be lost if app data is cleared |
 | **Avatar** | The picked image shows on the current device | It is stored as a device-local `content://` URI, which will not resolve on another device |
-| **Cache correctness** | Reads are cache-first | Deleted Firestore documents are not removed from the Room cache |
 
 ### 🏭 Unfinished production work — not in this repository
 
