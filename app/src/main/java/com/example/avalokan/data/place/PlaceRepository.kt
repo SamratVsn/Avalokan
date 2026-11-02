@@ -1,7 +1,7 @@
 package com.example.avalokan.data.place
 
 import com.example.avalokan.data.firestore.FirestoreCachedCollection
-import com.example.avalokan.data.firestore.textField
+import com.example.avalokan.data.firestore.asText
 import com.example.avalokan.domain.model.Place
 import com.example.avalokan.domain.repository.PlaceRepository
 import com.google.firebase.firestore.DocumentSnapshot
@@ -12,20 +12,26 @@ import javax.inject.Inject
 
 private const val PLACES_COLLECTION = "places"
 
-private fun DocumentSnapshot.toPlaceItem() = PlaceItem(
+/**
+ * Pure mapping step, kept separate from [DocumentSnapshot] so missing-field
+ * behaviour can be unit-tested without Firestore.
+ */
+internal fun toPlaceItem(id: String, field: (String) -> Any?): PlaceItem = PlaceItem(
     id = id,
-    name = textField("name"),
-    description = textField("description"),
-    meta = textField("meta"),
-    category = textField("category"),
-    rating = textField("rating"),
-    featured = getBoolean("featured") == true,
-    badge = textField("badge"),
-    entryFee = textField("entryFee"),
-    bestTime = textField("bestTime"),
-    hours = textField("hours"),
-    imageUrl = textField("imageUrl").ifBlank { null }
+    name = field("name").asText(),
+    description = field("description").asText(),
+    meta = field("meta").asText(),
+    category = field("category").asText(),
+    rating = field("rating").asText(),
+    featured = field("featured") == true,
+    badge = field("badge").asText(),
+    entryFee = field("entryFee").asText(),
+    bestTime = field("bestTime").asText(),
+    hours = field("hours").asText(),
+    imageUrl = field("imageUrl").asText().ifBlank { null }
 )
+
+private fun DocumentSnapshot.toPlaceItem() = toPlaceItem(id) { get(it) }
 
 class FirestorePlaceRepository @Inject constructor(
     firestore: FirebaseFirestore,

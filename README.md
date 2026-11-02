@@ -120,7 +120,7 @@ The UI talks to **ViewModels**, which consume **domain repository interfaces**. 
 | **Cloud** | Firebase Auth, Firestore, Analytics |
 | **Auth UX** | Credential Manager + Google ID |
 | **Build** | Android Gradle Plugin 9.4.1, Java 11 |
-| **Testing** | JUnit, Turbine, coroutines-test (unit tests) |
+| **Testing** | JUnit, Turbine, coroutines-test, AndroidX Test, Compose UI Test |
 
 ### Architecture overview
 
@@ -259,6 +259,7 @@ If keys were ever pushed to a public remote, rotate them in [Google Cloud Consol
 ```bash
 ./gradlew :app:assembleDebug
 ./gradlew :app:testDebugUnitTest
+./gradlew :app:connectedDebugAndroidTest   # needs a device or emulator
 ```
 
 Install the debug APK on a device or emulator, or run from Android Studio.
@@ -308,7 +309,7 @@ These are release blockers, not features. None of them are implemented:
 - [ ] **Privacy policy and Play Console data-safety disclosure** — not written.
 - [ ] **Store listing assets** — store screenshots, feature graphic, and listing copy.
 - [ ] **Backend validation and abuse controls** — profile writes come directly from the client with no server-side validation or moderation.
-- [ ] **Test coverage** — unit tests cover ViewModels and utilities; repositories, DAOs, and Compose UI behaviour are untested.
+- [ ] **Test coverage** — unit tests cover ViewModels, Firestore document mappers, and the Room-cache policy; instrumentation tests cover DAO transactions and a Compose card. Full screen/navigation flows and live Firestore emulator tests are still missing.
 - [ ] **Accessibility audit** — small text, undersized touch targets, and missing content descriptions still need review.
 - [ ] **Localization** — English only; no Nepali resource set.
 - [ ] **CI** — no automated build/test pipeline.

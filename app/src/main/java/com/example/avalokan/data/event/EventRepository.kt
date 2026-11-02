@@ -1,7 +1,7 @@
 package com.example.avalokan.data.event
 
 import com.example.avalokan.data.firestore.FirestoreCachedCollection
-import com.example.avalokan.data.firestore.textField
+import com.example.avalokan.data.firestore.asText
 import com.example.avalokan.domain.model.Event
 import com.example.avalokan.domain.repository.EventRepository
 import com.google.firebase.firestore.DocumentSnapshot
@@ -12,19 +12,25 @@ import javax.inject.Inject
 
 private const val EVENTS_COLLECTION = "events"
 
-private fun DocumentSnapshot.toEventItem() = EventItem(
+/**
+ * Pure mapping step, kept separate from [DocumentSnapshot] so missing-field
+ * behaviour can be unit-tested without Firestore.
+ */
+internal fun toEventItem(id: String, field: (String) -> Any?): EventItem = EventItem(
     id = id,
-    title = textField("title"),
-    description = textField("description"),
-    meta = textField("meta"),
-    fee = textField("fee"),
-    action = textField("action").ifBlank { "Join >" },
-    type = textField("type").ifBlank { "CULTURAL" },
-    featured = getBoolean("featured") == true,
-    date = textField("date"),
-    imageUrl = textField("imageUrl").ifBlank { null },
-    joinLink = textField("joinLink").ifBlank { textField("onJoinClick") }
+    title = field("title").asText(),
+    description = field("description").asText(),
+    meta = field("meta").asText(),
+    fee = field("fee").asText(),
+    action = field("action").asText().ifBlank { "Join >" },
+    type = field("type").asText().ifBlank { "CULTURAL" },
+    featured = field("featured") == true,
+    date = field("date").asText(),
+    imageUrl = field("imageUrl").asText().ifBlank { null },
+    joinLink = field("joinLink").asText().ifBlank { field("onJoinClick").asText() }
 )
+
+private fun DocumentSnapshot.toEventItem() = toEventItem(id) { get(it) }
 
 class FirestoreEventRepository @Inject constructor(
     firestore: FirebaseFirestore,

@@ -16,13 +16,15 @@ import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resumeWithException
 
 /** Console fields may be stored as String or Number — coerce either. */
-internal fun DocumentSnapshot.textField(name: String): String =
-    get(name)?.toString().orEmpty()
+internal fun Any?.asText(): String = this?.toString().orEmpty()
+
+internal fun DocumentSnapshot.textField(name: String): String = get(name).asText()
 
 /**
  * Shared, Room-first Firestore plumbing for a single collection.
@@ -53,34 +55,39 @@ internal class FirestoreCachedCollection<T>(
      * are written through to Room. A failed listener leaves the last good
      * Room emission in place instead of blanking the UI.
      */
-    fun observeAll(): Flow<List<T>> = flow {
-        coroutineScope {
-            val listener = launch {
-                collectionSnapshots()
-                    .catch { e -> Log.w(TAG, "Firestore listen failed for $collectionName", e) }
-                    .collect { snapshot ->
-                        try {
-                            val items = snapshot.documents.map { mapper(it) }
-                            // Firestore's local cache can be empty while Room still has
-                            // a good copy (for example, a cold offline start). Wait for
-                            // a server snapshot before replacing the cache with nothing.
-                            if (snapshot.metadata.isFromCache && items.isEmpty()) {
-                                return@collect
-                            }
-                            replaceAll(items)
-                        } catch (e: CancellationException) {
-                            throw e
-                        } catch (e: Exception) {
-                            Log.w(TAG, "Failed to cache $collectionName snapshot", e)
-                        }
-                    }
-            }
+    fun observeAll(): Flow<List<T>> {
+        val batches = collectionSnapshots().mapNotNull { snapshot ->
             try {
-                emitAll(observeCached())
-            } finally {
-                listener.cancel()
+                SnapshotBatch(
+                    items = snapshot.documents.map { mapper(it) },
+                    isFromCache = snapshot.metadata.isFromCache,
+                )
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to map $collectionName snapshot", e)
+                null
             }
         }
+
+        return observeCachedWithSnapshots(
+            cached = observeCached(),
+            snapshots = batches,
+            onSnapshot = { batch ->
+                // Firestore's local cache can be empty while Room still has a
+                // good copy (for example, a cold offline start). Wait for a
+                // server snapshot before replacing the cache with nothing.
+                if (shouldReplaceCache(batch.isFromCache, batch.items.size)) {
+                    replaceAll(batch.items)
+                }
+            },
+            onListenerError = { e ->
+                Log.w(TAG, "Firestore listen failed for $collectionName", e)
+            },
+            onSnapshotError = { e ->
+                Log.w(TAG, "Failed to cache $collectionName snapshot", e)
+            },
+        )
     }
 
     /**
@@ -98,12 +105,13 @@ internal class FirestoreCachedCollection<T>(
                         .catch { e -> Log.w(TAG, "Document listen failed for $collectionName/$id", e) }
                         .collect { snapshot ->
                             try {
-                                when {
-                                    snapshot.exists() -> upsert(listOf(mapper(snapshot)))
-                                    // Don't delete a cached row just because Firestore's
-                                    // own local cache does not know about it yet.
-                                    !snapshot.metadata.isFromCache -> deleteById(id)
-                                }
+                                applyDocumentSnapshot(
+                                    exists = snapshot.exists(),
+                                    isFromCache = snapshot.metadata.isFromCache,
+                                    item = { mapper(snapshot) },
+                                    upsert = { upsert(listOf(it)) },
+                                    delete = { deleteById(id) },
+                                )
                             } catch (e: CancellationException) {
                                 throw e
                             } catch (e: Exception) {

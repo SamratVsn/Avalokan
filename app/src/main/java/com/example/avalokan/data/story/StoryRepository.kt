@@ -1,7 +1,7 @@
 package com.example.avalokan.data.story
 
 import com.example.avalokan.data.firestore.FirestoreCachedCollection
-import com.example.avalokan.data.firestore.textField
+import com.example.avalokan.data.firestore.asText
 import com.example.avalokan.domain.model.Story
 import com.example.avalokan.domain.repository.StoryRepository
 import com.google.firebase.firestore.DocumentSnapshot
@@ -12,17 +12,23 @@ import javax.inject.Inject
 
 private const val STORIES_COLLECTION = "stories"
 
-private fun DocumentSnapshot.toStoryItem() = StoryItem(
+/**
+ * Pure mapping step, kept separate from [DocumentSnapshot] so missing-field
+ * behaviour can be unit-tested without Firestore.
+ */
+internal fun toStoryItem(id: String, field: (String) -> Any?): StoryItem = StoryItem(
     id = id,
-    title = textField("title"),
-    subtitle = textField("subTitle"),
-    description = textField("description"),
-    imageUrl = textField("imageUrl").ifBlank { null },
-    author = textField("author"),
-    date = textField("date"),
-    readTime = textField("readtime"),
-    badge = textField("badge")
+    title = field("title").asText(),
+    subtitle = field("subTitle").asText(),
+    description = field("description").asText(),
+    imageUrl = field("imageUrl").asText().ifBlank { null },
+    author = field("author").asText(),
+    date = field("date").asText(),
+    readTime = field("readtime").asText(),
+    badge = field("badge").asText()
 )
+
+private fun DocumentSnapshot.toStoryItem() = toStoryItem(id) { get(it) }
 
 class FirestoreStoryRepository @Inject constructor(
     firestore: FirebaseFirestore,
