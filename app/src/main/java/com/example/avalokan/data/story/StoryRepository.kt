@@ -2,17 +2,13 @@ package com.example.avalokan.data.story
 
 import com.example.avalokan.data.firestore.FirestoreCachedCollection
 import com.example.avalokan.data.firestore.textField
+import com.example.avalokan.domain.model.Story
+import com.example.avalokan.domain.repository.StoryRepository
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
-
-interface StoryRepository {
-    fun observeStories(): Flow<List<StoryItem>>
-    fun observeStory(id: String): Flow<StoryItem?>
-    suspend fun clearCache()
-    suspend fun refresh()
-}
 
 private const val STORIES_COLLECTION = "stories"
 
@@ -44,8 +40,12 @@ class FirestoreStoryRepository @Inject constructor(
         mapper = { it.toStoryItem() }
     )
 
-    override fun observeStories(): Flow<List<StoryItem>> = collection.observeAll()
-    override fun observeStory(id: String): Flow<StoryItem?> = collection.observeById(id)
+    override fun observeStories(): Flow<List<Story>> = collection.observeAll()
+        .map { items -> items.map { it.toDomain() } }
+
+    override fun observeStory(id: String): Flow<Story?> = collection.observeById(id)
+        .map { it?.toDomain() }
+
     override suspend fun refresh() = collection.refresh()
     override suspend fun clearCache() = collection.clearCache()
 }

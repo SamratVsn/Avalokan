@@ -52,7 +52,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
-import com.example.avalokan.data.event.EventItem
+import com.example.avalokan.domain.model.Event
 import com.example.avalokan.ui.common.openUrlInBrowser
 import com.example.avalokan.ui.components.EventsLoadingState
 import com.example.avalokan.ui.components.StateMessage
@@ -94,7 +94,7 @@ fun EventScreen(
 
 @Composable
 private fun EventContent(
-    events: List<EventItem>,
+    events: List<Event>,
     onEventClick: (String) -> Unit,
     onRetry: () -> Unit,
     isLoading: Boolean,
@@ -185,7 +185,7 @@ private fun TopTexts(modifier: Modifier = Modifier) {
 
 @Composable
 private fun FeaturedEvent(
-    event: EventItem,
+    event: Event,
     modifier: Modifier = Modifier,
     onRemindClick: () -> Unit = {}
 ) {
@@ -307,7 +307,7 @@ private fun FeaturedEvent(
 
 @Composable
 private fun UpcomingEvents(
-    events: List<EventItem>,
+    events: List<Event>,
     modifier: Modifier = Modifier,
     onEventClick: (String) -> Unit = {}
 ) {
@@ -418,9 +418,9 @@ private fun EventsPreview() {
     AvalokanTheme {
         EventContent(
             events = listOf(
-                EventItem("bhaktapur-pottery", "Bhaktapur Pottery Workshop", "", "Bhaktapur Square • 10:00 AM", "FREE ENTRY", "Join >"),
-                EventItem("samay-baji", "Alla & Samay Baji Festival", "", "Patan Square • 5:00 PM", "$15 ENTRY", "Join >"),
-                EventItem("thangka-demo", "Live Thangka Art Demo", "", "Boudha • 11:00 AM", "DONATION BASED", "Join >")
+                Event("bhaktapur-pottery", "Bhaktapur Pottery Workshop", "", "Bhaktapur Square • 10:00 AM", "FREE ENTRY", "Join >"),
+                Event("samay-baji", "Alla & Samay Baji Festival", "", "Patan Square • 5:00 PM", "$15 ENTRY", "Join >"),
+                Event("thangka-demo", "Live Thangka Art Demo", "", "Boudha • 11:00 AM", "DONATION BASED", "Join >")
             ),
             onEventClick = {},
             onRetry = {},

@@ -2,8 +2,8 @@ package com.example.avalokan.ui.events
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.avalokan.data.event.EventItem
-import com.example.avalokan.data.event.EventRepository
+import com.example.avalokan.domain.model.Event
+import com.example.avalokan.domain.repository.EventRepository
 import com.example.avalokan.ui.common.CONTENT_LOADING_TIMEOUT_MS
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -32,7 +32,7 @@ class EventsViewModel @Inject constructor(
         }
     }
 
-    val events: StateFlow<List<EventItem>> = eventRepository.observeEvents()
+    val events: StateFlow<List<Event>> = eventRepository.observeEvents()
         .onEach { events ->
             if (events.isNotEmpty()) _isLoading.value = false
         }

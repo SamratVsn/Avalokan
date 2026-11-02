@@ -2,18 +2,13 @@ package com.example.avalokan.data.place
 
 import com.example.avalokan.data.firestore.FirestoreCachedCollection
 import com.example.avalokan.data.firestore.textField
+import com.example.avalokan.domain.model.Place
+import com.example.avalokan.domain.repository.PlaceRepository
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
-
-interface PlaceRepository {
-    fun observePlaces(): Flow<List<PlaceItem>>
-    fun observePlace(id: String): Flow<PlaceItem?>
-    suspend fun clearCache()
-    /** Forces a server fetch; snapshot listeners keep streaming afterwards. */
-    suspend fun refresh()
-}
 
 private const val PLACES_COLLECTION = "places"
 
@@ -48,8 +43,12 @@ class FirestorePlaceRepository @Inject constructor(
         mapper = { it.toPlaceItem() }
     )
 
-    override fun observePlaces(): Flow<List<PlaceItem>> = collection.observeAll()
-    override fun observePlace(id: String): Flow<PlaceItem?> = collection.observeById(id)
+    override fun observePlaces(): Flow<List<Place>> = collection.observeAll()
+        .map { items -> items.map { it.toDomain() } }
+
+    override fun observePlace(id: String): Flow<Place?> = collection.observeById(id)
+        .map { it?.toDomain() }
+
     override suspend fun refresh() = collection.refresh()
     override suspend fun clearCache() = collection.clearCache()
 }

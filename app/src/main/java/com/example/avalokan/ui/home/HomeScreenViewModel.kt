@@ -2,10 +2,10 @@ package com.example.avalokan.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.avalokan.data.place.PlaceItem
-import com.example.avalokan.data.place.PlaceRepository
-import com.example.avalokan.data.story.StoryItem
-import com.example.avalokan.data.story.StoryRepository
+import com.example.avalokan.domain.model.Place
+import com.example.avalokan.domain.model.Story
+import com.example.avalokan.domain.repository.PlaceRepository
+import com.example.avalokan.domain.repository.StoryRepository
 import com.example.avalokan.ui.common.CONTENT_LOADING_TIMEOUT_MS
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -40,13 +40,13 @@ class HomeScreenViewModel @Inject constructor(
     }
 
     /** Hero = whatever the stories collection holds (curated doc preferred). */
-    val heroStory: StateFlow<StoryItem?> = storyRepository.observeStories()
+    val heroStory: StateFlow<Story?> = storyRepository.observeStories()
         .map { stories ->
             stories.find { it.id == heroStoryId } ?: stories.firstOrNull()
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    val places: StateFlow<List<PlaceItem>> = placeRepository.observePlaces()
+    val places: StateFlow<List<Place>> = placeRepository.observePlaces()
         .onEach { places ->
             if (places.isNotEmpty()) _isLoading.value = false
         }

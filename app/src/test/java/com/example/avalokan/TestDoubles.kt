@@ -1,20 +1,20 @@
 package com.example.avalokan
 
-import com.example.avalokan.data.event.EventItem
-import com.example.avalokan.data.event.EventRepository
 import com.example.avalokan.data.local.AvatarStore
 import com.example.avalokan.data.local.PreferencesStore
-import com.example.avalokan.data.place.PlaceItem
-import com.example.avalokan.data.place.PlaceRepository
 import com.example.avalokan.data.user.UserProfile
 import com.example.avalokan.data.user.UserRepository
+import com.example.avalokan.domain.model.Event
+import com.example.avalokan.domain.model.Place
+import com.example.avalokan.domain.repository.EventRepository
+import com.example.avalokan.domain.repository.PlaceRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 
 /** Places used by the view-model tests: one Historical, one Cultural. */
 internal val TestPlaces = listOf(
-    PlaceItem(
+    Place(
         id = "kathmandu-durbar",
         name = "Kathmandu Durbar Square",
         description = "desc",
@@ -22,7 +22,7 @@ internal val TestPlaces = listOf(
         category = "Historical",
         rating = "4.8"
     ),
-    PlaceItem(
+    Place(
         id = "lumbini-garden",
         name = "Lumbini Garden",
         description = "desc",
@@ -33,14 +33,14 @@ internal val TestPlaces = listOf(
 )
 
 internal val TestEvents = listOf(
-    EventItem(
+    Event(
         id = "dashain-festival",
         title = "Dashain Festival",
         description = "desc",
         meta = "Kathmandu • Cultural",
         date = "Oct 12, 2026"
     ),
-    EventItem(
+    Event(
         id = "heritage-walk",
         title = "Heritage Walk",
         description = "desc",
@@ -50,10 +50,10 @@ internal val TestEvents = listOf(
 )
 
 internal class FakeEventRepository(
-    private val events: List<EventItem> = TestEvents
+    private val events: List<Event> = TestEvents
 ) : EventRepository {
-    override fun observeEvents(): Flow<List<EventItem>> = flowOf(events)
-    override fun observeEvent(id: String): Flow<EventItem?> =
+    override fun observeEvents(): Flow<List<Event>> = flowOf(events)
+    override fun observeEvent(id: String): Flow<Event?> =
         flowOf(events.find { it.id == id })
 
     override suspend fun clearCache() = Unit
@@ -61,10 +61,10 @@ internal class FakeEventRepository(
 }
 
 internal class FakePlaceRepository(
-    private val places: List<PlaceItem> = TestPlaces
+    private val places: List<Place> = TestPlaces
 ) : PlaceRepository {
-    override fun observePlaces(): Flow<List<PlaceItem>> = flowOf(places)
-    override fun observePlace(id: String): Flow<PlaceItem?> =
+    override fun observePlaces(): Flow<List<Place>> = flowOf(places)
+    override fun observePlace(id: String): Flow<Place?> =
         flowOf(places.find { it.id == id })
 
     override suspend fun clearCache() = Unit

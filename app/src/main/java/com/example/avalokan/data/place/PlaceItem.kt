@@ -3,6 +3,10 @@ package com.example.avalokan.data.place
 import androidx.room3.Entity
 import androidx.room3.PrimaryKey
 
+/**
+ * Room persistence model. Map it to `domain.model.Place` at the repository
+ * boundary; UI code should never depend on this type.
+ */
 @Entity(tableName = "places")
 data class PlaceItem(
     @PrimaryKey val id: String,

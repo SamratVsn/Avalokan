@@ -3,9 +3,9 @@ package com.example.avalokan.ui.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.avalokan.data.event.EventItem
-import com.example.avalokan.data.event.EventRepository
 import com.example.avalokan.data.local.PreferencesStore
+import com.example.avalokan.domain.model.Event
+import com.example.avalokan.domain.repository.EventRepository
 import com.example.avalokan.ui.navigation.NavDestination
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -26,7 +26,7 @@ class EventDetailViewModel @Inject constructor(
     private val eventId: String =
         savedStateHandle.get<String>(NavDestination.EventDetail.ARG).orEmpty()
 
-    val event: StateFlow<EventItem?> = eventRepository.observeEvent(eventId)
+    val event: StateFlow<Event?> = eventRepository.observeEvent(eventId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     val favoriteIds: StateFlow<Set<String>> = userPreferences.favoriteEventIds

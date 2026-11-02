@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
-import com.example.avalokan.data.place.PlaceItem
+import com.example.avalokan.domain.model.Place
 import com.example.avalokan.ui.components.DiscoverLoadingState
 import com.example.avalokan.ui.components.StateMessage
 import com.example.avalokan.ui.theme.AvalokanTheme
@@ -108,7 +108,7 @@ private fun DiscoverContent(
     filters: List<String>,
     selected: Int,
     onSelect: (Int) -> Unit,
-    sites: List<PlaceItem>,
+    sites: List<Place>,
     totalPlaces: Int,
     savedIds: Set<String>,
     onToggleSave: (String) -> Unit,
@@ -116,7 +116,7 @@ private fun DiscoverContent(
     onRetry: () -> Unit,
     isLoading: Boolean,
     availableCategories: List<String>,
-    recommended: List<PlaceItem>,
+    recommended: List<Place>,
     onClearQuery: () -> Unit,
     onSuggestionSelect: (String) -> Unit,
     onExploreEventsClick: () -> Unit
@@ -241,7 +241,7 @@ private fun Suggestions(
     selected: Int,
     onSelect: (Int) -> Unit,
     query: String,
-    sites: List<PlaceItem>,
+    sites: List<Place>,
     totalPlaces: Int,
     savedIds: Set<String>,
     onToggleSave: (String) -> Unit,
@@ -249,7 +249,7 @@ private fun Suggestions(
     onRetry: () -> Unit,
     isLoading: Boolean,
     availableCategories: List<String>,
-    recommended: List<PlaceItem>,
+    recommended: List<Place>,
     onClearQuery: () -> Unit,
     onSuggestionSelect: (String) -> Unit,
     onExploreEventsClick: () -> Unit,
@@ -371,7 +371,7 @@ private fun Suggestions(
 /** Real content shown under a failed search, so the screen still leads somewhere. */
 @Composable
 private fun PopularNow(
-    places: List<PlaceItem>,
+    places: List<Place>,
     savedIds: Set<String>,
     onToggleSave: (String) -> Unit,
     onPlaceClick: (String) -> Unit,
@@ -441,7 +441,7 @@ private fun DiscoverPreview(){
             selected = 0,
             onSelect = {},
             sites = listOf(
-                PlaceItem(
+                Place(
                     id = "kathmandu-durbar",
                     name = "Kathmandu Durbar Square",
                     description = "The heart of old Kathmandu city.",
@@ -449,7 +449,7 @@ private fun DiscoverPreview(){
                     category = "Historical",
                     rating = "4.8"
                 ),
-                PlaceItem(
+                Place(
                     id = "lumbini-garden",
                     name = "Lumbini Garden",
                     description = "The sacred birthplace of Lord Buddha.",

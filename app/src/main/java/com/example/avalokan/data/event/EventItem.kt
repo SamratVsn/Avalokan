@@ -4,6 +4,11 @@ import androidx.room3.Entity
 import androidx.room3.PrimaryKey
 
 //Defining the basic parameters for the events
+
+/**
+ * Room persistence model. Map it to `domain.model.Event` at the repository
+ * boundary; UI code should never depend on this type.
+ */
 @Entity(tableName = "events")
 data class EventItem(
     @PrimaryKey val id: String,

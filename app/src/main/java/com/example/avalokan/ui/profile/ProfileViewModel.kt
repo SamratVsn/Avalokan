@@ -2,14 +2,14 @@ package com.example.avalokan.ui.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.avalokan.data.event.EventItem
-import com.example.avalokan.data.event.EventRepository
 import com.example.avalokan.data.local.AvatarStore
 import com.example.avalokan.data.local.PreferencesStore
-import com.example.avalokan.data.place.PlaceItem
-import com.example.avalokan.data.place.PlaceRepository
 import com.example.avalokan.data.user.UserProfile
 import com.example.avalokan.data.user.UserRepository
+import com.example.avalokan.domain.model.Event
+import com.example.avalokan.domain.model.Place
+import com.example.avalokan.domain.repository.EventRepository
+import com.example.avalokan.domain.repository.PlaceRepository
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -85,14 +85,14 @@ class ProfileViewModel @Inject constructor(
     ) { local, remote -> local?.takeIf { it.isNotBlank() } ?: remote?.avatarUrl }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    val savedPlaces: StateFlow<List<PlaceItem>> = combine(
+    val savedPlaces: StateFlow<List<Place>> = combine(
         placeRepository.observePlaces(),
         userPreferences.savedPlaceIds
     ) { remote, ids ->
         ids.mapNotNull { id -> remote.find { it.id == id } }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    val favoriteEvents: StateFlow<List<EventItem>> = combine(
+    val favoriteEvents: StateFlow<List<Event>> = combine(
         eventRepository.observeEvents(),
         userPreferences.favoriteEventIds
     ) { remote, ids ->

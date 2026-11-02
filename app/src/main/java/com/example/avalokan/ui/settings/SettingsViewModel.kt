@@ -3,11 +3,11 @@ package com.example.avalokan.ui.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.avalokan.data.auth.AuthRepository
-import com.example.avalokan.data.event.EventRepository
 import com.example.avalokan.data.local.AvatarStore
 import com.example.avalokan.data.local.PreferencesStore
-import com.example.avalokan.data.place.PlaceRepository
-import com.example.avalokan.data.story.StoryRepository
+import com.example.avalokan.domain.repository.EventRepository
+import com.example.avalokan.domain.repository.PlaceRepository
+import com.example.avalokan.domain.repository.StoryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

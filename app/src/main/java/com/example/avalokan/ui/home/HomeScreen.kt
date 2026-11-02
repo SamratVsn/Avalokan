@@ -51,7 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
-import com.example.avalokan.data.place.PlaceItem
+import com.example.avalokan.domain.model.Place
 import com.example.avalokan.ui.components.HomeLoadingState
 import com.example.avalokan.ui.components.StateMessage
 import com.example.avalokan.ui.theme.AvalokanTheme
@@ -105,7 +105,7 @@ private fun HomeContent(
     heroTitle: String?,
     heroSubtitle: String?,
     heroImageUrl: String?,
-    places: List<PlaceItem>,
+    places: List<Place>,
     onStoryClick: (String) -> Unit,
     onPlaceClick: (String) -> Unit,
     onExploreEventsClick: () -> Unit,
@@ -284,7 +284,7 @@ private fun StoryCard(
 
 @Composable
 private fun HistoricalGems(
-    places: List<PlaceItem>,
+    places: List<Place>,
     onPlaceClick: (String) -> Unit = {}
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
@@ -347,7 +347,7 @@ private fun PlaceCard(
 @Composable
 private fun RecentDiscoveries(
     modifier: Modifier = Modifier,
-    places: List<PlaceItem> = emptyList(),
+    places: List<Place> = emptyList(),
     onPlaceClick: (String) -> Unit = {}
 ) {
     Column(
@@ -445,10 +445,10 @@ private fun HomeScreenPreview(){
             heroSubtitle = null,
             heroImageUrl = null,
             places = listOf(
-                PlaceItem("patan-durbar", "Patan Durbar Square", "Artistic heritage of Lalitpur.", "Lalitpur • Historical Site", "Historical", "4.8"),
-                PlaceItem("swayambhu", "Swayambhu", "The Ancient Hill.", "Kathmandu • Spiritual Site", "Historical", "4.7"),
-                PlaceItem("boudha-stupa", "Boudha Stupa", "Boudhanath • Spiritual Site.", "Boudhanath • Spiritual Site", "Cultural", "4.9"),
-                PlaceItem("bhaktapur-pottery", "Bhaktapur Pottery Square", "Bhaktapur • Craft Quarter.", "Bhaktapur • Craft Quarter", "Cultural", "4.7")
+                Place("patan-durbar", "Patan Durbar Square", "Artistic heritage of Lalitpur.", "Lalitpur • Historical Site", "Historical", "4.8"),
+                Place("swayambhu", "Swayambhu", "The Ancient Hill.", "Kathmandu • Spiritual Site", "Historical", "4.7"),
+                Place("boudha-stupa", "Boudha Stupa", "Boudhanath • Spiritual Site.", "Boudhanath • Spiritual Site", "Cultural", "4.9"),
+                Place("bhaktapur-pottery", "Bhaktapur Pottery Square", "Bhaktapur • Craft Quarter.", "Bhaktapur • Craft Quarter", "Cultural", "4.7")
             ),
             onStoryClick = {},
             onPlaceClick = {},

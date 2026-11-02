@@ -48,8 +48,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.avalokan.R
-import com.example.avalokan.data.event.EventItem
-import com.example.avalokan.data.place.PlaceItem
+import com.example.avalokan.domain.model.Event
+import com.example.avalokan.domain.model.Place
 import androidx.compose.material.icons.filled.CalendarMonth
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.GreyBorder
@@ -94,8 +94,8 @@ private fun ProfileContent(
     bio: String,
     stats: ProfileStats,
     avatarUri: String?,
-    savedPlaces: List<PlaceItem>,
-    favoriteEvents: List<EventItem>,
+    savedPlaces: List<Place>,
+    favoriteEvents: List<Event>,
     onSettingsClick: () -> Unit,
     onDiscoverClick: () -> Unit,
     onEventsClick: () -> Unit
@@ -256,7 +256,7 @@ private fun UserSectionInfo(number: Int, text: String) {
 
 @Composable
 private fun HeritageCollection(
-    savedPlaces: List<PlaceItem>,
+    savedPlaces: List<Place>,
     onDiscoverClick: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -341,7 +341,7 @@ private fun CollectionCards(place: String, loc: String, modifier: Modifier = Mod
 
 @Composable
 private fun FavoriteEvents(
-    favoriteEvents: List<EventItem>,
+    favoriteEvents: List<Event>,
     onEventsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -367,7 +367,7 @@ private fun FavoriteEvents(
 }
 
 @Composable
-private fun FavoriteEventRow(event: EventItem) {
+private fun FavoriteEventRow(event: Event) {
     Card(
         shape = StandardCardShape,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)

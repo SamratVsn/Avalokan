@@ -22,8 +22,7 @@ class MainActivity : ComponentActivity() {
         val splashScreen = installSplashScreen()
         var keepSplash = true
         splashScreen.setKeepOnScreenCondition { keepSplash }
-        // Keep splash visible for a preferred time before proceeding
-        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({ keepSplash = false }, 1500L)
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({ keepSplash = false }, 1000L)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {

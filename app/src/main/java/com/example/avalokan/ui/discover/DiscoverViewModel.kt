@@ -3,8 +3,8 @@ package com.example.avalokan.ui.discover
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.avalokan.data.local.PreferencesStore
-import com.example.avalokan.data.place.PlaceItem
-import com.example.avalokan.data.place.PlaceRepository
+import com.example.avalokan.domain.model.Place
+import com.example.avalokan.domain.repository.PlaceRepository
 import com.example.avalokan.ui.common.CONTENT_LOADING_TIMEOUT_MS
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -65,10 +65,10 @@ class DiscoverViewModel @Inject constructor(
      * filter" apart from "nothing loaded at all".
      */
     private data class DiscoverState(
-        val sites: List<PlaceItem> = emptyList(),
+        val sites: List<Place> = emptyList(),
         val total: Int = 0,
         val availableCategories: List<String> = emptyList(),
-        val recommended: List<PlaceItem> = emptyList()
+        val recommended: List<Place> = emptyList()
     )
 
     private val discoverState: StateFlow<DiscoverState> = combine(
@@ -88,7 +88,7 @@ class DiscoverViewModel @Inject constructor(
             },
             recommended = remote
                 .sortedWith(
-                    compareByDescending<PlaceItem> { it.featured }
+                    compareByDescending<Place> { it.featured }
                         .thenByDescending { it.rating.toDoubleOrNull() ?: 0.0 }
                 )
                 .take(3)
@@ -99,7 +99,7 @@ class DiscoverViewModel @Inject constructor(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DiscoverState())
 
-    val sites: StateFlow<List<PlaceItem>> = discoverState
+    val sites: StateFlow<List<Place>> = discoverState
         .map { it.sites }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
@@ -117,7 +117,7 @@ class DiscoverViewModel @Inject constructor(
         )
 
     /** A few places worth showing when a search returns nothing. */
-    val recommended: StateFlow<List<PlaceItem>> = discoverState
+    val recommended: StateFlow<List<Place>> = discoverState
         .map { it.recommended }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 

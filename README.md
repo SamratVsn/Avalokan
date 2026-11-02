@@ -106,7 +106,7 @@ The goal is a modern, readable interface that makes heritage content feel engagi
 
 ## 🧱 Architecture & technology
 
-The UI talks to **ViewModels**, which consume **repository interfaces**. The place, event, and story repositories share one `FirestoreCachedCollection<T>` helper that keeps **Room as the single source of truth**: Firestore snapshot listeners only write into Room, and every read comes from the Room flow. The helper also handles server refresh and cache clearing. **Hilt** wires dependencies app-wide.
+The UI talks to **ViewModels**, which consume **domain repository interfaces**. The place, event, and story repositories map Room rows to domain models at the data boundary, so screens never depend on Room entities. The data implementations share one `FirestoreCachedCollection<T>` helper that keeps **Room as the single source of truth**: Firestore snapshot listeners only write into Room, and every read comes from the Room flow. The helper also handles server refresh and cache clearing. **Hilt** wires dependencies app-wide.
 
 ### Technology stack
 
@@ -133,8 +133,16 @@ The UI talks to **ViewModels**, which consume **repository interfaces**. The pla
                    │ ViewModels
                    ▼
 ┌─────────────────────────────────────┐
-│           Repository layer          │
-│  Place · Event · Story · User       │
+│            Domain layer             │
+│  Place · Event · Story models       │
+│  Place/Event/Story repository ports │
+└──────────────────┬──────────────────┘
+                   │ implemented by
+                   ▼
+┌─────────────────────────────────────┐
+│             Data layer              │
+│  Firestore repositories · mappers   │
+│  Room entities/DAOs · User sync     │
 └──────────────────┬──────────────────┘
                    │ observe / refresh
                    ▼
@@ -185,9 +193,13 @@ app/src/main/java/com/example/avalokan/
 │   ├── local/              # DataStore preferences & saved place IDs
 │   ├── auth/               # Firebase Auth, login rate limiting
 │   ├── firestore/          # shared Firestore + Room cache helper
-│   ├── place/ · event/ · story/
+│   ├── place/ · event/ · story/  # entities, DAOs, repository impls, mappers
 │   ├── user/
 │   └── AvalokanDatabase.kt
+│
+├── domain/
+│   ├── model/              # UI-facing Place, Event, Story models
+│   └── repository/         # repository interfaces consumed by ViewModels
 │
 └── ui/
     ├── home/ · discover/ · events/ · profile/
@@ -201,7 +213,8 @@ app/src/main/java/com/example/avalokan/
 * `MainActivity.kt` — activity entry point, edge-to-edge setup, and theme initialization.
 * `AvalokanApp.kt` — main scaffold, floating bottom navigation, and navigation host.
 * `AvalokanApplication.kt` — Hilt application entry; anonymous Firebase Auth bootstrap.
-* `data/` — repositories, Room entities/DAOs, Firestore mapping, auth, and user profile sync.
+* `domain/` — UI-facing models and repository interfaces; Room entities and Firestore documents do not cross this boundary.
+* `data/` — repository implementations, Room entities/DAOs, entity-to-domain mappers, Firestore mapping, auth, and user profile sync.
 * `ui/` — feature screens, detail layouts, shared components, navigation, and design system.
 
 ---
@@ -262,8 +275,8 @@ Avalokan is a **working beta**, not a finished product. The sections below delib
 | --- | --- |
 | **Screens & navigation** | Home, Discover, Events, Profile, Settings, Login, and place/event/story details |
 | **Design system** | Compose + Material 3 theme, typography, colors, reusable cards, and state views |
-| **Architecture** | Hilt DI, ViewModels, and repository interfaces |
-| **Data layer** | Firestore repositories backed by a Room cache, sharing one `FirestoreCachedCollection<T>` helper |
+| **Architecture** | Hilt DI, ViewModels, domain models, and repository interfaces |
+| **Data layer** | Firestore repositories backed by a Room cache, with entity-to-domain mappers and one shared `FirestoreCachedCollection<T>` helper |
 | **Content** | Places, events, and stories rendered from Firestore |
 | **Search** | Discover search, category filters, clear-search, and suggestions when nothing matches |
 | **Screen states** | Loading skeletons, empty states, error states, and retry actions on list screens |
