@@ -152,7 +152,7 @@ private fun EventDetailContent(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = { SnackbarHost(hostState = snackbarHost) },
         bottomBar = {
-            // Sticky footer: price + Book Now with shadow
+            // Sticky footer: price + booking link with shadow
             Surface(shadowElevation = 12.dp, color = MaterialTheme.colorScheme.surface) {
                 Row(
                     modifier = Modifier.fillMaxWidth()
@@ -178,7 +178,7 @@ private fun EventDetailContent(
                         colors = ButtonDefaults.buttonColors(containerColor = accent),
                         elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
                     ) {
-                        Text(text = "Book Now")
+                        Text(text = stringResource(R.string.go_to_booking_page))
                         Spacer(Modifier.width(8.dp))
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowForward,
