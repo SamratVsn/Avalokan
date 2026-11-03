@@ -73,4 +73,19 @@
     <string name="saved_places_empty_hint">Tap the bookmark on any heritage site to keep it here.</string>
     <string name="favorite_events_empty_title">No favorite events yet</string>
     <string name="favorite_events_empty_hint">Tap the heart on any event to keep it here.</string>
+
+    <!-- Missing content notices -->
+    <string name="not_available">Not available</string>
+    <string name="untitled">Untitled</string>
+    <string name="no_description">No description available.</string>
+    <string name="no_location">Location not available</string>
+    <string name="no_date">Date not available</string>
+    <string name="no_fee">Fee not available</string>
+    <string name="no_rating">No rating yet</string>
+    <string name="no_author">Author not available</string>
+    <string name="no_read_time">Read time not available</string>
+    <string name="no_bio">No bio added yet.</string>
+    <string name="no_story_content">No story content available.</string>
+    <string name="no_story_title">No story available yet</string>
+    <string name="no_story_summary">Check back soon for a featured heritage story.</string>
 </resources>

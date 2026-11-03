@@ -190,8 +190,8 @@ private fun FeaturedEvent(
     onRemindClick: () -> Unit = {}
 ) {
     val dateParts = event.date.split(" ", ",").filter { it.isNotBlank() }
-    val month = dateParts.getOrElse(0) { "SEPT" }
-    val day = dateParts.getOrElse(1) { "17" }
+    val month = dateParts.getOrNull(0)?.uppercase()
+    val day = dateParts.getOrNull(1)
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = "Featured Festival",
@@ -256,28 +256,36 @@ private fun FeaturedEvent(
                         verticalAlignment = Alignment.Top
                     ) {
                         Text(
-                            text = event.title,
+                            text = event.title.ifBlank { stringResource(R.string.untitled) },
                             style = MaterialTheme.typography.titleMedium,
                             color = Color.White,
                             modifier = Modifier.weight(1f)
                         )
                         Spacer(Modifier.width(8.dp))
-                        Column(horizontalAlignment = Alignment.End) {
+                        if (month != null && day != null) {
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text(
+                                    text = month,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color.White.copy(alpha = 0.8f)
+                                )
+                                Text(
+                                    text = day,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                            }
+                        } else {
                             Text(
-                                text = month.uppercase(),
+                                text = stringResource(R.string.no_date),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = Color.White.copy(alpha = 0.8f)
-                            )
-                            Text(
-                                text = day,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
                             )
                         }
                     }
                     Text(
-                        text = event.description,
+                        text = event.description.ifBlank { stringResource(R.string.no_description) },
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White.copy(alpha = 0.85f),
                         maxLines = 2,
@@ -382,32 +390,34 @@ private fun EventCards(
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 Text(
-                    text = name,
+                    text = name.ifBlank { stringResource(R.string.untitled) },
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = meta,
+                    text = meta.ifBlank { stringResource(R.string.no_location) },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = fee,
+                    text = fee.ifBlank { stringResource(R.string.no_fee) },
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.tertiary
                 )
             }
-            Text(
-                text = action.ifBlank { "Join >" },
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-                maxLines = 1,
-                modifier = Modifier.clickable(onClick = onJoinClick)
-            )
+            if (action.isNotBlank()) {
+                Text(
+                    text = action,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1,
+                    modifier = Modifier.clickable(onClick = onJoinClick)
+                )
+            }
         }
     }
 }

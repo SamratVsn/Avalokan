@@ -28,7 +28,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -49,9 +48,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.avalokan.R
 import com.example.avalokan.ui.common.openUrlInBrowser
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.HeroScrim
@@ -91,11 +92,12 @@ fun EventDetailScreen(
     }
 
     val eventTitle = event?.title.orEmpty()
+    val shareTitle = eventTitle.ifBlank { stringResource(R.string.untitled) }
     val eventType = EventType.from(event?.type)
     val onShareClick = {
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, "Check out this heritage event: $eventTitle on Avalokan, a Nepal Heritage Explorer!")
+            putExtra(Intent.EXTRA_TEXT, "Check out this heritage event: $shareTitle on Avalokan, a Nepal Heritage Explorer!")
         }
         context.startActivity(Intent.createChooser(intent, "Share event"))
     }
@@ -106,12 +108,11 @@ fun EventDetailScreen(
     ) {
         EventDetailContent(
             title = event?.title.orEmpty(),
-            location = event?.meta?.substringBefore("•")?.trim()
-                ?.ifBlank { "Nepal" } ?: "Nepal",
+            location = event?.meta?.substringBefore("•")?.trim().orEmpty(),
             eventType = eventType,
             date = event?.date.orEmpty(),
             description = event?.description.orEmpty(),
-            fee = event?.fee?.ifBlank { "Rs. 500" } ?: "Rs. 500",
+            fee = event?.fee.orEmpty(),
             imageUrl = event?.imageUrl,
             isFavorite = isFavorite,
             onFavoriteClick = { viewModel.toggleFavorite() },
@@ -166,7 +167,7 @@ private fun EventDetailContent(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = fee,
+                            text = fee.ifBlank { stringResource(R.string.not_available) },
                             style = MaterialTheme.typography.headlineMedium
                         )
                     }
@@ -268,33 +269,28 @@ private fun EventDetailContent(
                         ) {
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 DetailBadge(
-                                    text = if (date.isBlank()) "Festival" else "$date • Festival",
+                                    text = date.ifBlank { stringResource(R.string.no_date) },
                                     containerColor = accent.copy(alpha = 0.12f),
                                     contentColor = accent,
                                     icon = eventBadgeIcon(eventType)
                                 )
                                 Text(
-                                    text = title,
+                                    text = title.ifBlank { stringResource(R.string.untitled) },
                                     style = MaterialTheme.typography.headlineLarge,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                             }
-                            // Date / Time / Location metadata list
+                            // Date / location metadata list
                             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                 MetaRow(
                                     icon = Icons.Default.CalendarMonth,
                                     label = "Date",
-                                    value = "Sept 17, 2024"
-                                )
-                                MetaRow(
-                                    icon = Icons.Default.Schedule,
-                                    label = "Time",
-                                    value = "10:00 AM onwards"
+                                    value = date.ifBlank { stringResource(R.string.no_date) }
                                 )
                                 MetaRow(
                                     icon = Icons.Default.LocationOn,
                                     label = "Location",
-                                    value = location
+                                    value = location.ifBlank { stringResource(R.string.no_location) }
                                 )
                             }
                             // About the festival: full Firestore description.
@@ -305,7 +301,7 @@ private fun EventDetailContent(
                                     fontWeight = FontWeight.SemiBold
                                 )
                                 Text(
-                                    text = description,
+                                    text = description.ifBlank { stringResource(R.string.no_description) },
                                     style = MaterialTheme.typography.bodyLarge,
                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
                                 )

@@ -25,11 +25,8 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -52,29 +49,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
-import com.example.avalokan.ui.theme.AccentMarigold
+import com.example.avalokan.R
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.DangerRed
 import com.example.avalokan.ui.theme.PrimaryTeal
 import com.example.avalokan.ui.theme.Spacing
 
 private data class StoryUi(
-    val badge: String = "Cultural Insight",
-    val title: String = "The Sacred Echoes of Boudhanath",
-    val author: String = "Samrat Parajuli",
-    val date: String = "Sept 12, 2024",
-    val readTime: String = "6 min read",
-    val fact: String = "Boudhanath is one of the largest stupas in the world — its all-seeing Buddha eyes watch over Kathmandu from all four directions.",
-    val body: List<String> = listOf(
-        "\"Om Mani Padme Hum\" — the rhythmic chant flows through the air like the very breath of the stupa itself.",
-        "Standing before the world's largest stupas, Boudhanath is not merely a monument. It is a living mandala: centuries of butter lamps, prayer wheels spun by pilgrims, and the watchful eyes of the Buddha painted on all four sides, gazing across over 1,500 years of devotion.",
-        "As you walk clockwise around the stupa — the traditional kora — the sound of singing bowls, the scent of juniper incense, and the flutter of prayer flags carry centuries of stories into the soul of the city."
-    )
+    val badge: String,
+    val title: String,
+    val author: String,
+    val date: String,
+    val readTime: String,
+    val body: List<String>
 )
 
 @Composable
@@ -83,15 +76,8 @@ fun StoryDetailScreen(
     onBackClick: () -> Unit = {},
     viewModel: StoryDetailViewModel = hiltViewModel()
 ) {
-    val story = StoryUi(
-        badge = "Cultural Insight",
-        title = "The Sacred Echoes of Boudhanath",
-        author = "Samrat Parajuli",
-        date = "Sept 12, 2024",
-        readTime = "6 min read"
-    )
-    val item = viewModel.story.collectAsState().value
-    if (item == null) {
+    val storyItem = viewModel.story.collectAsState().value
+    if (storyItem == null) {
         if (isStillMissing(itemPresent = false)) {
             DetailMissing(kind = "story", onBackClick = onBackClick)
         } else {
@@ -99,18 +85,20 @@ fun StoryDetailScreen(
         }
         return
     }
-    val resolved = story.copy(
-        badge = item?.badge?.ifBlank { story.badge } ?: story.badge,
-        title = item?.title?.ifBlank { story.title } ?: story.title,
-        author = item?.author?.ifBlank { story.author } ?: story.author,
-        date = item?.date?.ifBlank { story.date } ?: story.date,
-        readTime = item?.readTime?.ifBlank { story.readTime } ?: story.readTime,
-        body = item?.description
-            ?.split("\n\n")
-            ?.map { it.trim() }
-            ?.filter { it.isNotEmpty() }
-            ?: story.body
+    val story = StoryUi(
+        badge = storyItem.badge,
+        title = storyItem.title,
+        author = storyItem.author,
+        date = storyItem.date,
+        readTime = storyItem.readTime,
+        body = storyItem.description
+            .split("\n\n")
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
     )
+    val shareTitle = story.title.ifBlank { stringResource(R.string.untitled) }
+    val shareAuthor = story.author.ifBlank { stringResource(R.string.no_author) }
+    val shareReadTime = story.readTime.ifBlank { stringResource(R.string.no_read_time) }
     val snackbarHost = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -121,7 +109,7 @@ fun StoryDetailScreen(
             type = "text/plain"
             putExtra(
                 Intent.EXTRA_TEXT,
-                "“${resolved.title}” — a story by ${resolved.author} (${resolved.readTime}) on Avalokan, a Nepal Heritage Explorer."
+                "“$shareTitle” — a story by $shareAuthor ($shareReadTime) on Avalokan, a Nepal Heritage Explorer."
             )
         }
         context.startActivity(Intent.createChooser(send, "Share story"))
@@ -163,11 +151,11 @@ fun StoryDetailScreen(
                                 .background(MaterialTheme.colorScheme.surfaceVariant),
                             contentAlignment = Alignment.Center
                         ) {
-                            val heroImage = item?.imageUrl
+                            val heroImage = storyItem.imageUrl
                             if (heroImage != null) {
                                 coil.compose.AsyncImage(
                                     model = heroImage,
-                                    contentDescription = resolved.title,
+                                    contentDescription = shareTitle,
                                     contentScale = androidx.compose.ui.layout.ContentScale.Crop,
                                     modifier = Modifier.fillMaxSize()
                                 )
@@ -191,7 +179,7 @@ fun StoryDetailScreen(
                         color = MaterialTheme.colorScheme.surface
                     ) {
                         StoryBody(
-                            story = resolved,
+                            story = story,
                             modifier = Modifier.padding(horizontal = 24.dp)
                                 .padding(top = 24.dp)
                         )
@@ -302,13 +290,16 @@ private fun StoryBody(story: StoryUi, modifier: Modifier = Modifier) {
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        DetailBadge(text = story.badge)
+        if (story.badge.isNotBlank()) {
+            DetailBadge(text = story.badge)
+        }
         Text(
-            text = story.title,
+            text = story.title.ifBlank { stringResource(R.string.untitled) },
             style = MaterialTheme.typography.headlineLarge,
             color = MaterialTheme.colorScheme.onSurface
         )
-        // Metadata: avatar + author, date, read time
+        // Metadata: avatar + author on one row, date and read time below.
+        val authorLabel = story.author.ifBlank { stringResource(R.string.no_author) }
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -319,26 +310,22 @@ private fun StoryBody(story: StoryUi, modifier: Modifier = Modifier) {
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = story.author.first().toString(),
+                    text = authorLabel.firstOrNull()?.uppercase() ?: "?",
                     style = MaterialTheme.typography.titleMedium,
                     color = PrimaryTeal
                 )
             }
             Text(
-                text = story.author,
+                text = authorLabel,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f, fill = false)
+                overflow = TextOverflow.Ellipsis
             )
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
-                text = "•",
-                style = MaterialTheme.typography.bodyMedium,
-                color = PrimaryTeal
-            )
-            Text(
-                text = story.date,
+                text = story.date.ifBlank { stringResource(R.string.no_date) },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -348,48 +335,24 @@ private fun StoryBody(story: StoryUi, modifier: Modifier = Modifier) {
                 color = PrimaryTeal
             )
             Text(
-                text = story.readTime,
+                text = story.readTime.ifBlank { stringResource(R.string.no_read_time) },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        story.body.forEach { paragraph ->
+        if (story.body.isEmpty()) {
             Text(
-                text = paragraph,
-                style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 24.sp),
+                text = stringResource(R.string.no_story_content),
+                style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
             )
-        }
-        // Interesting-fact callout on primary container
-        Card(
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer
-            )
-        ) {
-            Row(
-                modifier = Modifier.padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Icon(
-                    Icons.Default.Lightbulb,
-                    contentDescription = null,
-                    tint = AccentMarigold,
-                    modifier = Modifier.size(24.dp)
+        } else {
+            story.body.forEach { paragraph ->
+                Text(
+                    text = paragraph,
+                    style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 24.sp),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
                 )
-                androidx.compose.foundation.layout.Column {
-                    Text(
-                        text = "Interesting Fact",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = PrimaryTeal
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = story.fact,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
             }
         }
         Spacer(Modifier.height(Spacing.small))
@@ -400,6 +363,15 @@ private fun StoryBody(story: StoryUi, modifier: Modifier = Modifier) {
 @Composable
 private fun StoryDetailPreview() {
     AvalokanTheme {
-        StoryBody(story = StoryUi())
+        StoryBody(
+            story = StoryUi(
+                badge = "Cultural Insight",
+                title = "The Sacred Echoes of Boudhanath",
+                author = "Samrat Parajuli",
+                date = "Sept 12, 2024",
+                readTime = "6 min read",
+                body = listOf("Preview content for the story detail screen.")
+            )
+        )
     }
 }

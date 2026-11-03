@@ -252,11 +252,11 @@ private fun StoryCard(
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
-                    text = title ?: "The Sacred Echoes of Boudhanath",
+                    text = title?.takeIf { it.isNotBlank() } ?: stringResource(R.string.no_story_title),
                     style = MaterialTheme.typography.headlineLarge.copy(fontSize = 24.sp, lineHeight = 30.sp),
                     color = Color.White, maxLines = 3, overflow = TextOverflow.Ellipsis)
                 Text(
-                    text = subtitle ?: "Discover the spiritual significance...",
+                    text = subtitle?.takeIf { it.isNotBlank() } ?: stringResource(R.string.no_story_summary),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.White.copy(0.85f), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Spacer(Modifier.height(2.dp))
@@ -312,10 +312,8 @@ private fun HistoricalGems(
                 val place = historical[index]
                 PlaceCard(
                     title = place.name,
-                    subtitle = place.description,
-                    badge = place.badge.ifBlank {
-                        if (index == 0) "EST. 3D CENTURY" else "2500+ YRS"
-                    },
+                    subtitle = place.description.ifBlank { stringResource(R.string.no_description) },
+                    badge = place.badge,
                     imageUrl = place.imageUrl,
                     onCardClick = { onPlaceClick(place.id) }
                 )
@@ -370,8 +368,8 @@ private fun RecentDiscoveries(
             .forEach { place ->
                 com.example.avalokan.ui.components.HeritageCard(
                     title = place.name,
-                    subtitle = place.meta,
-                    badge = if (place.id == "boudha-stupa") "NEW" else "TRENDING",
+                    subtitle = place.meta.ifBlank { stringResource(R.string.no_location) },
+                    badge = place.badge.takeIf { it.isNotBlank() },
                     rating = place.rating,
                     imageUrl = place.imageUrl,
                     onCardClick = { onPlaceClick(place.id) }

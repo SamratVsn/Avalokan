@@ -217,7 +217,7 @@ private fun UserSection(
                 color = TextPrimary
             )
             Text(
-                text = bio,
+                text = bio.ifBlank { stringResource(R.string.no_bio) },
                 style = MaterialTheme.typography.bodyMedium,
                 color = TextSecondary
             )
@@ -292,8 +292,9 @@ private fun HeritageCollection(
             ) {
                 savedPlaces.take(2).forEach { place ->
                     CollectionCards(
-                        place.name,
-                        place.meta.substringBefore("•").trim().ifBlank { "Nepal" },
+                        place.name.ifBlank { stringResource(R.string.untitled) },
+                        place.meta.substringBefore("•").trim()
+                            .ifBlank { stringResource(R.string.no_location) },
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -388,26 +389,25 @@ private fun FavoriteEventRow(event: Event) {
             }
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
-                    text = event.title,
+                    text = event.title.ifBlank { stringResource(R.string.untitled) },
                     style = MaterialTheme.typography.titleMedium.copy(fontSize = 14.sp),
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = event.meta.substringBefore("•").trim().ifBlank { "Nepal" },
+                    text = event.meta.substringBefore("•").trim()
+                        .ifBlank { stringResource(R.string.no_location) },
                     style = MaterialTheme.typography.bodyMedium.copy(fontSize = 12.sp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                if (event.date.isNotBlank()) {
-                    Text(
-                        text = event.date,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
+                Text(
+                    text = event.date.ifBlank { stringResource(R.string.no_date) },
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
         }
     }

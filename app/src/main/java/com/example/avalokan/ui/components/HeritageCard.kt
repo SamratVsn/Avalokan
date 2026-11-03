@@ -32,12 +32,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.example.avalokan.R
 import com.example.avalokan.ui.theme.BadgeShape
 import com.example.avalokan.ui.theme.SageSoft
 
@@ -184,7 +186,7 @@ private fun HeritageTexts(
     descriptionLines: Int
 ) {
     Text(
-        text = title,
+        text = title.ifBlank { stringResource(R.string.untitled) },
         style = MaterialTheme.typography.titleMedium,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis
@@ -196,7 +198,7 @@ private fun HeritageTexts(
         maxLines = 1,
         overflow = TextOverflow.Ellipsis
     )
-    if (description != null) {
+    if (!description.isNullOrBlank()) {
         Text(
             text = description,
             style = MaterialTheme.typography.bodyMedium,
@@ -204,7 +206,7 @@ private fun HeritageTexts(
             overflow = TextOverflow.Ellipsis
         )
     }
-    if (badge != null || rating != null) {
+    if (!badge.isNullOrBlank() || !rating.isNullOrBlank()) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -222,7 +224,7 @@ private fun HeritageTexts(
                     )
                 }
             }
-            if (rating != null) {
+            if (!rating.isNullOrBlank()) {
                 Spacer(Modifier.weight(1f, fill = false))
                 Icon(
                     Icons.Default.Star,

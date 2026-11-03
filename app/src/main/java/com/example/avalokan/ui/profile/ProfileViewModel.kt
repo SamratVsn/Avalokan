@@ -70,10 +70,10 @@ class ProfileViewModel @Inject constructor(
         remote?.displayName?.ifBlank { local } ?: local
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "Guest")
 
-    private val _bio = MutableStateFlow("Exploring the heritage of Nepal")
+    private val _bio = MutableStateFlow("")
     val bio: StateFlow<String> = combine(_bio, remoteProfile) { local, remote ->
         remote?.takeIf { it.bio.isNotBlank() }?.bio ?: local
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "Exploring the heritage of Nepal")
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
 
     /**
      * Local avatars win: they are the only ones this device can actually read.

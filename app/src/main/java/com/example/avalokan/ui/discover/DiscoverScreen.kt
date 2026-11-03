@@ -415,10 +415,10 @@ private fun SearchPlaceCard(
 ){
     com.example.avalokan.ui.components.HeritageCard(
         title = title,
-        subtitle = meta.uppercase(),
+        subtitle = meta.ifBlank { stringResource(R.string.no_location) }.uppercase(),
         subtitleStyle = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
-        rating = rating,
-        description = desc,
+        rating = rating.takeIf { it.isNotBlank() },
+        description = desc.ifBlank { stringResource(R.string.no_description) },
         imageHeight = 180.dp,
         imageCorner = 28.dp,
         imageUrl = imageUrl,

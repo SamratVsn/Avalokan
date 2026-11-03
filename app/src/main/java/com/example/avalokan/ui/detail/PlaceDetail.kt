@@ -58,12 +58,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.launch
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.avalokan.R
 import com.example.avalokan.ui.theme.AccentMarigold
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
@@ -97,8 +99,7 @@ fun PlaceDetailScreen(
     val placeTitle = place?.name.orEmpty()
     // Location comes from the place itself ("Lalitpur • Historical Site"),
     // never a hardcoded city — places can be anywhere in Nepal.
-    val placeLocation = place?.meta?.substringBefore("•")?.trim()
-        ?.ifBlank { "Nepal" } ?: "Nepal"
+    val placeLocation = place?.meta?.substringBefore("•")?.trim().orEmpty()
     val onShareClick = {
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
@@ -110,7 +111,11 @@ fun PlaceDetailScreen(
         context.startActivity(Intent.createChooser(intent, "Share place"))
     }
     val onDirectionsClick = {
-        val query = Uri.encode("$placeTitle, $placeLocation, Nepal")
+        val query = Uri.encode(
+            listOf(placeTitle, placeLocation, "Nepal")
+                .filter { it.isNotBlank() }
+                .joinToString(", ")
+        )
         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=$query")))
     }
     DetailBody(
@@ -147,9 +152,9 @@ private fun PlaceDetailContent(
     rating: String,
     description: String,
     badge: String = "",
-    entryFee: String = "Rs. 100",
-    bestTime: String = "Oct – Mar",
-    hours: String = "9 AM – 5 PM",
+    entryFee: String = "",
+    bestTime: String = "",
+    hours: String = "",
     imageUrl: String? = null,
     isSaved: Boolean,
     onSaveClick: () -> Unit,
@@ -271,11 +276,15 @@ private fun PlaceDetailContent(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
-                                text = title,
+                                text = title.ifBlank { stringResource(R.string.untitled) },
                                 style = MaterialTheme.typography.headlineMedium,
                                 modifier = Modifier.weight(1f)
                             )
-                            DetailBadge(text = "$rating ★")
+                            if (rating.isNotBlank()) {
+                                DetailBadge(text = "$rating ★")
+                            } else {
+                                DetailBadge(text = stringResource(R.string.no_rating))
+                            }
                         }
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             if (badge.isNotBlank()) {
@@ -285,12 +294,13 @@ private fun PlaceDetailContent(
                     }
                 }
                 item {
-                    // 2x2 quick-stats grid (values from data, spec defaults as fallback)
+                    // 2x2 quick-stats grid, with an explicit notice for missing values
+                    val notAvailable = stringResource(R.string.not_available)
                     val stats = listOf(
-                        StatUi(Icons.Default.ConfirmationNumber, "Entry Fee", entryFee),
-                        StatUi(Icons.Default.CalendarMonth, "Best Time", bestTime),
-                        StatUi(Icons.Default.Schedule, "Hours", hours),
-                        StatUi(Icons.Default.Star, "Rating", rating)
+                        StatUi(Icons.Default.ConfirmationNumber, "Entry Fee", entryFee.ifBlank { notAvailable }),
+                        StatUi(Icons.Default.CalendarMonth, "Best Time", bestTime.ifBlank { notAvailable }),
+                        StatUi(Icons.Default.Schedule, "Hours", hours.ifBlank { notAvailable }),
+                        StatUi(Icons.Default.Star, "Rating", rating.ifBlank { stringResource(R.string.no_rating) })
                     )
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2),
@@ -371,7 +381,7 @@ private fun DescriptionSection(description: String, modifier: Modifier = Modifie
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
         DetailSectionTitle(text = "About this Place")
         Text(
-            text = description,
+            text = description.ifBlank { stringResource(R.string.no_description) },
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
         )
