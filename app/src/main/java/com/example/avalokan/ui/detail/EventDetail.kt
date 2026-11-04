@@ -84,15 +84,13 @@ fun EventDetailScreen(
         viewModel.events.collect { event ->
             when (event) {
                 EventDetailEvent.NavigateBack -> onBackClick()
-                EventDetailEvent.Booked -> scope.launch {
-                    snackbarHost.showSnackbar("Booked! See you there.")
-                }
             }
         }
     }
 
     val eventTitle = event?.title.orEmpty()
     val shareTitle = eventTitle.ifBlank { stringResource(R.string.untitled) }
+    val bookingUnavailable = stringResource(R.string.booking_unavailable)
     val eventType = EventType.from(event?.type)
     val onShareClick = {
         val intent = Intent(Intent.ACTION_SEND).apply {
@@ -120,7 +118,7 @@ fun EventDetailScreen(
             onBookClick = {
                 val link = event?.joinLink.orEmpty()
                 if (!context.openUrlInBrowser(link)) {
-                    viewModel.onBookEvent()
+                    scope.launch { snackbarHost.showSnackbar(bookingUnavailable) }
                 }
             },
             snackbarHost = snackbarHost,

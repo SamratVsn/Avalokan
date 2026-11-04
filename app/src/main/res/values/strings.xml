@@ -89,4 +89,5 @@
     <string name="no_story_title">No story available yet</string>
     <string name="no_story_summary">Check back soon for a featured heritage story.</string>
     <string name="go_to_booking_page">Go to booking page</string>
+    <string name="booking_unavailable">Booking page not available</string>
 </resources>

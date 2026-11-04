@@ -41,10 +41,6 @@ class EventDetailViewModel @Inject constructor(
         viewModelScope.launch { userPreferences.setFavoriteEventIds(current) }
     }
 
-    fun onBookEvent() {
-        viewModelScope.launch { _events.emit(EventDetailEvent.Booked) }
-    }
-
     fun onBackClick() {
         viewModelScope.launch { _events.emit(EventDetailEvent.NavigateBack) }
     }
@@ -52,5 +48,4 @@ class EventDetailViewModel @Inject constructor(
 
 sealed interface EventDetailEvent {
     data object NavigateBack : EventDetailEvent
-    data object Booked : EventDetailEvent
 }
