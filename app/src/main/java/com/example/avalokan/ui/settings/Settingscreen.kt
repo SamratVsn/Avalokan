@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,19 +27,17 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Login
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -64,7 +61,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -193,33 +189,33 @@ private fun SettingsContent(
             )
         }
         Spacer(Modifier.height(12.dp))
-        if (uiState.isLoggedIn) {
-            Column(
-                modifier = Modifier.weight(1f)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                AccountSetting(
-                    notificationsChecked = uiState.notificationsEnabled && notificationsGranted,
-                    onNotificationsChange = onNotificationsChange,
-                    onEditProfileClick = onEditProfileClick,
-                    modifier = Modifier.padding(horizontal = Spacing.sidePadding)
-                )
-                AppearanceSection(
-                    themeChoice = uiState.themeChoice,
-                    onThemeCycle = onThemeCycle,
-                    modifier = Modifier.padding(horizontal = Spacing.sidePadding)
-                )
-                SuppNFeed(
-                    onSendSuggestions = onSendSuggestions,
-                    onAboutClick = onAboutClick,
-                    modifier = Modifier.padding(horizontal = Spacing.sidePadding)
-                )
-                StorageSection(
-                    onClearCache = { showClearDialog = true },
-                    onResetSettings = { showResetDialog = true },
-                    modifier = Modifier.padding(horizontal = Spacing.sidePadding)
-                )
+        Column(
+            modifier = Modifier.weight(1f)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            AccountSetting(
+                notificationsChecked = uiState.notificationsEnabled && notificationsGranted,
+                onNotificationsChange = onNotificationsChange,
+                onEditProfileClick = onEditProfileClick,
+                modifier = Modifier.padding(horizontal = Spacing.sidePadding)
+            )
+            AppearanceSection(
+                themeChoice = uiState.themeChoice,
+                onThemeCycle = onThemeCycle,
+                modifier = Modifier.padding(horizontal = Spacing.sidePadding)
+            )
+            SuppNFeed(
+                onSendSuggestions = onSendSuggestions,
+                onAboutClick = onAboutClick,
+                modifier = Modifier.padding(horizontal = Spacing.sidePadding)
+            )
+            StorageSection(
+                onClearCache = { showClearDialog = true },
+                onResetSettings = { showResetDialog = true },
+                modifier = Modifier.padding(horizontal = Spacing.sidePadding)
+            )
+            if (uiState.isLoggedIn) {
                 SettingCard(
                     icon = Icons.AutoMirrored.Filled.Logout,
                     iconBg = DangerBg,
@@ -229,27 +225,31 @@ private fun SettingsContent(
                     onClick = { showLogoutDialog = true },
                     modifier = Modifier.padding(horizontal = Spacing.sidePadding)
                 )
+            } else {
+                SettingCard(
+                    icon = Icons.AutoMirrored.Filled.Login,
+                    iconBg = SageSoft,
+                    iconTint = PrimaryGreen,
+                    settingName = stringResource(R.string.logIn),
+                    nameColor = PrimaryGreen,
+                    onClick = onLoginClick,
+                    modifier = Modifier.padding(horizontal = Spacing.sidePadding)
+                )
             }
-            Spacer(Modifier.height(16.dp))
-            Text(
-                text = "Crafted with ❤ for Nepal's Heritage",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-            Text(
-                text = "Version 1.0.4",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-        } else {
-            LockedSettings(
-                onLoginClick = onLoginClick,
-                modifier = Modifier.weight(1f)
-                    .padding(horizontal = Spacing.sidePadding)
-            )
         }
+        Spacer(Modifier.height(16.dp))
+        Text(
+            text = "Crafted with ❤ for Nepal's Heritage",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+        Text(
+            text = "Version 1.0.4",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
         if (showClearDialog) {
             AlertDialog(
                 onDismissRequest = { showClearDialog = false },
@@ -297,58 +297,6 @@ private fun SettingsContent(
                     TextButton(onClick = { showLogoutDialog = false }) { Text(text = "Cancel") }
                 }
             )
-        }
-    }
-}
-
-@Composable
-private fun LockedSettings(
-    onLoginClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Box(
-            modifier = Modifier.size(72.dp)
-                .background(color = SageSoft, shape = CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                Icons.Default.Lock,
-                contentDescription = null,
-                tint = PrimaryGreen,
-                modifier = Modifier.size(30.dp)
-            )
-        }
-        Spacer(Modifier.height(Spacing.medium))
-        Text(
-            text = "Settings are locked",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(Modifier.height(Spacing.extraSmall))
-        Text(
-            text = "Log in to manage your account, appearance, and data preferences.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
-        Spacer(Modifier.height(Spacing.large))
-        Button(
-            onClick = onLoginClick,
-            modifier = Modifier.fillMaxWidth().height(48.dp),
-            shape = RoundedCornerShape(16.dp)
-        ) {
-            Icon(
-                Icons.Default.Login,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp)
-            )
-            Spacer(Modifier.width(8.dp))
-            Text(text = stringResource(R.string.logIn), fontWeight = FontWeight.Bold)
         }
     }
 }
