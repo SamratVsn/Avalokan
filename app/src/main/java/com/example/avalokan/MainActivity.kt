@@ -10,13 +10,13 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.example.avalokan.data.local.PreferencesStore
-import com.example.avalokan.ui.settings.SettingsViewModel
+import com.example.avalokan.ui.MainViewModel
 import com.example.avalokan.ui.theme.AvalokanTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val settingsViewModel: SettingsViewModel by viewModels()
+    private val mainViewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -26,10 +26,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val uiState by settingsViewModel.uiState.collectAsState()
+            val themeChoice by mainViewModel.themeChoice.collectAsState()
             val systemDark = isSystemInDarkTheme()
             AvalokanTheme(
-                darkTheme = when (uiState.themeChoice) {
+                darkTheme = when (themeChoice) {
                     PreferencesStore.THEME_LIGHT -> false
                     PreferencesStore.THEME_DARK -> true
                     else -> systemDark
