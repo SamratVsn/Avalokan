@@ -5,9 +5,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,6 +30,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -50,25 +54,27 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withLink
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import com.example.avalokan.R
+import com.example.avalokan.domain.model.Story
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.DangerRed
 import com.example.avalokan.ui.theme.PrimaryTeal
 import com.example.avalokan.ui.theme.Spacing
-
-private data class StoryUi(
-    val badge: String,
-    val title: String,
-    val author: String,
-    val date: String,
-    val readTime: String,
-    val body: List<String>
-)
 
 @Composable
 fun StoryDetailScreen(
@@ -85,20 +91,17 @@ fun StoryDetailScreen(
         }
         return
     }
-    val story = StoryUi(
-        badge = storyItem.badge,
-        title = storyItem.title,
-        author = storyItem.author,
-        date = storyItem.date,
-        readTime = storyItem.readTime,
-        body = storyItem.description
-            .split("\n\n")
-            .map { it.trim() }
-            .filter { it.isNotEmpty() }
+    val story = storyItem
+    val blocks = remember(story.description) { parseStoryBody(story.description) }
+    val fallbackTitle = stringResource(R.string.untitled)
+    val shareTitle = story.title.ifBlank { fallbackTitle }
+    val shareText = buildStoryShareText(
+        title = story.title,
+        author = story.author,
+        readTime = story.readTime,
+        fallbackTitle = fallbackTitle,
     )
-    val shareTitle = story.title.ifBlank { stringResource(R.string.untitled) }
-    val shareAuthor = story.author.ifBlank { stringResource(R.string.no_author) }
-    val shareReadTime = story.readTime.ifBlank { stringResource(R.string.no_read_time) }
+    val shareChooserTitle = stringResource(R.string.share_story)
     val snackbarHost = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -107,12 +110,9 @@ fun StoryDetailScreen(
     val onShareClick = {
         val send = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
-            putExtra(
-                Intent.EXTRA_TEXT,
-                "“$shareTitle” — a story by $shareAuthor ($shareReadTime) on Avalokan, a Nepal Heritage Explorer."
-            )
+            putExtra(Intent.EXTRA_TEXT, shareText)
         }
-        context.startActivity(Intent.createChooser(send, "Share story"))
+        context.startActivity(Intent.createChooser(send, shareChooserTitle))
     }
     Scaffold(
         containerColor = MaterialTheme.colorScheme.surface,
@@ -180,6 +180,7 @@ fun StoryDetailScreen(
                     ) {
                         StoryBody(
                             story = story,
+                            blocks = blocks,
                             modifier = Modifier.padding(horizontal = 24.dp)
                                 .padding(top = 24.dp)
                         )
@@ -285,8 +286,13 @@ private fun StoryBarAction(
 }
 
 @Composable
-private fun StoryBody(story: StoryUi, modifier: Modifier = Modifier) {
-    androidx.compose.foundation.layout.Column(
+private fun StoryBody(
+    story: Story,
+    blocks: List<StoryBlock>,
+    modifier: Modifier = Modifier,
+) {
+    val metadata = StoryMetadata.from(story)
+    Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -298,80 +304,290 @@ private fun StoryBody(story: StoryUi, modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.headlineLarge,
             color = MaterialTheme.colorScheme.onSurface
         )
-        // Metadata: avatar + author on one row, date and read time below.
-        val authorLabel = story.author.ifBlank { stringResource(R.string.no_author) }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Box(
-                modifier = Modifier.size(32.dp)
-                    .background(PrimaryTeal.copy(alpha = 0.12f), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = authorLabel.firstOrNull()?.uppercase() ?: "?",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = PrimaryTeal
-                )
-            }
-            Text(
-                text = authorLabel,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+        // Only render details the story actually contains. A blank field means
+        // "not recorded", so the row disappears instead of saying "not available".
+        metadata.author?.let { StoryAuthor(it) }
+        if (metadata.hasDateOrReadTime) {
+            StoryDateAndReadTime(date = metadata.date, readTime = metadata.readTime)
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        metadata.curator?.let { curator ->
             Text(
-                text = story.date.ifBlank { stringResource(R.string.no_date) },
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                text = "•",
-                style = MaterialTheme.typography.bodyMedium,
-                color = PrimaryTeal
-            )
-            Text(
-                text = story.readTime.ifBlank { stringResource(R.string.no_read_time) },
-                style = MaterialTheme.typography.bodyMedium,
+                text = stringResource(R.string.story_curated_by, curator),
+                style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        if (story.body.isEmpty()) {
+        if (blocks.isEmpty()) {
             Text(
                 text = stringResource(R.string.no_story_content),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
             )
         } else {
-            story.body.forEach { paragraph ->
-                Text(
-                    text = paragraph,
-                    style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 24.sp),
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
-                )
-            }
+            StoryBlocks(blocks)
+        }
+        if (metadata.hasProvenance) {
+            StoryProvenance(metadata)
         }
         Spacer(Modifier.height(Spacing.small))
     }
 }
+
+@Composable
+private fun StoryAuthor(author: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Box(
+            modifier = Modifier.size(32.dp)
+                .background(PrimaryTeal.copy(alpha = 0.12f), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = author.firstOrNull()?.uppercase() ?: "",
+                style = MaterialTheme.typography.titleMedium,
+                color = PrimaryTeal
+            )
+        }
+        Text(
+            text = author,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
+private fun StoryDateAndReadTime(date: String?, readTime: String?) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        date?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        if (date != null && readTime != null) {
+            Text(
+                text = "•",
+                style = MaterialTheme.typography.bodyMedium,
+                color = PrimaryTeal
+            )
+        }
+        readTime?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun StoryBlocks(blocks: List<StoryBlock>) {
+    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        blocks.forEach { block ->
+            when (block) {
+                is StoryBlock.Heading -> StoryHeading(block)
+                is StoryBlock.Paragraph -> StoryParagraph(block.spans)
+                is StoryBlock.BulletList -> StoryList(block.items, ordered = false)
+                is StoryBlock.NumberedList -> StoryList(block.items, ordered = true)
+                is StoryBlock.Quote -> StoryQuote(block.spans)
+                StoryBlock.Divider -> HorizontalDivider(
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun StoryHeading(block: StoryBlock.Heading) {
+    val style = when (block.level) {
+        1 -> MaterialTheme.typography.headlineMedium
+        2 -> MaterialTheme.typography.headlineSmall
+        3 -> MaterialTheme.typography.titleLarge
+        else -> MaterialTheme.typography.titleMedium
+    }
+    Text(
+        text = block.spans.toAnnotatedString(MaterialTheme.colorScheme.primary),
+        style = style,
+        color = MaterialTheme.colorScheme.onSurface
+    )
+}
+
+@Composable
+private fun StoryParagraph(spans: List<StorySpan>) {
+    Text(
+        text = spans.toAnnotatedString(MaterialTheme.colorScheme.primary),
+        style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
+    )
+}
+
+@Composable
+private fun StoryList(items: List<List<StorySpan>>, ordered: Boolean) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        items.forEachIndexed { index, item ->
+            Row(
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = if (ordered) "${index + 1}." else "•",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = PrimaryTeal
+                )
+                Text(
+                    text = item.toAnnotatedString(MaterialTheme.colorScheme.primary),
+                    style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 24.sp),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun StoryQuote(spans: List<StorySpan>) {
+    Row(
+        modifier = Modifier.fillMaxWidth()
+            .height(IntrinsicSize.Min)
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Box(
+            modifier = Modifier
+                .width(4.dp)
+                .fillMaxHeight()
+                .background(PrimaryTeal.copy(alpha = 0.7f))
+        )
+        Text(
+            text = spans.toAnnotatedString(MaterialTheme.colorScheme.primary),
+            style = MaterialTheme.typography.bodyLarge.copy(
+                lineHeight = 24.sp,
+                fontStyle = FontStyle.Italic
+            ),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
+        )
+    }
+}
+
+@Composable
+private fun StoryProvenance(metadata: StoryMetadata) {
+    val sourceLabel = metadata.sourceLabel ?: metadata.sourceUrl
+    val safeUrl = metadata.sourceUrl?.takeIf(::isSafeStoryLink)
+    val sourcePrefix = stringResource(R.string.story_source) + ": "
+    val linkStyle = SpanStyle(
+        color = MaterialTheme.colorScheme.primary,
+        textDecoration = TextDecoration.Underline
+    )
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        if (sourceLabel != null) {
+            val source = buildAnnotatedString {
+                append(sourcePrefix)
+                if (safeUrl != null) {
+                    withLink(
+                        LinkAnnotation.Url(
+                            url = safeUrl,
+                            styles = TextLinkStyles(style = linkStyle)
+                        )
+                    ) {
+                        append(sourceLabel)
+                    }
+                } else {
+                    append(sourceLabel)
+                }
+            }
+            Text(
+                text = source,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        metadata.lastVerifiedAt?.let { verified ->
+            Text(
+                text = stringResource(R.string.story_last_verified, verified),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+private fun List<StorySpan>.toAnnotatedString(linkColor: Color): AnnotatedString =
+    buildAnnotatedString {
+        this@toAnnotatedString.forEach { span ->
+            val baseStyle = SpanStyle(
+                fontWeight = if (span.bold) FontWeight.SemiBold else null,
+                fontStyle = if (span.italic) FontStyle.Italic else null
+            )
+            val url = span.link
+            if (url != null) {
+                withLink(
+                    LinkAnnotation.Url(
+                        url = url,
+                        styles = TextLinkStyles(
+                            style = baseStyle.copy(
+                                color = linkColor,
+                                textDecoration = TextDecoration.Underline
+                            )
+                        )
+                    )
+                ) {
+                    append(span.text)
+                }
+            } else {
+                withStyle(baseStyle) {
+                    append(span.text)
+                }
+            }
+        }
+    }
 
 @Preview
 @Composable
 private fun StoryDetailPreview() {
     AvalokanTheme {
         StoryBody(
-            story = StoryUi(
-                badge = "Cultural Insight",
+            story = Story(
+                id = "preview",
                 title = "The Sacred Echoes of Boudhanath",
+                description = "Preview",
+                badge = "Cultural Insight",
                 author = "Samrat Parajuli",
                 date = "Sept 12, 2024",
                 readTime = "6 min read",
-                body = listOf("Preview content for the story detail screen.")
-            )
+                curator = "Avalokan heritage desk",
+                sourceLabel = "Department of Archaeology",
+                sourceUrl = "https://example.com/source",
+                lastVerifiedAt = "2026-10-01"
+            ),
+            blocks = parseStoryBody(
+                """
+                ## A living mandala
+
+                Prayer wheels and butter lamps fill the square.
+
+                - Walk clockwise
+                - **Remove shoes** before entering
+
+                > The stupa is a mandala of the mind.
+
+                [Read the source](https://example.com/source)
+                """.trimIndent()
+            ),
+            modifier = Modifier.padding(24.dp)
         )
     }
 }

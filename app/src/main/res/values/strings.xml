@@ -102,4 +102,10 @@
     <string name="no_story_summary">Check back soon for a featured heritage story.</string>
     <string name="go_to_booking_page">Go to booking page</string>
     <string name="booking_unavailable">Booking page not available</string>
+
+    <!-- Story detail -->
+    <string name="share_story">Share story</string>
+    <string name="story_curated_by">Curated by %1$s</string>
+    <string name="story_source">Source</string>
+    <string name="story_last_verified">Last verified: %1$s</string>
 </resources>
