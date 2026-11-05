@@ -14,4 +14,21 @@ data class Place(
     val badge: String = "",
     val featured: Boolean = false,
     val imageUrl: String? = null,
+    // Heritage context. Every field is optional so older documents keep working.
+    val province: String = "",
+    val district: String = "",
+    val latitude: Double? = null,
+    val longitude: Double? = null,
+    val era: String = "",
+    val unescoStatus: String = "",
+    val heritageType: String = "",
+    val significance: String = "",
+    val livingHeritage: Boolean = false,
+    val etiquette: String = "",
+    val accessibility: String = "",
+    // Provenance. Blank means "not recorded", never "verified".
+    val sourceLabel: String = "",
+    val sourceUrl: String = "",
+    val lastVerifiedAt: String = "",
+    val verificationStatus: String = "",
 )

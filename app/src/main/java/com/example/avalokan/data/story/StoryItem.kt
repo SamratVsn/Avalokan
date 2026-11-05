@@ -17,5 +17,13 @@ data class StoryItem(
     val author: String = "",
     val date: String = "",
     val readTime: String = "",
-    val badge: String = ""
+    val badge: String = "",
+    // Editorial provenance. Blank means "not recorded", never "verified".
+    val curator: String = "",
+    val sourceLabel: String = "",
+    val sourceUrl: String = "",
+    val lastVerifiedAt: String = "",
+    val verificationStatus: String = "",
+    // Places referenced by this story, stored through the List<String> converter.
+    val placeIds: List<String> = emptyList()
 )

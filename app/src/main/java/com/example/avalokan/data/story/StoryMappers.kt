@@ -16,4 +16,10 @@ internal fun StoryItem.toDomain(): Story = Story(
     date = date,
     readTime = readTime,
     badge = badge,
+    curator = curator,
+    sourceLabel = sourceLabel,
+    sourceUrl = sourceUrl,
+    lastVerifiedAt = lastVerifiedAt,
+    verificationStatus = verificationStatus,
+    placeIds = placeIds,
 )

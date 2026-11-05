@@ -32,7 +32,22 @@ class DomainMappingTest {
             hours = "9 AM – 5 PM",
             badge = "UNESCO Site",
             featured = true,
-            imageUrl = "https://example.com/place.jpg"
+            imageUrl = "https://example.com/place.jpg",
+            province = "Bagmati",
+            district = "Kathmandu",
+            latitude = 27.7043,
+            longitude = 85.3075,
+            era = "Malla period",
+            unescoStatus = "World Heritage",
+            heritageType = "Durbar square",
+            significance = "Royal palace complex",
+            livingHeritage = true,
+            etiquette = "Remove shoes before entering temples.",
+            accessibility = "Step-free entry to the outer square.",
+            sourceLabel = "Department of Archaeology",
+            sourceUrl = "https://example.com/source",
+            lastVerifiedAt = "2026-10-01",
+            verificationStatus = "VERIFIED"
         )
 
         assertEquals(
@@ -48,7 +63,22 @@ class DomainMappingTest {
                 hours = "9 AM – 5 PM",
                 badge = "UNESCO Site",
                 featured = true,
-                imageUrl = "https://example.com/place.jpg"
+                imageUrl = "https://example.com/place.jpg",
+                province = "Bagmati",
+                district = "Kathmandu",
+                latitude = 27.7043,
+                longitude = 85.3075,
+                era = "Malla period",
+                unescoStatus = "World Heritage",
+                heritageType = "Durbar square",
+                significance = "Royal palace complex",
+                livingHeritage = true,
+                etiquette = "Remove shoes before entering temples.",
+                accessibility = "Step-free entry to the outer square.",
+                sourceLabel = "Department of Archaeology",
+                sourceUrl = "https://example.com/source",
+                lastVerifiedAt = "2026-10-01",
+                verificationStatus = "VERIFIED"
             ),
             entity.toDomain()
         )
@@ -67,7 +97,16 @@ class DomainMappingTest {
             date = "Sept 17, 2026",
             imageUrl = "https://example.com/event.jpg",
             featured = true,
-            joinLink = "https://example.com/join"
+            joinLink = "https://example.com/join",
+            eventKind = "FESTIVAL",
+            locality = "NATIONWIDE",
+            ticketing = "FREE",
+            placeId = "kathmandu-durbar",
+            storyId = "boudhanath",
+            sourceLabel = "Kathmandu Metropolitan City",
+            sourceUrl = "https://example.com/event-source",
+            lastVerifiedAt = "2026-09-20",
+            verificationStatus = "VERIFIED"
         )
 
         assertEquals(
@@ -82,7 +121,16 @@ class DomainMappingTest {
                 date = "Sept 17, 2026",
                 imageUrl = "https://example.com/event.jpg",
                 featured = true,
-                joinLink = "https://example.com/join"
+                joinLink = "https://example.com/join",
+                eventKind = "FESTIVAL",
+                locality = "NATIONWIDE",
+                ticketing = "FREE",
+                placeId = "kathmandu-durbar",
+                storyId = "boudhanath",
+                sourceLabel = "Kathmandu Metropolitan City",
+                sourceUrl = "https://example.com/event-source",
+                lastVerifiedAt = "2026-09-20",
+                verificationStatus = "VERIFIED"
             ),
             entity.toDomain()
         )
@@ -99,7 +147,13 @@ class DomainMappingTest {
             author = "Samrat Parajuli",
             date = "Sept 12, 2026",
             readTime = "6 min read",
-            badge = "Cultural Insight"
+            badge = "Cultural Insight",
+            curator = "Avalokan editorial desk",
+            sourceLabel = "Interview with local caretakers",
+            sourceUrl = "https://example.com/story-source",
+            lastVerifiedAt = "2026-09-12",
+            verificationStatus = "VERIFIED",
+            placeIds = listOf("boudhanath", "kathmandu-durbar")
         )
 
         assertEquals(
@@ -112,7 +166,13 @@ class DomainMappingTest {
                 author = "Samrat Parajuli",
                 date = "Sept 12, 2026",
                 readTime = "6 min read",
-                badge = "Cultural Insight"
+                badge = "Cultural Insight",
+                curator = "Avalokan editorial desk",
+                sourceLabel = "Interview with local caretakers",
+                sourceUrl = "https://example.com/story-source",
+                lastVerifiedAt = "2026-09-12",
+                verificationStatus = "VERIFIED",
+                placeIds = listOf("boudhanath", "kathmandu-durbar")
             ),
             entity.toDomain()
         )

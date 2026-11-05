@@ -13,4 +13,16 @@ data class Event(
     val imageUrl: String? = null,
     val featured: Boolean = false,
     val joinLink: String = "",
+    // Classification. Empty values mean "not classified", not a guessed type.
+    val eventKind: String = "",
+    val locality: String = "",
+    val ticketing: String = "",
+    // Optional links to related heritage content.
+    val placeId: String = "",
+    val storyId: String = "",
+    // Provenance. Blank means "not recorded", never "verified".
+    val sourceLabel: String = "",
+    val sourceUrl: String = "",
+    val lastVerifiedAt: String = "",
+    val verificationStatus: String = "",
 )

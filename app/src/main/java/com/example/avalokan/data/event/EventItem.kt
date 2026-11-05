@@ -23,5 +23,20 @@ data class EventItem(
     val imageUrl: String? = null,
     val featured: Boolean = false,
 //     Registration or ticket URL from Firestore (`joinLink`).
-    val joinLink: String = ""
+    val joinLink: String = "",
+    // Classification. Empty values mean "not classified", not a guessed type.
+    // eventKind: FESTIVAL / WORKSHOP / COMMUNITY / TECH
+    val eventKind: String = "",
+    // locality: NATIONWIDE / LOCAL / REGIONAL
+    val locality: String = "",
+    // ticketing: FREE / TICKETED / DONATION
+    val ticketing: String = "",
+    // Optional links to related heritage content.
+    val placeId: String = "",
+    val storyId: String = "",
+    // Provenance. Blank means "not recorded", never "verified".
+    val sourceLabel: String = "",
+    val sourceUrl: String = "",
+    val lastVerifiedAt: String = "",
+    val verificationStatus: String = ""
 )

@@ -24,6 +24,27 @@ import kotlin.coroutines.resumeWithException
 /** Console fields may be stored as String or Number — coerce either. */
 internal fun Any?.asText(): String = this?.toString().orEmpty()
 
+/** Coordinates may arrive as a Double, an integral Long, or a numeric String. */
+internal fun Any?.asDoubleOrNull(): Double? = when (this) {
+    null -> null
+    is Number -> toDouble()
+    is String -> trim().toDoubleOrNull()
+    else -> null
+}
+
+/**
+ * Related ids may be stored as a Firestore array or as a single id string.
+ * Blank entries are dropped so an empty result always means "no links".
+ */
+internal fun Any?.asStringList(): List<String> = when (this) {
+    null -> emptyList()
+    is List<*> -> mapNotNull { value ->
+        value?.toString()?.trim()?.takeIf { it.isNotEmpty() }
+    }
+    is String -> trim().takeIf { it.isNotEmpty() }?.let(::listOf).orEmpty()
+    else -> emptyList()
+}
+
 internal fun DocumentSnapshot.textField(name: String): String = get(name).asText()
 
 /**

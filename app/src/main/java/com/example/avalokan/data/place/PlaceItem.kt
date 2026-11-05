@@ -21,5 +21,24 @@ data class PlaceItem(
     val badge: String = "",
     val featured: Boolean = false,
     // Getting url to show the image, null if there's nothing in the database
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+    // Heritage context. Every field is optional so older documents keep working.
+    val province: String = "",
+    val district: String = "",
+    val latitude: Double? = null,
+    val longitude: Double? = null,
+    val era: String = "",
+    // Free-form so values such as "World Heritage" or "Tentative List" survive.
+    val unescoStatus: String = "",
+    val heritageType: String = "",
+    // Short editorial answer to "why does this place matter?".
+    val significance: String = "",
+    val livingHeritage: Boolean = false,
+    val etiquette: String = "",
+    val accessibility: String = "",
+    // Provenance. Blank means "not recorded", never "verified".
+    val sourceLabel: String = "",
+    val sourceUrl: String = "",
+    val lastVerifiedAt: String = "",
+    val verificationStatus: String = ""
 )

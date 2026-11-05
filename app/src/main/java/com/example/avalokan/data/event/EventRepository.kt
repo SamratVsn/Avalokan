@@ -27,7 +27,16 @@ internal fun toEventItem(id: String, field: (String) -> Any?): EventItem = Event
     featured = field("featured") == true,
     date = field("date").asText(),
     imageUrl = field("imageUrl").asText().ifBlank { null },
-    joinLink = field("joinLink").asText().ifBlank { field("onJoinClick").asText() }
+    joinLink = field("joinLink").asText().ifBlank { field("onJoinClick").asText() },
+    eventKind = field("eventKind").asText(),
+    locality = field("locality").asText(),
+    ticketing = field("ticketing").asText(),
+    placeId = field("placeId").asText(),
+    storyId = field("storyId").asText(),
+    sourceLabel = field("sourceLabel").asText(),
+    sourceUrl = field("sourceUrl").asText(),
+    lastVerifiedAt = field("lastVerifiedAt").asText(),
+    verificationStatus = field("verificationStatus").asText()
 )
 
 private fun DocumentSnapshot.toEventItem() = toEventItem(id) { get(it) }

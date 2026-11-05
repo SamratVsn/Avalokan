@@ -1,5 +1,6 @@
 package com.example.avalokan.data
 
+import androidx.room3.ColumnTypeConverters
 import androidx.room3.Database
 import androidx.room3.RoomDatabase
 import com.example.avalokan.data.event.EventDao
@@ -20,9 +21,10 @@ import com.example.avalokan.data.story.StoryItem
  * Schemas are exported to `app/schemas/` so future migrations can be written
  * from the current version onward.
  */
+@ColumnTypeConverters(Converters::class)
 @Database(
     entities = [PlaceItem::class, EventItem::class, StoryItem::class],
-    version = 8,
+    version = 9,
     exportSchema = true,
 )
 abstract class AvalokanDatabase : RoomDatabase() {

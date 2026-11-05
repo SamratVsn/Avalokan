@@ -18,4 +18,13 @@ internal fun EventItem.toDomain(): Event = Event(
     imageUrl = imageUrl,
     featured = featured,
     joinLink = joinLink,
+    eventKind = eventKind,
+    locality = locality,
+    ticketing = ticketing,
+    placeId = placeId,
+    storyId = storyId,
+    sourceLabel = sourceLabel,
+    sourceUrl = sourceUrl,
+    lastVerifiedAt = lastVerifiedAt,
+    verificationStatus = verificationStatus,
 )

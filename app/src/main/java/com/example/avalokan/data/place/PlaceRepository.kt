@@ -1,6 +1,7 @@
 package com.example.avalokan.data.place
 
 import com.example.avalokan.data.firestore.FirestoreCachedCollection
+import com.example.avalokan.data.firestore.asDoubleOrNull
 import com.example.avalokan.data.firestore.asText
 import com.example.avalokan.domain.model.Place
 import com.example.avalokan.domain.repository.PlaceRepository
@@ -28,7 +29,22 @@ internal fun toPlaceItem(id: String, field: (String) -> Any?): PlaceItem = Place
     entryFee = field("entryFee").asText(),
     bestTime = field("bestTime").asText(),
     hours = field("hours").asText(),
-    imageUrl = field("imageUrl").asText().ifBlank { null }
+    imageUrl = field("imageUrl").asText().ifBlank { null },
+    province = field("province").asText(),
+    district = field("district").asText(),
+    latitude = field("latitude").asDoubleOrNull(),
+    longitude = field("longitude").asDoubleOrNull(),
+    era = field("era").asText(),
+    unescoStatus = field("unescoStatus").asText(),
+    heritageType = field("heritageType").asText(),
+    significance = field("significance").asText(),
+    livingHeritage = field("livingHeritage") == true,
+    etiquette = field("etiquette").asText(),
+    accessibility = field("accessibility").asText(),
+    sourceLabel = field("sourceLabel").asText(),
+    sourceUrl = field("sourceUrl").asText(),
+    lastVerifiedAt = field("lastVerifiedAt").asText(),
+    verificationStatus = field("verificationStatus").asText()
 )
 
 private fun DocumentSnapshot.toPlaceItem() = toPlaceItem(id) { get(it) }

@@ -1,6 +1,7 @@
 package com.example.avalokan.data.story
 
 import com.example.avalokan.data.firestore.FirestoreCachedCollection
+import com.example.avalokan.data.firestore.asStringList
 import com.example.avalokan.data.firestore.asText
 import com.example.avalokan.domain.model.Story
 import com.example.avalokan.domain.repository.StoryRepository
@@ -25,7 +26,13 @@ internal fun toStoryItem(id: String, field: (String) -> Any?): StoryItem = Story
     author = field("author").asText(),
     date = field("date").asText(),
     readTime = field("readtime").asText(),
-    badge = field("badge").asText()
+    badge = field("badge").asText(),
+    curator = field("curator").asText(),
+    sourceLabel = field("sourceLabel").asText(),
+    sourceUrl = field("sourceUrl").asText(),
+    lastVerifiedAt = field("lastVerifiedAt").asText(),
+    verificationStatus = field("verificationStatus").asText(),
+    placeIds = field("placeIds").asStringList()
 )
 
 private fun DocumentSnapshot.toStoryItem() = toStoryItem(id) { get(it) }
