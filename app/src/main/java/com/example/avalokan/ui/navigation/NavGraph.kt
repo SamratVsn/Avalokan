@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.avalokan.navigateTab
+import com.example.avalokan.ui.category.CategoryPlacesScreen
 import com.example.avalokan.ui.detail.EventDetailScreen
 import com.example.avalokan.ui.detail.PlaceDetailScreen
 import com.example.avalokan.ui.detail.StoryDetailScreen
@@ -18,6 +19,7 @@ import com.example.avalokan.ui.discover.DiscoverScreen
 import com.example.avalokan.ui.events.EventScreen
 import com.example.avalokan.ui.home.AvalokanHome
 import com.example.avalokan.ui.auth.LoginScreen
+import com.example.avalokan.ui.navigation.NavDestination.CategoryPlaces
 import com.example.avalokan.ui.navigation.NavDestination.Discover
 import com.example.avalokan.ui.navigation.NavDestination.EditProfile
 import com.example.avalokan.ui.navigation.NavDestination.EventDetail
@@ -48,7 +50,11 @@ fun AvalokanNavHost(
             AvalokanHome(
                 onStoryClick = { id -> navController.navigate(StoryDetail.createRoute(id)) },
                 onPlaceClick = { id -> navController.navigate(PlaceDetail.createRoute(id)) },
-                onExploreEventsClick = { navController.navigateTab(Events.route) }
+                onExploreEventsClick = { navController.navigateTab(Events.route) },
+                onViewAllCategoryClick = { category ->
+                    navController.navigate(CategoryPlaces.createRoute(category))
+                },
+                onViewAllPlacesClick = { navController.navigateTab(Discover.route) }
             )
         }
 
@@ -110,6 +116,17 @@ fun AvalokanNavHost(
         ) {
             StoryDetailScreen(
                 onBackClick = { navController.navigateUp() }
+            )
+        }
+
+        composable(
+            route = CategoryPlaces.route,
+            arguments = listOf(navArgument(CategoryPlaces.ARG) { type = NavType.StringType })
+        ) {
+            CategoryPlacesScreen(
+                onBackClick = { navController.navigateUp() },
+                onPlaceClick = { id -> navController.navigate(PlaceDetail.createRoute(id)) },
+                onBrowseAllClick = { navController.navigateTab(Discover.route) }
             )
         }
 

@@ -1,5 +1,6 @@
 package com.example.avalokan.ui.navigation
 
+import android.net.Uri
 import androidx.annotation.StringRes
 import com.example.avalokan.R
 
@@ -55,5 +56,16 @@ sealed interface NavDestination {
         override val route = "story_detail/{storyId}"
         override val titleRes = R.string.story_detail
         fun createRoute(storyId: String) = "story_detail/$storyId"
+    }
+
+    /**
+     * "View All" listing for one place category. The category travels as a
+     * navigation argument so every category card reuses the same destination.
+     */
+    data object CategoryPlaces : NavDestination {
+        const val ARG = "category"
+        override val route = "category/{category}"
+        override val titleRes = R.string.explore_places
+        fun createRoute(category: String) = "category/${Uri.encode(category)}"
     }
 }

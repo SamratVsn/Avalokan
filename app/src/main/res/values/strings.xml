@@ -58,6 +58,18 @@
     <string name="explore_places">Explore places</string>
     <string name="browse_events">Browse events</string>
     <string name="discover_places">Discover places</string>
+    <string name="back">Back</string>
+
+    <!-- Category listing -->
+    <string name="category_historical">Historical Gems</string>
+    <string name="category_cultural">Cultural Heritage</string>
+    <string name="category_spiritual">Spiritual Places</string>
+    <string name="category_nature">Natural Wonders</string>
+    <string name="category_adventure">Adventure Spots</string>
+    <plurals name="places_count">
+        <item quantity="one">%1$d place</item>
+        <item quantity="other">%1$d places</item>
+    </plurals>
 
     <string name="no_results_title">No matches for “%1$s”</string>
     <string name="no_results_message">We couldn’t find a place matching that. Check the spelling, try a broader term, or start from one of these.</string>

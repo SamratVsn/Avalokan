@@ -1,6 +1,7 @@
 package com.example.avalokan.ui.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -72,6 +73,8 @@ fun AvalokanHome(
     onStoryClick: (String) -> Unit = {},
     onPlaceClick: (String) -> Unit = {},
     onExploreEventsClick: () -> Unit = {},
+    onViewAllCategoryClick: (String) -> Unit = {},
+    onViewAllPlacesClick: () -> Unit = {},
     viewModel: HomeScreenViewModel = hiltViewModel()
 ) {
     val places by viewModel.places.collectAsState()
@@ -88,15 +91,17 @@ fun AvalokanHome(
             heroStoryId = heroStory?.id ?: viewModel.heroStoryId,
             heroTitle = heroStory?.title,
             heroSubtitle = heroStory?.subtitle,
-        heroImageUrl = heroStory?.imageUrl,
-        places = places,
-        onStoryClick = onStoryClick,
-        onPlaceClick = onPlaceClick,
-        onExploreEventsClick = onExploreEventsClick,
-        onRetry = viewModel::refresh,
-        isLoading = isLoading
-    )
-}
+            heroImageUrl = heroStory?.imageUrl,
+            places = places,
+            onStoryClick = onStoryClick,
+            onPlaceClick = onPlaceClick,
+            onExploreEventsClick = onExploreEventsClick,
+            onViewAllCategoryClick = onViewAllCategoryClick,
+            onViewAllPlacesClick = onViewAllPlacesClick,
+            onRetry = viewModel::refresh,
+            isLoading = isLoading
+        )
+    }
 }
 
 @Composable
@@ -109,6 +114,8 @@ private fun HomeContent(
     onStoryClick: (String) -> Unit,
     onPlaceClick: (String) -> Unit,
     onExploreEventsClick: () -> Unit,
+    onViewAllCategoryClick: (String) -> Unit,
+    onViewAllPlacesClick: () -> Unit,
     onRetry: () -> Unit,
     isLoading: Boolean,
     modifier: Modifier = Modifier
@@ -144,7 +151,11 @@ private fun HomeContent(
                 onSecondaryAction = onExploreEventsClick
             )
         } else {
-            HistoricalGems(places = places, onPlaceClick = onPlaceClick)
+            HistoricalGems(
+                places = places,
+                onPlaceClick = onPlaceClick,
+                onViewAllClick = { onViewAllCategoryClick("Historical") }
+            )
         }
         EventSuggestion(
             modifier = Modifier.padding(horizontal = 24.dp),
@@ -154,7 +165,8 @@ private fun HomeContent(
             RecentDiscoveries(
                 modifier = Modifier.padding(horizontal = 24.dp),
                 places = places,
-                onPlaceClick = onPlaceClick
+                onPlaceClick = onPlaceClick,
+                onViewAllClick = onViewAllPlacesClick
             )
         }
     }
@@ -285,7 +297,8 @@ private fun StoryCard(
 @Composable
 private fun HistoricalGems(
     places: List<Place>,
-    onPlaceClick: (String) -> Unit = {}
+    onPlaceClick: (String) -> Unit = {},
+    onViewAllClick: () -> Unit = {}
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
         Row(
@@ -298,7 +311,12 @@ private fun HistoricalGems(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
-            Text(text = stringResource(R.string.viewAll), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
+            Text(
+                text = stringResource(R.string.viewAll),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable(onClick = onViewAllClick)
+            )
         }
         LazyRow(
             contentPadding = PaddingValues(horizontal = 24.dp),
@@ -346,7 +364,8 @@ private fun PlaceCard(
 private fun RecentDiscoveries(
     modifier: Modifier = Modifier,
     places: List<Place> = emptyList(),
-    onPlaceClick: (String) -> Unit = {}
+    onPlaceClick: (String) -> Unit = {},
+    onViewAllClick: () -> Unit = {}
 ) {
     Column(
         modifier = modifier,
@@ -362,7 +381,12 @@ private fun RecentDiscoveries(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
-            Text(text = stringResource(R.string.viewAll), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
+            Text(
+                text = stringResource(R.string.viewAll),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable(onClick = onViewAllClick)
+            )
         }
         places.filter { it.featured }
             .forEach { place ->
@@ -451,6 +475,8 @@ private fun HomeScreenPreview(){
             onStoryClick = {},
             onPlaceClick = {},
             onExploreEventsClick = {},
+            onViewAllCategoryClick = {},
+            onViewAllPlacesClick = {},
             onRetry = {},
             isLoading = false
         )
