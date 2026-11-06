@@ -65,6 +65,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.avalokan.BuildConfig
 import com.example.avalokan.R
 import com.example.avalokan.data.local.PreferencesStore
 import com.example.avalokan.ui.theme.AvalokanTheme
@@ -245,7 +246,7 @@ private fun SettingsContent(
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
         Text(
-            text = "Version 1.0.4",
+            text = stringResource(R.string.version_label, BuildConfig.VERSION_NAME),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
             modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -508,7 +509,7 @@ private fun SuppNFeed(
                     iconBg = NeutralBg,
                     iconTint = TextSecondary,
                     name = stringResource(R.string.appVersion),
-                    trailing = "1.0.0",
+                    trailing = BuildConfig.VERSION_NAME,
                     onClick = onAboutClick
                 )
             }
@@ -626,7 +627,7 @@ private fun AboutDialog(onDismiss: () -> Unit) {
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = "Version 1.0.0",
+                    text = stringResource(R.string.version_label, BuildConfig.VERSION_NAME),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

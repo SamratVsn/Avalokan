@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,12 +15,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -40,7 +37,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -55,7 +51,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -66,11 +61,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.avalokan.R
-import com.example.avalokan.ui.theme.AccentMarigold
+import com.example.avalokan.ui.components.PhotoOverlayIconButton
+import com.example.avalokan.ui.components.PhotoOverlayOutlinedButton
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
-import com.example.avalokan.ui.theme.PrimaryLight
-import com.example.avalokan.ui.theme.PrimaryTeal
 import com.example.avalokan.ui.theme.Spacing
 import com.example.avalokan.ui.theme.StandardCardShape
 
@@ -180,28 +174,28 @@ private fun PlaceDetailContent(
                         onClick = onDirectionsClick,
                         modifier = Modifier.size(48.dp)
                             .background(
-                                PrimaryLight,
+                                MaterialTheme.colorScheme.primaryContainer,
                                 StandardCardShape
                             )
                     ) {
                         Icon(
                             Icons.Default.Directions,
                             contentDescription = "Get directions",
-                            tint = PrimaryTeal
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
                     IconButton(
                         onClick = onShareClick,
                         modifier = Modifier.size(48.dp)
                             .background(
-                                PrimaryLight,
+                                MaterialTheme.colorScheme.primaryContainer,
                                 StandardCardShape
                             )
                     ) {
                         Icon(
                             Icons.Default.Share,
                             contentDescription = "Share this place",
-                            tint = PrimaryTeal
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
                     Button(
@@ -209,8 +203,16 @@ private fun PlaceDetailContent(
                         modifier = Modifier.weight(1f).height(48.dp),
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isSaved) MaterialTheme.colorScheme.surfaceVariant else PrimaryTeal,
-                            contentColor = if (isSaved) PrimaryTeal else Color.White
+                            containerColor = if (isSaved) {
+                                MaterialTheme.colorScheme.primaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.primary
+                            },
+                            contentColor = if (isSaved) {
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.onPrimary
+                            }
                         )
                     ) {
                         Text(
@@ -233,7 +235,7 @@ private fun PlaceDetailContent(
                     Box(modifier = Modifier.fillMaxWidth().height(300.dp)) {
                         Box(
                             modifier = Modifier.fillMaxSize()
-                                .background(PrimaryLight),
+                                .background(MaterialTheme.colorScheme.surfaceVariant),
                             contentAlignment = Alignment.Center
                         ) {
                             if (imageUrl != null) {
@@ -247,23 +249,17 @@ private fun PlaceDetailContent(
                                 Icon(
                                     Icons.Default.Landscape,
                                     contentDescription = null,
-                                    tint = PrimaryTeal,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(48.dp)
                                 )
                             }
                         }
-                        OutlinedButton(
+                        PhotoOverlayOutlinedButton(
+                            text = "View Gallery",
+                            icon = Icons.Default.PhotoLibrary,
                             onClick = {},
                             modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
-                        ) {
-                            Icon(
-                                Icons.Default.PhotoLibrary,
-                                null,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(Modifier.width(6.dp))
-                            Text(text = "View Gallery")
-                        }
+                        )
                     }
                 }
                 item {
@@ -323,21 +319,14 @@ private fun PlaceDetailContent(
                     )
                 }
             }
-            IconButton(
+            PhotoOverlayIconButton(
+                icon = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back",
                 onClick = onBackClick,
                 modifier = Modifier.align(Alignment.TopStart)
                     .statusBarsPadding()
                     .padding(top = 8.dp, start = 16.dp)
-                    .size(40.dp)
-                    .background(Color.Black.copy(alpha = 0.2f), CircleShape)
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color.White,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
+            )
         }
     }
 }
@@ -356,7 +345,12 @@ private fun StatCard(stat: StatUi) {
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            Icon(stat.icon, null, tint = PrimaryTeal, modifier = Modifier.size(22.dp))
+            Icon(
+                stat.icon,
+                null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(22.dp)
+            )
             Text(
                 text = stat.label.uppercase(),
                 style = MaterialTheme.typography.labelSmall.copy(
@@ -388,7 +382,11 @@ private fun DescriptionSection(description: String, modifier: Modifier = Modifie
     }
 }
 
-@Preview
+@Preview(name = "Place Detail — Light")
+@Preview(
+    name = "Place Detail — Dark",
+    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES
+)
 @Composable
 private fun PlaceDetailPreview() {
     AvalokanTheme {

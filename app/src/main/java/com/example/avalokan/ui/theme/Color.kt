@@ -70,8 +70,15 @@ val HistoricalAccent = PrimaryGreen
 val NatureAccent = Sage
 val LocalAccent = SandDark
 
-// Hero image overlay
-val HeroScrim = Color.Black.copy(alpha = 0.35f)
+// Photo overlays. These are deliberately fixed rather than themed: the
+// backdrop is arbitrary photography, so controls sitting on it must stay
+// legible over both bright and dark images in either app theme.
+val ImageScrim = Color.Black.copy(alpha = 0.60f)
+val ImageScrimStrong = Color.Black.copy(alpha = 0.78f)
+val OnImage = Color(0xFFF7F5EF)
+
+// Kept as an alias for existing editorial surfaces.
+val HeroScrim = ImageScrim
 
 
 val PrimaryTeal = PrimaryGreen

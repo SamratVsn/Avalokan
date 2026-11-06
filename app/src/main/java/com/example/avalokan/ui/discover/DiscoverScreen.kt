@@ -51,10 +51,7 @@ import com.example.avalokan.ui.components.DiscoverLoadingState
 import com.example.avalokan.ui.components.StateMessage
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
-import com.example.avalokan.ui.theme.GreyLight
 import com.example.avalokan.ui.theme.Spacing
-import com.example.avalokan.ui.theme.TextPrimary
-import com.example.avalokan.ui.theme.TextSecondary
 import com.example.avalokan.ui.theme.discoverCategoryAccent
 import com.example.avalokan.ui.theme.discoverCategoryOnAccent
 
@@ -222,15 +219,19 @@ private fun SearchField(
         singleLine = true,
         shape = CircleShape,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = Color.Transparent, unfocusedBorderColor = Color.Transparent,
-            focusedContainerColor = GreyLight,
-            unfocusedContainerColor = GreyLight,
-            focusedTextColor = TextPrimary,
-            unfocusedTextColor = TextPrimary,
-            focusedPlaceholderColor = TextSecondary,
-            unfocusedPlaceholderColor = TextSecondary,
-            focusedLeadingIconColor = TextSecondary,
-            unfocusedLeadingIconColor = TextSecondary
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+            focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            focusedLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            unfocusedLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            focusedTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            unfocusedTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            cursorColor = MaterialTheme.colorScheme.primary
         )
     )
 }
@@ -430,7 +431,11 @@ private fun SearchPlaceCard(
     )
 }
 
-@Preview
+@Preview(name = "Discover — Light")
+@Preview(
+    name = "Discover — Dark",
+    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES
+)
 @Composable
 private fun DiscoverPreview(){
     AvalokanTheme(){

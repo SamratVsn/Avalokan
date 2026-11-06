@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
@@ -23,14 +22,12 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -41,7 +38,6 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.avalokan.R
 import com.example.avalokan.ui.theme.BadgeShape
-import com.example.avalokan.ui.theme.SageSoft
 
 @Composable
 fun HeritageCard(
@@ -138,7 +134,7 @@ private fun HeritageImage(
     // AsyncImage fills this exact container when the Data layer supplies a URL.
     Box(
         modifier = Modifier.fillMaxWidth().height(imageHeight)
-            .background(SageSoft),
+            .background(MaterialTheme.colorScheme.surfaceVariant),
         contentAlignment = Alignment.Center
     ) {
         if (imageUrl != null) {
@@ -152,25 +148,22 @@ private fun HeritageImage(
             Icon(
                 Icons.Default.Landscape,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
         if (showSave && onSaveClick != null) {
-            Surface(
+            PhotoOverlayIconButton(
+                icon = if (isSaved) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                contentDescription = if (isSaved) {
+                    "Remove $title from collection"
+                } else {
+                    "Save $title to collection"
+                },
+                onClick = onSaveClick,
                 modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
-                shape = CircleShape,
-                color = Color.White.copy(alpha = 0.9f)
-            ) {
-                IconButton(onClick = onSaveClick, modifier = Modifier.size(28.dp)) {
-                    Icon(
-                        if (isSaved) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                        contentDescription = if (isSaved) "Remove $title from collection"
-                        else "Save $title to collection",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-            }
+                buttonSize = 28.dp,
+                iconSize = 16.dp
+            )
         }
     }
 }
@@ -219,7 +212,7 @@ private fun HeritageTexts(
                     Text(
                         text = badge,
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
                     )
                 }

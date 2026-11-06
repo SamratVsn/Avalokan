@@ -71,9 +71,8 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import com.example.avalokan.R
 import com.example.avalokan.domain.model.Story
+import com.example.avalokan.ui.components.PhotoOverlayIconButton
 import com.example.avalokan.ui.theme.AvalokanTheme
-import com.example.avalokan.ui.theme.DangerRed
-import com.example.avalokan.ui.theme.PrimaryTeal
 import com.example.avalokan.ui.theme.Spacing
 
 @Composable
@@ -163,7 +162,7 @@ fun StoryDetailScreen(
                                 Icon(
                                     Icons.Default.Person,
                                     contentDescription = null,
-                                    tint = PrimaryTeal,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(48.dp)
                                 )
                             }
@@ -187,21 +186,14 @@ fun StoryDetailScreen(
                     }
                 }
             }
-            IconButton(
+            PhotoOverlayIconButton(
+                icon = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back",
                 onClick = onBackClick,
                 modifier = Modifier.align(Alignment.TopStart)
                     .statusBarsPadding()
                     .padding(top = 8.dp, start = 16.dp)
-                    .size(40.dp)
-                    .background(Color.Black.copy(alpha = 0.2f), CircleShape)
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color.White,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
+            )
         }
     }
 }
@@ -232,7 +224,7 @@ private fun StoryBottomBar(
             StoryBarAction(
                 icon = if (isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                 label = if (isLiked) "Liked" else "Like",
-                tint = if (isLiked) DangerRed else MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = if (isLiked) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                 onClick = onLike
             )
             StoryBarAction(
@@ -244,7 +236,7 @@ private fun StoryBottomBar(
             StoryBarAction(
                 icon = if (isSaved) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
                 label = if (isSaved) "Saved" else "Save",
-                tint = if (isSaved) PrimaryTeal else MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = if (isSaved) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                 onClick = onSave
             )
         }
@@ -341,13 +333,13 @@ private fun StoryAuthor(author: String) {
     ) {
         Box(
             modifier = Modifier.size(32.dp)
-                .background(PrimaryTeal.copy(alpha = 0.12f), CircleShape),
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f), CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = author.firstOrNull()?.uppercase() ?: "",
                 style = MaterialTheme.typography.titleMedium,
-                color = PrimaryTeal
+                color = MaterialTheme.colorScheme.primary
             )
         }
         Text(
@@ -377,7 +369,7 @@ private fun StoryDateAndReadTime(date: String?, readTime: String?) {
             Text(
                 text = "•",
                 style = MaterialTheme.typography.bodyMedium,
-                color = PrimaryTeal
+                color = MaterialTheme.colorScheme.primary
             )
         }
         readTime?.let {
@@ -443,7 +435,7 @@ private fun StoryList(items: List<List<StorySpan>>, ordered: Boolean) {
                 Text(
                     text = if (ordered) "${index + 1}." else "•",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = PrimaryTeal
+                    color = MaterialTheme.colorScheme.primary
                 )
                 Text(
                     text = item.toAnnotatedString(MaterialTheme.colorScheme.primary),
@@ -468,7 +460,7 @@ private fun StoryQuote(spans: List<StorySpan>) {
             modifier = Modifier
                 .width(4.dp)
                 .fillMaxHeight()
-                .background(PrimaryTeal.copy(alpha = 0.7f))
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.7f))
         )
         Text(
             text = spans.toAnnotatedString(MaterialTheme.colorScheme.primary),
@@ -555,7 +547,11 @@ private fun List<StorySpan>.toAnnotatedString(linkColor: Color): AnnotatedString
         }
     }
 
-@Preview
+@Preview(name = "Story Detail — Light")
+@Preview(
+    name = "Story Detail — Dark",
+    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES
+)
 @Composable
 private fun StoryDetailPreview() {
     AvalokanTheme {

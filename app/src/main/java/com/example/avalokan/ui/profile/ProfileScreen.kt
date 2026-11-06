@@ -36,7 +36,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -52,14 +51,8 @@ import com.example.avalokan.domain.model.Event
 import com.example.avalokan.domain.model.Place
 import androidx.compose.material.icons.filled.CalendarMonth
 import com.example.avalokan.ui.theme.AvalokanTheme
-import com.example.avalokan.ui.theme.GreyBorder
-import com.example.avalokan.ui.theme.GreyLight
-import com.example.avalokan.ui.theme.PrimaryLight
-import com.example.avalokan.ui.theme.PrimaryTeal
 import com.example.avalokan.ui.theme.Spacing
 import com.example.avalokan.ui.theme.StandardCardShape
-import com.example.avalokan.ui.theme.TextPrimary
-import com.example.avalokan.ui.theme.TextSecondary
 
 @Composable
 fun ProfileScreen(
@@ -123,7 +116,7 @@ private fun ProfileContent(
                 onClick = onSettingsClick,
                 modifier = Modifier.size(40.dp)
                     .background(
-                        color = GreyLight,
+                        color = MaterialTheme.colorScheme.surfaceVariant,
                         shape = CircleShape
                     )
             ) {
@@ -162,7 +155,9 @@ private fun UserSection(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(40.dp),
-        colors = CardDefaults.cardColors(containerColor = PrimaryLight)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        )
     ) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 28.dp),
@@ -172,9 +167,12 @@ private fun UserSection(
             Box(contentAlignment = Alignment.BottomEnd) {
                 Surface(
                     shape = CircleShape,
-                    color = PrimaryLight,
+                    color = MaterialTheme.colorScheme.surface,
                     shadowElevation = 4.dp,
-                    border = BorderStroke(2.dp, Color.White)
+                    border = BorderStroke(
+                        2.dp,
+                        MaterialTheme.colorScheme.outlineVariant
+                    )
                 ) {
                     if (avatarUri != null) {
                         AsyncImage(
@@ -191,20 +189,20 @@ private fun UserSection(
                             Text(
                                 text = userName.firstOrNull()?.uppercase() ?: "G",
                                 style = MaterialTheme.typography.headlineMedium,
-                                color = PrimaryTeal
+                                color = MaterialTheme.colorScheme.primary
                             )
                         }
                     }
                 }
                 Surface(
                     shape = CircleShape,
-                    color = PrimaryTeal,
+                    color = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.padding(bottom = 4.dp, end = 4.dp)
                 ) {
                     Icon(
                         Icons.Default.Check,
                         null,
-                        tint = Color.White,
                         modifier = Modifier.padding(4.dp).size(12.dp)
                     )
                 }
@@ -214,12 +212,12 @@ private fun UserSection(
                 text = userName,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = TextPrimary
+                color = MaterialTheme.colorScheme.onPrimaryContainer
             )
             Text(
                 text = bio.ifBlank { stringResource(R.string.no_bio) },
                 style = MaterialTheme.typography.bodyMedium,
-                color = TextSecondary
+                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.78f)
             )
             Spacer(Modifier.height(20.dp))
             Row(
@@ -241,7 +239,7 @@ private fun UserSectionInfo(number: Int, text: String) {
             text = "$number",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.onPrimaryContainer
         )
         Text(
             text = text,
@@ -249,7 +247,7 @@ private fun UserSectionInfo(number: Int, text: String) {
                 fontSize = 10.sp,
                 letterSpacing = 1.sp
             ),
-            color = TextSecondary
+            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.72f)
         )
     }
 }
@@ -314,10 +312,15 @@ private fun CollectionCards(place: String, loc: String, modifier: Modifier = Mod
     ) {
         Card(shape = RoundedCornerShape(28.dp)) {
             Box(
-                modifier = Modifier.fillMaxWidth().height(150.dp).background(PrimaryLight),
+                modifier = Modifier.fillMaxWidth().height(150.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.Landscape, null, tint = PrimaryTeal)
+                Icon(
+                    Icons.Default.Landscape,
+                    null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
         Text(
@@ -382,10 +385,14 @@ private fun FavoriteEventRow(event: Event) {
                 modifier = Modifier
                     .size(56.dp)
                     .clip(RoundedCornerShape(16.dp))
-                    .background(PrimaryLight),
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.CalendarMonth, null, tint = PrimaryTeal)
+                Icon(
+                    Icons.Default.CalendarMonth,
+                    null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
@@ -427,7 +434,7 @@ private fun EmptyCollectionCard(
         modifier = modifier.fillMaxWidth(),
         shape = StandardCardShape,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, GreyBorder)
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -435,13 +442,14 @@ private fun EmptyCollectionCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
-                modifier = Modifier.size(44.dp).background(PrimaryLight, CircleShape),
+                modifier = Modifier.size(44.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = PrimaryTeal,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -478,7 +486,11 @@ private fun EmptyCollectionCard(
     }
 }
 
-@Preview
+@Preview(name = "Profile — Light")
+@Preview(
+    name = "Profile — Dark",
+    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES
+)
 @Composable
 private fun ProfilePreview() {
     AvalokanTheme {

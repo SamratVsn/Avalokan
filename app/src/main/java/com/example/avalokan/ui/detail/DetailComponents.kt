@@ -21,7 +21,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -37,11 +36,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.avalokan.ui.components.PhotoOverlayIconButton
 import com.example.avalokan.ui.components.StateMessage
 import com.example.avalokan.ui.theme.BadgeShape
-import com.example.avalokan.ui.theme.HeroScrim
-import com.example.avalokan.ui.theme.PrimaryLight
-import com.example.avalokan.ui.theme.PrimaryTeal
 import com.example.avalokan.ui.theme.Spacing
 import kotlinx.coroutines.delay
 
@@ -87,21 +84,14 @@ fun DetailBody(
 
 @Composable
 fun BoxScope.DetailBackButton(onBackClick: () -> Unit) {
-    IconButton(
+    PhotoOverlayIconButton(
+        icon = Icons.AutoMirrored.Filled.ArrowBack,
+        contentDescription = "Back",
         onClick = onBackClick,
         modifier = Modifier.align(Alignment.TopStart)
             .statusBarsPadding()
             .padding(top = 8.dp, start = 16.dp)
-            .size(40.dp)
-            .background(HeroScrim, CircleShape)
-    ) {
-        Icon(
-            Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = "Back",
-            tint = Color.White,
-            modifier = Modifier.size(18.dp)
-        )
-    }
+    )
 }
 
 @Composable
@@ -114,7 +104,10 @@ fun DetailLoading(kind: String, onBackClick: () -> Unit, modifier: Modifier = Mo
             modifier = Modifier.align(Alignment.Center),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            CircularProgressIndicator(color = PrimaryTeal, modifier = Modifier.size(40.dp))
+            CircularProgressIndicator(
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(40.dp)
+            )
             Spacer(Modifier.height(Spacing.medium))
             Text(
                 text = "Loading $kind…",
@@ -147,11 +140,16 @@ fun DetailMissing(kind: String, onBackClick: () -> Unit, modifier: Modifier = Mo
 fun DetailBadge(
     text: String,
     containerColor: Color = MaterialTheme.colorScheme.primaryContainer,
-    contentColor: Color = PrimaryTeal,
+    contentColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
     icon: ImageVector? = null,
     modifier: Modifier = Modifier
 ) {
-    Surface(modifier = modifier, shape = BadgeShape, color = containerColor) {
+    Surface(
+        modifier = modifier,
+        shape = BadgeShape,
+        color = containerColor,
+        contentColor = contentColor
+    ) {
         Row(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -189,7 +187,7 @@ fun MetaRow(
         Box(
             modifier = Modifier.size(36.dp)
                 .background(
-                    color = PrimaryLight,
+                    color = MaterialTheme.colorScheme.primaryContainer,
                     shape = RoundedCornerShape(16.dp)
                 ),
             contentAlignment = Alignment.Center
@@ -197,7 +195,7 @@ fun MetaRow(
             Icon(
                 icon,
                 contentDescription = null,
-                tint = PrimaryTeal,
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
                 modifier = Modifier.size(18.dp)
             )
         }
@@ -232,7 +230,11 @@ fun Facepile(initials: List<String>, modifier: Modifier = Modifier) {
         initials.forEachIndexed { index, initial ->
             Surface(
                 shape = CircleShape,
-                color = if (index % 2 == 0) PrimaryTeal else MaterialTheme.colorScheme.surfaceVariant,
+                color = if (index % 2 == 0) {
+                    MaterialTheme.colorScheme.primaryContainer
+                } else {
+                    MaterialTheme.colorScheme.surfaceVariant
+                },
                 shadowElevation = 2.dp,
                 modifier = Modifier.offset(x = if (index == 0) 0.dp else (-8).dp)
             ) {
@@ -243,7 +245,11 @@ fun Facepile(initials: List<String>, modifier: Modifier = Modifier) {
                     Text(
                         text = initial,
                         style = MaterialTheme.typography.labelSmall,
-                        color = if (index % 2 == 0) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                        color = if (index % 2 == 0) {
+                            MaterialTheme.colorScheme.onPrimaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
                     )
                 }
             }

@@ -34,6 +34,7 @@
     <string name="suppNFe">Support And Feedback</string>
     <string name="sendSugRep">Send Suggestions/Report</string>
     <string name="appVersion">App Version</string>
+    <string name="version_label">Version %1$s</string>
     <string name="logIn">Log In</string>
     <string name="logOut">Log Out</string>
     <string name="signUp">Sign Up</string>

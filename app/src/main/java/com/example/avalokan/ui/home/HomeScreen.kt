@@ -58,14 +58,12 @@ import com.example.avalokan.ui.components.StateMessage
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
 import com.example.avalokan.ui.theme.EditorialLargeCardShape
-import com.example.avalokan.ui.theme.HeroScrim
-import com.example.avalokan.ui.theme.PrimaryGreen
+import com.example.avalokan.ui.theme.ImageScrim
+import com.example.avalokan.ui.theme.ImageScrimStrong
+import com.example.avalokan.ui.theme.OnImage
 import com.example.avalokan.ui.theme.Spacing
 import com.example.avalokan.ui.theme.StandardButtonShape
 import com.example.avalokan.ui.theme.StandardCardShape
-import com.example.avalokan.ui.theme.Terracotta
-import com.example.avalokan.ui.theme.TextPrimary
-import com.example.avalokan.ui.theme.TextSecondary
 
 @Composable
 fun AvalokanHome(
@@ -231,7 +229,14 @@ private fun StoryCard(
             // Hero image from the story stream; gradient placeholder until it loads.
             Box(
                 modifier = Modifier.fillMaxSize()
-                    .background(Brush.verticalGradient(listOf(PrimaryGreen, TextPrimary))),
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.primaryContainer
+                            )
+                        )
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 if (imageUrl != null) {
@@ -246,16 +251,23 @@ private fun StoryCard(
             // Dark scrim so badge/title/button stay legible over any future photo
             Box(
                 modifier = Modifier.fillMaxSize()
-                    .background(Brush.verticalGradient(0f to Color.Transparent, 0.45f to HeroScrim, 1f to Color.Black.copy(0.65f)))
+                    .background(
+                        Brush.verticalGradient(
+                            0f to Color.Transparent,
+                            0.45f to ImageScrim,
+                            1f to ImageScrimStrong
+                        )
+                    )
             )
             Surface(
                 modifier = Modifier.align(Alignment.TopStart).padding(12.dp),
-                shape = BadgeShape, color = Terracotta
+                shape = BadgeShape,
+                color = MaterialTheme.colorScheme.tertiary,
+                contentColor = MaterialTheme.colorScheme.onTertiary
             ) {
                 Text(
                     text = stringResource(R.string.storyOfTheDay).uppercase(),
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onTertiary,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                 )
             }
@@ -266,11 +278,11 @@ private fun StoryCard(
                 Text(
                     text = title?.takeIf { it.isNotBlank() } ?: stringResource(R.string.no_story_title),
                     style = MaterialTheme.typography.headlineLarge.copy(fontSize = 24.sp, lineHeight = 30.sp),
-                    color = Color.White, maxLines = 3, overflow = TextOverflow.Ellipsis)
+                    color = OnImage, maxLines = 3, overflow = TextOverflow.Ellipsis)
                 Text(
                     text = subtitle?.takeIf { it.isNotBlank() } ?: stringResource(R.string.no_story_summary),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White.copy(0.85f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    color = OnImage.copy(alpha = 0.85f), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Spacer(Modifier.height(2.dp))
                 Button(
                     onClick = onReadClick,
@@ -417,12 +429,12 @@ private fun EventSuggestion(
                 Text(
                     text = stringResource(R.string.localED),
                     style = MaterialTheme.typography.titleMedium,
-                    color = TextPrimary
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
                 Text(
                     text = stringResource(R.string.joinEventDesc),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = TextSecondary,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -457,7 +469,11 @@ private fun EventSuggestion(
     }
 }
 
-@Preview
+@Preview(name = "Home — Light")
+@Preview(
+    name = "Home — Dark",
+    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES
+)
 @Composable
 private fun HomeScreenPreview(){
     AvalokanTheme() {

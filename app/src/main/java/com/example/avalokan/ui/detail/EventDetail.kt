@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -34,7 +33,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -47,16 +45,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.avalokan.R
 import com.example.avalokan.ui.common.openUrlInBrowser
+import com.example.avalokan.ui.components.PhotoOverlayIconButton
 import com.example.avalokan.ui.theme.AvalokanTheme
-import com.example.avalokan.ui.theme.HeroScrim
-import com.example.avalokan.ui.theme.PrimaryTeal
 import com.example.avalokan.ui.theme.StandardCardShape
 import android.content.Intent
 import android.net.Uri
@@ -143,7 +139,10 @@ private fun EventDetailContent(
     snackbarHost: SnackbarHostState,
     onBackClick: () -> Unit
 ) {
-    val accent = eventType.accent
+    val badgeContainer = eventType.badgeContainerColor()
+    val badgeContent = eventType.badgeContentColor()
+    val actionContainer = eventType.actionContainerColor()
+    val actionContent = eventType.actionContentColor()
     Scaffold(
         // Matches the white sheet so no color gap appears at the bottom.
         containerColor = MaterialTheme.colorScheme.surface,
@@ -173,7 +172,10 @@ private fun EventDetailContent(
                         onClick = onBookClick,
                         modifier = Modifier.height(52.dp),
                         shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = accent),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = actionContainer,
+                            contentColor = actionContent
+                        ),
                         elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
                     ) {
                         Text(text = stringResource(R.string.go_to_booking_page))
@@ -212,7 +214,7 @@ private fun EventDetailContent(
                                 Icon(
                                     Icons.Default.CalendarMonth,
                                     contentDescription = null,
-                                    tint = PrimaryTeal,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(48.dp)
                                 )
                             }
@@ -224,30 +226,24 @@ private fun EventDetailContent(
                             horizontalArrangement = Arrangement.End
                         ) {
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                IconButton(
-                                    onClick = onShareClick,
-                                    modifier = Modifier.size(40.dp)
-                                        .background(HeroScrim, CircleShape)
-                                ) {
-                                    Icon(
-                                        Icons.Default.Share,
-                                        contentDescription = "Share",
-                                        tint = Color.White,
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                }
-                                IconButton(
-                                    onClick = onFavoriteClick,
-                                    modifier = Modifier.size(40.dp)
-                                        .background(HeroScrim, CircleShape)
-                                ) {
-                                    Icon(
-                                        if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                        contentDescription = if (isFavorite) "Remove from favorites" else "Save to favorites",
-                                        tint = Color.White,
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                }
+                                PhotoOverlayIconButton(
+                                    icon = Icons.Default.Share,
+                                    contentDescription = "Share",
+                                    onClick = onShareClick
+                                )
+                                PhotoOverlayIconButton(
+                                    icon = if (isFavorite) {
+                                        Icons.Default.Favorite
+                                    } else {
+                                        Icons.Default.FavoriteBorder
+                                    },
+                                    contentDescription = if (isFavorite) {
+                                        "Remove from favorites"
+                                    } else {
+                                        "Save to favorites"
+                                    },
+                                    onClick = onFavoriteClick
+                                )
                             }
                         }
                     }
@@ -268,8 +264,8 @@ private fun EventDetailContent(
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 DetailBadge(
                                     text = date.ifBlank { stringResource(R.string.no_date) },
-                                    containerColor = accent.copy(alpha = 0.12f),
-                                    contentColor = accent,
+                                    containerColor = badgeContainer,
+                                    contentColor = badgeContent,
                                     icon = eventBadgeIcon(eventType)
                                 )
                                 Text(
@@ -308,26 +304,23 @@ private fun EventDetailContent(
                     }
                 }
             }
-            IconButton(
+            PhotoOverlayIconButton(
+                icon = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back",
                 onClick = onBackClick,
                 modifier = Modifier.align(Alignment.TopStart)
                     .statusBarsPadding()
                     .padding(top = 8.dp, start = 16.dp)
-                    .size(40.dp)
-                    .background(HeroScrim, CircleShape)
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color.White,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
+            )
         }
     }
 }
 
-@Preview
+@Preview(name = "Event Detail — Light")
+@Preview(
+    name = "Event Detail — Dark",
+    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES
+)
 @Composable
 private fun EventDetailPreview() {
     AvalokanTheme {

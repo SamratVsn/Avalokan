@@ -36,7 +36,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -46,8 +45,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.avalokan.R
 import com.example.avalokan.ui.theme.AvalokanTheme
-import com.example.avalokan.ui.theme.PrimaryLight
-import com.example.avalokan.ui.theme.PrimaryTeal
 import com.example.avalokan.ui.theme.Spacing
 import com.example.avalokan.ui.theme.StandardButtonShape
 
@@ -147,25 +144,28 @@ private fun EditProfileContent(
                 } else {
                     Box(
                         modifier = Modifier.size(96.dp)
-                            .background(PrimaryLight, CircleShape),
+                            .background(
+                                MaterialTheme.colorScheme.primaryContainer,
+                                CircleShape
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = userName.firstOrNull()?.uppercase() ?: "G",
                             style = MaterialTheme.typography.headlineMedium,
-                            color = PrimaryTeal
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
                 }
                 androidx.compose.material3.Surface(
                     shape = CircleShape,
-                    color = PrimaryTeal,
+                    color = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.clickable(onClick = onAvatarClick)
                 ) {
                     Icon(
                         Icons.Default.Edit,
                         contentDescription = "Change profile photo",
-                        tint = Color.White,
                         modifier = Modifier.padding(6.dp).size(14.dp)
                     )
                 }
@@ -194,7 +194,10 @@ private fun EditProfileContent(
         Button(
             onClick = onSaveClick,
             shape = StandardButtonShape,
-            colors = ButtonDefaults.buttonColors(containerColor = PrimaryTeal),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ),
             modifier = Modifier.fillMaxWidth()
                 .padding(horizontal = Spacing.sidePadding)
                 .height(48.dp)
@@ -204,7 +207,11 @@ private fun EditProfileContent(
     }
 }
 
-@Preview
+@Preview(name = "Edit Profile — Light")
+@Preview(
+    name = "Edit Profile — Dark",
+    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES
+)
 @Composable
 private fun EditProfilePreview() {
     AvalokanTheme {
