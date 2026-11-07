@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -24,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material.icons.filled.Directions
 import androidx.compose.material.icons.filled.Landscape
@@ -37,6 +40,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -61,6 +65,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.avalokan.R
+import com.example.avalokan.ui.common.placeBadgeLabelRes
 import com.example.avalokan.ui.components.PhotoOverlayIconButton
 import com.example.avalokan.ui.components.PhotoOverlayOutlinedButton
 import com.example.avalokan.ui.theme.AvalokanTheme
@@ -82,6 +87,10 @@ fun PlaceDetailScreen(
     val scope = rememberCoroutineScope()
     val savedIds by viewModel.savedIds.collectAsState()
     val isSaved = savedIds.contains(place?.id)
+    val visitedIds by viewModel.visitedIds.collectAsState()
+    val isVisited = visitedIds.contains(place?.id)
+    val markedVisitedMessage = stringResource(R.string.marked_as_visited)
+    val removedVisitedMessage = stringResource(R.string.visited_removed)
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when (event) {
@@ -122,14 +131,26 @@ fun PlaceDetailScreen(
             rating = place?.rating.orEmpty(),
             description = place?.description.orEmpty(),
             badge = place?.badge.orEmpty(),
+            classificationBadges = place?.badges()
+                ?.map { stringResource(placeBadgeLabelRes(it)) }
+                .orEmpty(),
             entryFee = place?.entryFee.orEmpty(),
             bestTime = place?.bestTime.orEmpty(),
             hours = place?.hours.orEmpty(),
             imageUrl = place?.imageUrl,
             isSaved = isSaved,
+            isVisited = isVisited,
             onSaveClick = {
                 if (viewModel.toggleSave()) {
                     scope.launch { snackbarHost.showSnackbar("Saved to Collection") }
+                }
+            },
+            onVisitedClick = {
+                val nowVisited = viewModel.toggleVisited()
+                scope.launch {
+                    snackbarHost.showSnackbar(
+                        if (nowVisited) markedVisitedMessage else removedVisitedMessage
+                    )
                 }
             },
             onBackClick = onBackClick,
@@ -146,12 +167,15 @@ private fun PlaceDetailContent(
     rating: String,
     description: String,
     badge: String = "",
+    classificationBadges: List<String> = emptyList(),
     entryFee: String = "",
     bestTime: String = "",
     hours: String = "",
     imageUrl: String? = null,
     isSaved: Boolean,
     onSaveClick: () -> Unit,
+    isVisited: Boolean = false,
+    onVisitedClick: () -> Unit = {},
     onBackClick: () -> Unit,
     onShareClick: () -> Unit,
     onDirectionsClick: () -> Unit,
@@ -283,9 +307,36 @@ private fun PlaceDetailContent(
                             }
                         }
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            if (badge.isNotBlank()) {
+                            if (classificationBadges.isNotEmpty()) {
+                                classificationBadges.forEach { label ->
+                                    DetailBadge(text = label)
+                                }
+                            } else if (badge.isNotBlank()) {
                                 DetailBadge(text = badge)
                             }
+                        }
+                        // Explicit visit tracking: the user must choose this;
+                        // merely opening the detail screen is not a visit.
+                        OutlinedButton(
+                            onClick = onVisitedClick,
+                            shape = BadgeShape
+                        ) {
+                            Icon(
+                                Icons.Default.Check,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                text = stringResource(
+                                    if (isVisited) {
+                                        R.string.visited_badge
+                                    } else {
+                                        R.string.mark_as_visited
+                                    }
+                                ),
+                                fontWeight = FontWeight.SemiBold
+                            )
                         }
                     }
                 }

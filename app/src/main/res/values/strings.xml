@@ -21,7 +21,6 @@
     <string name="search">Search places, temples, events…</string>
     <string name="localEvents">Locality Events</string>
     <string name="discoverEventsDesc">Discover and join events happening around you.</string>
-    <string name="kathmanduValley">All Over Nepal</string>
     <string name="myHeritageColl">My Place Collection</string>
     <string name="savedPlaces">Saved Places</string>
     <string name="manage">See all</string>
@@ -98,11 +97,110 @@
     <string name="no_author">Author not available</string>
     <string name="no_read_time">Read time not available</string>
     <string name="no_bio">No bio added yet.</string>
+    <string name="profile_stat_visited">VISITED</string>
+    <string name="profile_stat_saved">SAVED</string>
+    <string name="profile_stat_favorites">FAVORITES</string>
+    <string name="mark_as_visited">Mark as visited</string>
+    <string name="marked_as_visited">Marked as visited</string>
+    <string name="visited_removed">Removed from visited</string>
+    <string name="visited_badge">Visited</string>
     <string name="no_story_content">No story content available.</string>
     <string name="no_story_title">No story available yet</string>
     <string name="no_story_summary">Check back soon for a featured heritage story.</string>
     <string name="go_to_booking_page">Go to booking page</string>
     <string name="booking_unavailable">Booking page not available</string>
+
+    <!-- Heritage taxonomy: Discover filters -->
+    <string name="filter_all">All</string>
+    <string name="heritage_pagoda_newa">Pagoda &amp; Newa Architecture</string>
+    <string name="heritage_stupa_monastery">Stupas &amp; Monasteries</string>
+    <string name="heritage_shikhara_granthakuta">Shikhara &amp; Granthakuta</string>
+    <string name="heritage_sacred_water">Sacred Water Architecture</string>
+    <string name="heritage_sacred_landscape">Sacred Landscapes &amp; Lakes</string>
+
+    <string name="heritage_pagoda_newa_help">Degah, Bahal, Bahi and Durbar courtyards built by Newa craftspeople.</string>
+    <string name="heritage_stupa_monastery_help">Stupas, chortens, gompas and Buddhist monastery complexes.</string>
+    <string name="heritage_shikhara_granthakuta_help">Shikhara and granthakuta temple forms found across Nepal.</string>
+    <string name="heritage_sacred_water_help">Hiti, dhunge dhara, pokhari and kunda — historic water architecture.</string>
+    <string name="heritage_sacred_landscape_help">Taal, danda, sacred caves, forests and pilgrimage landscapes.</string>
+
+    <!-- Verified place badges -->
+    <string name="badge_unesco_heritage">UNESCO Heritage</string>
+    <string name="badge_buddhist_heritage">Buddhist Heritage</string>
+    <string name="badge_newa_architecture">Newa Architecture</string>
+    <string name="badge_sacred_water_system">Sacred Water System</string>
+    <string name="badge_living_heritage">Living Heritage</string>
+    <string name="badge_archaeological_site">Archaeological Site</string>
+    <string name="badge_historic_monument">Historic Monument</string>
+    <string name="badge_natural_heritage">Natural Heritage</string>
+
+    <!-- Event classification -->
+    <string name="event_kind_festival">Festival</string>
+    <string name="event_kind_religious_celebration">Religious Celebration</string>
+    <string name="event_kind_local_tradition">Local Tradition</string>
+    <string name="event_kind_cultural_performance">Cultural Performance</string>
+    <string name="event_kind_community_gathering">Community Gathering</string>
+    <string name="event_kind_workshop">Workshop</string>
+    <string name="event_kind_exhibition">Exhibition</string>
+    <string name="event_kind_food_culinary">Food &amp; Culinary</string>
+    <string name="event_kind_heritage_experience">Heritage Experience</string>
+    <string name="event_kind_technology">Technology &amp; Innovation</string>
+    <string name="event_kind_educational">Educational</string>
+    <string name="event_kind_other">Event</string>
+
+    <string name="scope_local">Local</string>
+    <string name="scope_regional">Regional</string>
+    <string name="scope_nationwide">Nationwide</string>
+    <string name="scope_unknown">Scope not recorded</string>
+
+    <string name="participation_open">Open to all</string>
+    <string name="participation_registration">Registration required</string>
+    <string name="participation_invitation">Invitation only</string>
+    <string name="participation_unknown">Participation not recorded</string>
+
+    <string name="about_festival">About the Festival</string>
+    <string name="about_celebration">About the Celebration</string>
+    <string name="about_workshop">About the Workshop</string>
+    <string name="about_exhibition">About the Exhibition</string>
+    <string name="about_gathering">About the Gathering</string>
+    <string name="about_conference">About the Conference</string>
+    <string name="about_event">About the Event</string>
+
+    <string name="price_entry">Entry</string>
+    <string name="price_ticket">Ticket price</string>
+    <string name="price_per_person">Price per person</string>
+    <string name="price_donation">Support</string>
+    <string name="price_free_value">Free</string>
+    <string name="price_donation_value">Donation based</string>
+
+    <string name="cta_book_tickets">Book Tickets</string>
+    <string name="cta_register">Register</string>
+    <string name="cta_visit_event_website">Visit Event Website</string>
+    <string name="cta_view_details">View details</string>
+    <string name="action_tickets">Tickets</string>
+    <string name="action_register">Register</string>
+    <string name="action_website">Website</string>
+
+    <string name="featured_festival">Featured Festival</string>
+    <string name="featured_celebration">Featured Celebration</string>
+    <string name="events_upcoming">Upcoming Events</string>
+    <string name="event_reach">Reach</string>
+    <string name="event_participation">Participation</string>
+    <string name="events_scope_nationwide_local">Nationwide &amp; local</string>
+    <string name="events_scope_local_regional">Local &amp; regional</string>
+    <string name="events_scope_across_nepal">Events across Nepal</string>
+
+    <!-- Story editorial categories -->
+    <string name="story_category_history">History &amp; Civilization</string>
+    <string name="story_category_architecture">Architecture &amp; Heritage</string>
+    <string name="story_category_religion">Religion &amp; Philosophy</string>
+    <string name="story_category_festivals">Festivals &amp; Traditions</string>
+    <string name="story_category_art">Art &amp; Craftsmanship</string>
+    <string name="story_category_people">People &amp; Legends</string>
+    <string name="story_category_food">Food &amp; Culture</string>
+    <string name="story_category_nature">Nature &amp; Sacred Landscapes</string>
+    <string name="story_category_communities">Local Communities</string>
+    <string name="story_category_archaeology">Archaeology</string>
 
     <!-- Story detail -->
     <string name="share_story">Share story</string>

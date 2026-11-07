@@ -1,5 +1,6 @@
 package com.example.avalokan.data.event
 
+import androidx.room3.ColumnInfo
 import androidx.room3.Entity
 import androidx.room3.PrimaryKey
 
@@ -38,5 +39,14 @@ data class EventItem(
     val sourceLabel: String = "",
     val sourceUrl: String = "",
     val lastVerifiedAt: String = "",
-    val verificationStatus: String = ""
+    val verificationStatus: String = "",
+    // Additional event dimensions. Type, reach, participation and pricing stay
+    // independent so a technology conference can never become a festival.
+    @ColumnInfo(defaultValue = "''") val priceBasis: String = "",
+    @ColumnInfo(defaultValue = "''") val participation: String = "",
+    @ColumnInfo(defaultValue = "''") val format: String = "",
+    @ColumnInfo(defaultValue = "''") val secondaryCategories: List<String> = emptyList(),
+    @ColumnInfo(defaultValue = "''") val tags: List<String> = emptyList(),
+    @ColumnInfo(defaultValue = "''") val relatedPlaceIds: List<String> = emptyList(),
+    @ColumnInfo(defaultValue = "''") val relatedEventIds: List<String> = emptyList()
 )

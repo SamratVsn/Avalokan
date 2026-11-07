@@ -1,5 +1,6 @@
 package com.example.avalokan.data.story
 
+import com.example.avalokan.data.classification.LegacyClassificationCatalog
 import com.example.avalokan.data.firestore.FirestoreCachedCollection
 import com.example.avalokan.data.firestore.asStringList
 import com.example.avalokan.data.firestore.asText
@@ -17,23 +18,34 @@ private const val STORIES_COLLECTION = "stories"
  * Pure mapping step, kept separate from [DocumentSnapshot] so missing-field
  * behaviour can be unit-tested without Firestore.
  */
-internal fun toStoryItem(id: String, field: (String) -> Any?): StoryItem = StoryItem(
-    id = id,
-    title = field("title").asText(),
-    subtitle = field("subTitle").asText(),
-    description = field("description").asText(),
-    imageUrl = field("imageUrl").asText().ifBlank { null },
-    author = field("author").asText(),
-    date = field("date").asText(),
-    readTime = field("readtime").asText(),
-    badge = field("badge").asText(),
-    curator = field("curator").asText(),
-    sourceLabel = field("sourceLabel").asText(),
-    sourceUrl = field("sourceUrl").asText(),
-    lastVerifiedAt = field("lastVerifiedAt").asText(),
-    verificationStatus = field("verificationStatus").asText(),
-    placeIds = field("placeIds").asStringList()
-)
+internal fun toStoryItem(id: String, field: (String) -> Any?): StoryItem {
+    val seed = LegacyClassificationCatalog.story(id)
+    return StoryItem(
+        id = id,
+        title = field("title").asText(),
+        subtitle = field("subTitle").asText(),
+        description = field("description").asText(),
+        imageUrl = field("imageUrl").asText().ifBlank { null },
+        author = field("author").asText(),
+        date = field("date").asText(),
+        readTime = field("readtime").asText(),
+        badge = field("badge").asText(),
+        curator = field("curator").asText(),
+        sourceLabel = field("sourceLabel").asText(),
+        sourceUrl = field("sourceUrl").asText(),
+        lastVerifiedAt = field("lastVerifiedAt").asText(),
+        verificationStatus = field("verificationStatus").asText(),
+        placeIds = field("placeIds").asStringList().ifEmpty { seed?.placeIds.orEmpty() },
+        primaryCategory = field("primaryCategory").asText().ifBlank { seed?.primaryCategory.orEmpty() },
+        secondaryCategories = field("secondaryCategories").asStringList()
+            .ifEmpty { seed?.secondaryCategories.orEmpty() },
+        typologies = field("typologies").asStringList().ifEmpty { seed?.typologies.orEmpty() },
+        tags = field("tags").asStringList().ifEmpty { seed?.tags.orEmpty() },
+        relatedEventIds = field("relatedEventIds").asStringList()
+            .ifEmpty { seed?.relatedEventIds.orEmpty() },
+        period = field("period").asText().ifBlank { seed?.period.orEmpty() }
+    )
+}
 
 private fun DocumentSnapshot.toStoryItem() = toStoryItem(id) { get(it) }
 

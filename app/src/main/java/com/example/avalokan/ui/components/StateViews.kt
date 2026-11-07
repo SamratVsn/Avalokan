@@ -55,6 +55,7 @@ fun StateMessage(
     onSecondaryAction: (() -> Unit)? = null,
     suggestions: List<String> = emptyList(),
     suggestionsLabel: String? = null,
+    suggestionLabels: Map<String, String> = emptyMap(),
     onSuggestionClick: ((String) -> Unit)? = null
 ) {
     Column(
@@ -122,7 +123,7 @@ fun StateMessage(
                 items(suggestions) { suggestion ->
                     AssistChip(
                         onClick = { onSuggestionClick(suggestion) },
-                        label = { Text(suggestion) }
+                        label = { Text(suggestionLabels[suggestion] ?: suggestion) }
                     )
                 }
             }

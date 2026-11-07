@@ -1,6 +1,7 @@
 package com.example.avalokan
 
 import app.cash.turbine.test
+import com.example.avalokan.domain.model.Place
 import com.example.avalokan.ui.discover.DiscoverCategories
 import com.example.avalokan.ui.discover.DiscoverViewModel
 import kotlinx.coroutines.Dispatchers
@@ -38,7 +39,62 @@ class DiscoverViewModelTest {
         vm.sites.test {
             skipItems(1) // stateIn replays its empty initial value first
             assertEquals(2, awaitItem().size) // All
-            vm.onCategorySelect(1) // Historical
+            vm.onCategorySelect(DiscoverCategories.indexOf("PAGODA_NEWA"))
+            assertEquals(listOf("kathmandu-durbar"), awaitItem().map { it.id })
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `place with multiple typologies appears once under each matching filter`() = runTest {
+        val vm = DiscoverViewModel(FakePlaceRepository(), FakePreferencesStore())
+        vm.sites.test {
+            skipItems(1)
+            awaitItem()
+            vm.onCategorySelect(DiscoverCategories.indexOf("STUPA_MONASTERY"))
+            assertEquals(listOf("lumbini-garden"), awaitItem().map { it.id })
+            // Go through All so the next filter produces a distinct emission;
+            // both STUPA_MONASTERY and SACRED_LANDSCAPE match Lumbini.
+            vm.onCategorySelect(0)
+            assertEquals(2, awaitItem().size)
+            vm.onCategorySelect(DiscoverCategories.indexOf("SACRED_LANDSCAPE"))
+            assertEquals(listOf("lumbini-garden"), awaitItem().map { it.id })
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `search composes with the selected heritage typology`() = runTest {
+        val vm = DiscoverViewModel(FakePlaceRepository(), FakePreferencesStore())
+        vm.sites.test {
+            skipItems(1)
+            awaitItem()
+            vm.onCategorySelect(DiscoverCategories.indexOf("PAGODA_NEWA"))
+            assertEquals(listOf("kathmandu-durbar"), awaitItem().map { it.id })
+            vm.onQueryChange("lumbini")
+            assertEquals(emptyList<String>(), awaitItem().map { it.id })
+            vm.onCategorySelect(0)
+            assertEquals(listOf("lumbini-garden"), awaitItem().map { it.id })
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `legacy place without typologies is safe and appears only under All`() = runTest {
+        val legacy = Place(
+            id = "legacy-place",
+            name = "Legacy Place",
+            description = "desc",
+            category = "Historical"
+        )
+        val vm = DiscoverViewModel(
+            FakePlaceRepository(TestPlaces + legacy),
+            FakePreferencesStore()
+        )
+        vm.sites.test {
+            skipItems(1)
+            assertEquals(3, awaitItem().size)
+            vm.onCategorySelect(DiscoverCategories.indexOf("PAGODA_NEWA"))
             assertEquals(listOf("kathmandu-durbar"), awaitItem().map { it.id })
             cancelAndIgnoreRemainingEvents()
         }
@@ -83,7 +139,7 @@ class DiscoverViewModelTest {
         vm.sites.test {
             skipItems(1)
             assertEquals(2, awaitItem().size) // All
-            vm.onCategorySelect(DiscoverCategories.indexOf("Adventure"))
+            vm.onCategorySelect(DiscoverCategories.indexOf("SACRED_WATER"))
             assertEquals(emptyList<String>(), awaitItem().map { it.id })
             // Nothing matched, yet the repository did load both places — the
             // screen needs this to avoid claiming a connection failure.
@@ -119,11 +175,29 @@ class DiscoverViewModelTest {
     }
 
     @Test
+    fun `available categories only include heritage groups with content`() = runTest {
+        val vm = DiscoverViewModel(FakePlaceRepository(), FakePreferencesStore())
+        vm.availableCategories.test {
+            skipItems(1)
+            val categories = awaitItem()
+            assertTrue(categories.contains("All"))
+            assertTrue(categories.contains("PAGODA_NEWA"))
+            assertTrue(categories.contains("STUPA_MONASTERY"))
+            assertTrue(categories.contains("SACRED_LANDSCAPE"))
+            // No water architecture and no shikhara content was loaded, so the
+            // UI must not offer those filters as if they had results.
+            assertFalse(categories.contains("SACRED_WATER"))
+            assertFalse(categories.contains("SHIKHARA_GRANTHAKUTA"))
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun `suggestion select clears the query and switches category`() = runTest {
         val vm = DiscoverViewModel(FakePlaceRepository(), FakePreferencesStore())
         vm.onQueryChange("nothing matches this")
-        vm.onSuggestionSelect("Historical")
+        vm.onSuggestionSelect("PAGODA_NEWA")
         assertEquals("", vm.query.value)
-        assertEquals(DiscoverCategories.indexOf("Historical"), vm.selectedCategory.value)
+        assertEquals(DiscoverCategories.indexOf("PAGODA_NEWA"), vm.selectedCategory.value)
     }
 }

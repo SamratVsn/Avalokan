@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
 import com.example.avalokan.domain.model.Place
+import com.example.avalokan.ui.common.placeBadgeLabel
 import com.example.avalokan.ui.components.DiscoverLoadingState
 import com.example.avalokan.ui.components.HeritageCard
 import com.example.avalokan.ui.components.StateMessage
@@ -218,6 +219,7 @@ private fun CategoryPlaceCard(
         title = place.name,
         subtitle = place.meta.ifBlank { stringResource(R.string.no_location) }.uppercase(),
         subtitleStyle = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
+        badge = placeBadgeLabel(place),
         rating = place.rating.takeIf { it.isNotBlank() },
         description = place.description.ifBlank { stringResource(R.string.no_description) },
         imageHeight = 180.dp,

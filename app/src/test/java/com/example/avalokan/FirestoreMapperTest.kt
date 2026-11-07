@@ -35,8 +35,15 @@ class FirestoreMapperTest {
         assertEquals("", event.eventKind)
         assertEquals("", event.locality)
         assertEquals("", event.ticketing)
+        assertEquals("", event.priceBasis)
+        assertEquals("", event.participation)
+        assertEquals("", event.format)
+        assertTrue(event.secondaryCategories.isEmpty())
+        assertTrue(event.tags.isEmpty())
         assertEquals("", event.placeId)
         assertEquals("", event.storyId)
+        assertTrue(event.relatedPlaceIds.isEmpty())
+        assertTrue(event.relatedEventIds.isEmpty())
         assertEquals("", event.sourceLabel)
         assertEquals("", event.sourceUrl)
         assertEquals("", event.lastVerifiedAt)
@@ -96,6 +103,14 @@ class FirestoreMapperTest {
         assertFalse(place.livingHeritage)
         assertEquals("", place.etiquette)
         assertEquals("", place.accessibility)
+        assertEquals("", place.primaryCategory)
+        assertTrue(place.secondaryCategories.isEmpty())
+        assertTrue(place.typologies.isEmpty())
+        assertTrue(place.attributes.isEmpty())
+        assertTrue(place.tags.isEmpty())
+        assertEquals("", place.locality)
+        assertTrue(place.relatedPlaceIds.isEmpty())
+        assertTrue(place.relatedEventIds.isEmpty())
         assertEquals("", place.sourceLabel)
         assertEquals("", place.sourceUrl)
         assertEquals("", place.lastVerifiedAt)
@@ -121,6 +136,12 @@ class FirestoreMapperTest {
         assertEquals("", story.lastVerifiedAt)
         assertEquals("", story.verificationStatus)
         assertTrue(story.placeIds.isEmpty())
+        assertEquals("", story.primaryCategory)
+        assertTrue(story.secondaryCategories.isEmpty())
+        assertTrue(story.typologies.isEmpty())
+        assertTrue(story.tags.isEmpty())
+        assertTrue(story.relatedEventIds.isEmpty())
+        assertEquals("", story.period)
     }
 
     @Test
@@ -221,6 +242,141 @@ class FirestoreMapperTest {
         assertEquals(listOf("boudhanath"), fromArray.placeIds)
         assertEquals(listOf("boudhanath"), fromString.placeIds)
         assertTrue(fromBlank.placeIds.isEmpty())
+    }
+
+    @Test
+    fun `place mapper forbids inventing classification when no audit entry exists`() {
+        // "missing" is not in the audited catalog: every classification field
+        // must stay blank rather than being guessed from the category text.
+        val place = toPlaceItem("missing") { null }
+
+        assertNull(place.primaryCategory.takeIf { it.isNotBlank() })
+        assertTrue(place.typologies.isEmpty())
+        assertTrue(place.attributes.isEmpty())
+    }
+
+    @Test
+    fun `place mapper reads explicit classification fields and preserves unknown keys`() {
+        val fields = mapOf<String, Any?>(
+            "primaryCategory" to "BUDDHIST_HERITAGE_SITE",
+            "secondaryCategories" to listOf("SACRED_LANDSCAPE"),
+            "typologies" to listOf("STUPA", "SOMETHING_NEW"),
+            "attributes" to listOf("RELIGIOUS_SPIRITUAL", "PILGRIMAGE"),
+            "tags" to listOf("Buddhist Pilgrimage"),
+            "locality" to "Kathmandu",
+            "relatedPlaceIds" to listOf("swayambhunath-stupa"),
+            "relatedEventIds" to "buddha-jayanti",
+        )
+
+        val place = toPlaceItem("boudha-stupa") { fields[it] }
+
+        assertEquals("BUDDHIST_HERITAGE_SITE", place.primaryCategory)
+        assertEquals(listOf("SACRED_LANDSCAPE"), place.secondaryCategories)
+        // Unknown taxonomy keys are preserved verbatim so a later app version
+        // can understand them without a data migration.
+        assertEquals(listOf("STUPA", "SOMETHING_NEW"), place.typologies)
+        assertEquals(listOf("RELIGIOUS_SPIRITUAL", "PILGRIMAGE"), place.attributes)
+        assertEquals(listOf("Buddhist Pilgrimage"), place.tags)
+        assertEquals("Kathmandu", place.locality)
+        assertEquals(listOf("swayambhunath-stupa"), place.relatedPlaceIds)
+        assertEquals(listOf("buddha-jayanti"), place.relatedEventIds)
+    }
+
+    @Test
+    fun `place mapper prefers Firestore fields over the audited legacy catalog`() {
+        val fields = mapOf<String, Any?>(
+            "primaryCategory" to "ARCHAEOLOGICAL_SITE",
+            "typologies" to listOf("SHIKHARA"),
+            "locality" to "Patan",
+        )
+
+        // boudha-stupa has a catalog seed; explicit Firestore values must win.
+        val place = toPlaceItem("boudha-stupa") { fields[it] }
+
+        assertEquals("ARCHAEOLOGICAL_SITE", place.primaryCategory)
+        assertEquals(listOf("SHIKHARA"), place.typologies)
+        assertEquals("Patan", place.locality)
+    }
+
+    @Test
+    fun `place mapper falls back to the audited legacy catalog`() {
+        val place = toPlaceItem("boudha-stupa") { null }
+
+        assertEquals("BUDDHIST_HERITAGE_SITE", place.primaryCategory)
+        assertTrue(place.typologies.contains("STUPA"))
+        assertEquals("Kathmandu", place.locality)
+        assertEquals("World Heritage", place.unescoStatus)
+    }
+
+    @Test
+    fun `event mapper prefers explicit classification over the legacy catalog`() {
+        val fields = mapOf<String, Any?>(
+            "eventKind" to "WORKSHOP",
+            "locality" to "LOCAL",
+            "ticketing" to "TICKETED",
+            "priceBasis" to "PER_PERSON",
+            "participation" to "REGISTRATION_REQUIRED",
+            "format" to "WORKSHOP",
+            "tags" to listOf("Pottery"),
+            "relatedEventIds" to listOf("tihar"),
+        )
+
+        // tihar has a catalog seed (FESTIVAL/NATIONWIDE/FREE); explicit fields win.
+        val event = toEventItem("tihar") { fields[it] }
+
+        assertEquals("WORKSHOP", event.eventKind)
+        assertEquals("LOCAL", event.locality)
+        assertEquals("TICKETED", event.ticketing)
+        assertEquals("PER_PERSON", event.priceBasis)
+        assertEquals("REGISTRATION_REQUIRED", event.participation)
+        assertEquals("WORKSHOP", event.format)
+        assertEquals(listOf("Pottery"), event.tags)
+        assertEquals(listOf("tihar"), event.relatedEventIds)
+    }
+
+    @Test
+    fun `event mapper falls back to the audited legacy catalog`() {
+        val event = toEventItem("tihar") { null }
+
+        assertEquals("FESTIVAL", event.eventKind)
+        assertEquals("NATIONWIDE", event.locality)
+        assertEquals("FREE", event.ticketing)
+        assertEquals("OPEN", event.participation)
+    }
+
+    @Test
+    fun `unknown document ids never receive a guessed event classification`() {
+        val event = toEventItem("event") { null }
+
+        assertEquals("", event.eventKind)
+        assertEquals("", event.locality)
+        assertEquals("", event.ticketing)
+    }
+
+    @Test
+    fun `story mapper prefers explicit classification over the legacy catalog`() {
+        val fields = mapOf<String, Any?>(
+            "primaryCategory" to "ARCHITECTURE_HERITAGE",
+            "typologies" to listOf("PAGODA"),
+            "tags" to listOf("Wood carving"),
+            "period" to "Malla period",
+        )
+
+        val story = toStoryItem("boudhanath") { fields[it] }
+
+        assertEquals("ARCHITECTURE_HERITAGE", story.primaryCategory)
+        assertEquals(listOf("PAGODA"), story.typologies)
+        assertEquals(listOf("Wood carving"), story.tags)
+        assertEquals("Malla period", story.period)
+    }
+
+    @Test
+    fun `story mapper falls back to the audited legacy catalog`() {
+        val story = toStoryItem("boudhanath") { null }
+
+        assertEquals("RELIGION_PHILOSOPHY", story.primaryCategory)
+        assertTrue(story.typologies.contains("STUPA"))
+        assertEquals(listOf("boudha-stupa"), story.placeIds)
     }
 
     @Test

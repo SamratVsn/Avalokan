@@ -1,5 +1,11 @@
 package com.example.avalokan.domain.model
 
+import com.example.avalokan.domain.classification.HeritageGroup
+import com.example.avalokan.domain.classification.HeritageTypology
+import com.example.avalokan.domain.classification.PlaceAttribute
+import com.example.avalokan.domain.classification.PlaceBadge
+import com.example.avalokan.domain.classification.PlacePrimaryCategory
+
 //A heritage place as the UI understands it.
 data class Place(
     val id: String,
@@ -26,9 +32,77 @@ data class Place(
     val livingHeritage: Boolean = false,
     val etiquette: String = "",
     val accessibility: String = "",
+    // Multi-dimensional classification. Raw keys are stored so unknown future
+    // values survive; typed accessors below ignore what this build cannot name.
+    val primaryCategory: String = "",
+    val secondaryCategories: List<String> = emptyList(),
+    val typologies: List<String> = emptyList(),
+    val attributes: List<String> = emptyList(),
+    val tags: List<String> = emptyList(),
+    val locality: String = "",
+    val relatedPlaceIds: List<String> = emptyList(),
+    val relatedEventIds: List<String> = emptyList(),
     // Provenance. Blank means "not recorded", never "verified".
     val sourceLabel: String = "",
     val sourceUrl: String = "",
     val lastVerifiedAt: String = "",
     val verificationStatus: String = "",
-)
+) {
+    val primary: PlacePrimaryCategory?
+        get() = PlacePrimaryCategory.fromKey(primaryCategory)
+
+    val heritageTypologies: List<HeritageTypology>
+        get() = HeritageTypology.fromKeys(typologies)
+
+    val heritageGroups: List<HeritageGroup>
+        get() = heritageTypologies.map { it.group }.distinct()
+
+    val placeAttributes: List<PlaceAttribute>
+        get() = attributes.mapNotNull(PlaceAttribute::fromKey)
+
+    fun matches(group: HeritageGroup?): Boolean =
+        group == null || heritageGroups.contains(group)
+
+    fun matchesQuery(query: String): Boolean {
+        val needle = query.trim()
+        if (needle.isEmpty()) return true
+        return name.contains(needle, ignoreCase = true) ||
+            meta.contains(needle, ignoreCase = true) ||
+            locality.contains(needle, ignoreCase = true) ||
+            heritageTypologies.any { it.name.contains(needle, ignoreCase = true) } ||
+            tags.any { it.contains(needle, ignoreCase = true) }
+    }
+
+    /** Verified-only badges, in priority order, capped so cards stay readable. */
+    fun badges(limit: Int = 2): List<PlaceBadge> {
+        val result = buildList {
+            if (isUnescoListed) add(PlaceBadge.UNESCO_HERITAGE)
+            if (primary == PlacePrimaryCategory.BUDDHIST_HERITAGE_SITE) {
+                add(PlaceBadge.BUDDHIST_HERITAGE)
+            }
+            if (heritageGroups.contains(HeritageGroup.PAGODA_NEWA)) {
+                add(PlaceBadge.NEWA_ARCHITECTURE)
+            }
+            if (heritageGroups.contains(HeritageGroup.SACRED_WATER)) {
+                add(PlaceBadge.SACRED_WATER_SYSTEM)
+            }
+            if (livingHeritage) add(PlaceBadge.LIVING_HERITAGE)
+            if (primary == PlacePrimaryCategory.ARCHAEOLOGICAL_SITE ||
+                placeAttributes.contains(PlaceAttribute.ARCHAEOLOGICAL)
+            ) {
+                add(PlaceBadge.ARCHAEOLOGICAL_SITE)
+            }
+            if (placeAttributes.contains(PlaceAttribute.HISTORICAL)) {
+                add(PlaceBadge.HISTORIC_MONUMENT)
+            }
+            if (primary == PlacePrimaryCategory.NATURAL_HERITAGE) {
+                add(PlaceBadge.NATURAL_HERITAGE)
+            }
+        }
+        return result.distinct().take(limit)
+    }
+
+    private val isUnescoListed: Boolean
+        get() = unescoStatus.contains("world heritage", ignoreCase = true) ||
+            tags.any { it.contains("UNESCO", ignoreCase = true) }
+}

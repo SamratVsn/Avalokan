@@ -1,7 +1,9 @@
 package com.example.avalokan.data.place
 
+import com.example.avalokan.data.classification.LegacyClassificationCatalog
 import com.example.avalokan.data.firestore.FirestoreCachedCollection
 import com.example.avalokan.data.firestore.asDoubleOrNull
+import com.example.avalokan.data.firestore.asStringList
 import com.example.avalokan.data.firestore.asText
 import com.example.avalokan.domain.model.Place
 import com.example.avalokan.domain.repository.PlaceRepository
@@ -17,35 +19,47 @@ private const val PLACES_COLLECTION = "places"
  * Pure mapping step, kept separate from [DocumentSnapshot] so missing-field
  * behaviour can be unit-tested without Firestore.
  */
-internal fun toPlaceItem(id: String, field: (String) -> Any?): PlaceItem = PlaceItem(
-    id = id,
-    name = field("name").asText(),
-    description = field("description").asText(),
-    meta = field("meta").asText(),
-    category = field("category").asText(),
-    rating = field("rating").asText(),
-    featured = field("featured") == true,
-    badge = field("badge").asText(),
-    entryFee = field("entryFee").asText(),
-    bestTime = field("bestTime").asText(),
-    hours = field("hours").asText(),
-    imageUrl = field("imageUrl").asText().ifBlank { null },
-    province = field("province").asText(),
-    district = field("district").asText(),
-    latitude = field("latitude").asDoubleOrNull(),
-    longitude = field("longitude").asDoubleOrNull(),
-    era = field("era").asText(),
-    unescoStatus = field("unescoStatus").asText(),
-    heritageType = field("heritageType").asText(),
-    significance = field("significance").asText(),
-    livingHeritage = field("livingHeritage") == true,
-    etiquette = field("etiquette").asText(),
-    accessibility = field("accessibility").asText(),
-    sourceLabel = field("sourceLabel").asText(),
-    sourceUrl = field("sourceUrl").asText(),
-    lastVerifiedAt = field("lastVerifiedAt").asText(),
-    verificationStatus = field("verificationStatus").asText()
-)
+internal fun toPlaceItem(id: String, field: (String) -> Any?): PlaceItem {
+    val seed = LegacyClassificationCatalog.place(id)
+    return PlaceItem(
+        id = id,
+        name = field("name").asText(),
+        description = field("description").asText(),
+        meta = field("meta").asText(),
+        category = field("category").asText(),
+        rating = field("rating").asText(),
+        featured = field("featured") == true,
+        badge = field("badge").asText(),
+        entryFee = field("entryFee").asText(),
+        bestTime = field("bestTime").asText(),
+        hours = field("hours").asText(),
+        imageUrl = field("imageUrl").asText().ifBlank { null },
+        province = field("province").asText(),
+        district = field("district").asText(),
+        latitude = field("latitude").asDoubleOrNull(),
+        longitude = field("longitude").asDoubleOrNull(),
+        era = field("era").asText(),
+        unescoStatus = field("unescoStatus").asText().ifBlank { seed?.unescoStatus.orEmpty() },
+        heritageType = field("heritageType").asText().ifBlank { seed?.heritageType.orEmpty() },
+        significance = field("significance").asText(),
+        livingHeritage = field("livingHeritage") == true || seed?.livingHeritage == true,
+        etiquette = field("etiquette").asText(),
+        accessibility = field("accessibility").asText(),
+        primaryCategory = field("primaryCategory").asText().ifBlank { seed?.primaryCategory.orEmpty() },
+        secondaryCategories = field("secondaryCategories").asStringList()
+            .ifEmpty { seed?.secondaryCategories.orEmpty() },
+        typologies = field("typologies").asStringList().ifEmpty { seed?.typologies.orEmpty() },
+        attributes = field("attributes").asStringList().ifEmpty { seed?.attributes.orEmpty() },
+        tags = field("tags").asStringList().ifEmpty { seed?.tags.orEmpty() },
+        locality = field("locality").asText().ifBlank { seed?.locality.orEmpty() },
+        relatedPlaceIds = field("relatedPlaceIds").asStringList(),
+        relatedEventIds = field("relatedEventIds").asStringList(),
+        sourceLabel = field("sourceLabel").asText(),
+        sourceUrl = field("sourceUrl").asText(),
+        lastVerifiedAt = field("lastVerifiedAt").asText(),
+        verificationStatus = field("verificationStatus").asText()
+    )
+}
 
 private fun DocumentSnapshot.toPlaceItem() = toPlaceItem(id) { get(it) }
 

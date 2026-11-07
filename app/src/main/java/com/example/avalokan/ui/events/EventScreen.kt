@@ -16,11 +16,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.EventBusy
 import androidx.compose.material.icons.filled.Landscape
 import androidx.compose.material3.Button
@@ -28,7 +26,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -52,8 +49,18 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
+import com.example.avalokan.domain.classification.EventKind
+import com.example.avalokan.domain.classification.GeographicScope
 import com.example.avalokan.domain.model.Event
+import com.example.avalokan.domain.model.EventCta
+import com.example.avalokan.domain.model.cta
+import com.example.avalokan.domain.model.priceDisplay
+import com.example.avalokan.ui.common.cardActionLabelRes
+import com.example.avalokan.ui.common.ctaLabelRes
+import com.example.avalokan.ui.common.eventKindLabelRes
+import com.example.avalokan.ui.common.eventPriceValue
 import com.example.avalokan.ui.common.openUrlInBrowser
+import com.example.avalokan.ui.common.scopeLabelRes
 import com.example.avalokan.ui.components.EventsLoadingState
 import com.example.avalokan.ui.components.StateMessage
 import com.example.avalokan.ui.theme.AvalokanTheme
@@ -100,7 +107,6 @@ private fun EventContent(
     isLoading: Boolean,
     onExplorePlacesClick: () -> Unit
 ) {
-    val context = LocalContext.current
     Column(
         modifier = Modifier.fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
@@ -110,7 +116,7 @@ private fun EventContent(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Spacer(Modifier.height(Spacing.small))
-        TopTexts(modifier = Modifier.padding(horizontal = 24.dp))
+        TopTexts(events = events, modifier = Modifier.padding(horizontal = 24.dp))
         if (isLoading && events.isEmpty()) {
             EventsLoadingState()
         } else if (events.isEmpty()) {
@@ -124,62 +130,65 @@ private fun EventContent(
                 onSecondaryAction = onExplorePlacesClick
             )
         } else {
-            val featured = events.find { it.featured } ?: events.firstOrNull()
+            // Featured presentation is restricted to explicitly classified
+            // festival content; a technology event never becomes "Featured".
+            val featured = events.firstOrNull { it.isFeaturedEligible }
             if (featured != null) {
                 FeaturedEvent(
                     event = featured,
                     modifier = Modifier.padding(horizontal = 24.dp),
-                    onRemindClick = {
-                        if (!context.openUrlInBrowser(featured.joinLink)) {
-                            onEventClick(featured.id)
-                        }
-                    }
+                    onEventClick = { onEventClick(featured.id) }
                 )
             }
-            UpcomingEvents(
-                events = events,
-                modifier = Modifier.padding(horizontal = 24.dp).padding(top = 20.dp),
-                onEventClick = onEventClick
-            )
+            val upcoming = events.filterNot { it.id == featured?.id }
+            if (upcoming.isNotEmpty()) {
+                UpcomingEvents(
+                    events = upcoming,
+                    modifier = Modifier.padding(horizontal = 24.dp).padding(top = 20.dp),
+                    onEventClick = onEventClick
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun TopTexts(modifier: Modifier = Modifier) {
-    Row(
+private fun TopTexts(events: List<Event>, modifier: Modifier = Modifier) {
+    Column(
         modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(
-                text = stringResource(R.string.events),
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = stringResource(R.string.kathmanduValley),
-                style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        IconButton(
-            onClick = { /* TODO: calendar */ },
-            modifier = Modifier
-                .size(40.dp)
-                .background(
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    shape = CircleShape
-                )
-        ) {
-            Icon(
-                imageVector = Icons.Default.CalendarMonth,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(18.dp)
-            )
-        }
+        Text(
+            text = stringResource(R.string.events),
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Text(
+            text = eventsScopeLabel(events.map { it.geographicScope }),
+            style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+/**
+ * Summarises the actual reach of the events on screen. This replaces the old
+ * "All Over Nepal" label that was attached to the `kathmanduValley` key.
+ */
+@Composable
+private fun eventsScopeLabel(scopes: List<GeographicScope>): String {
+    val known = scopes.filterNot { it == GeographicScope.UNKNOWN }.toSet()
+    return when {
+        known.isEmpty() -> stringResource(R.string.scope_unknown)
+        known.contains(GeographicScope.NATIONWIDE) &&
+            known.any { it == GeographicScope.LOCAL || it == GeographicScope.REGIONAL } ->
+            stringResource(R.string.events_scope_nationwide_local)
+        known.contains(GeographicScope.NATIONWIDE) -> stringResource(R.string.scope_nationwide)
+        known.contains(GeographicScope.LOCAL) && known.contains(GeographicScope.REGIONAL) ->
+            stringResource(R.string.events_scope_local_regional)
+        known.contains(GeographicScope.LOCAL) -> stringResource(R.string.scope_local)
+        known.contains(GeographicScope.REGIONAL) -> stringResource(R.string.scope_regional)
+        else -> stringResource(R.string.events_scope_across_nepal)
     }
 }
 
@@ -187,14 +196,26 @@ private fun TopTexts(modifier: Modifier = Modifier) {
 private fun FeaturedEvent(
     event: Event,
     modifier: Modifier = Modifier,
-    onRemindClick: () -> Unit = {}
+    onEventClick: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+    val cta = event.cta()
+    val ctaRes = ctaLabelRes(cta)
+    val actionLabel = ctaRes?.let { stringResource(it) } ?: stringResource(R.string.cta_view_details)
+    val kindLabel = stringResource(eventKindLabelRes(event.primaryKind))
+    val scopeLabel = stringResource(scopeLabelRes(event.geographicScope))
     val dateParts = event.date.split(" ", ",").filter { it.isNotBlank() }
     val month = dateParts.getOrNull(0)?.uppercase()
     val day = dateParts.getOrNull(1)
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
-            text = "Featured Festival",
+            text = stringResource(
+                if (event.primaryKind == EventKind.FESTIVAL) {
+                    R.string.featured_festival
+                } else {
+                    R.string.featured_celebration
+                }
+            ),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
@@ -291,9 +312,20 @@ private fun FeaturedEvent(
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
+                    Text(
+                        text = "$kindLabel · $scopeLabel",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White.copy(alpha = 0.8f)
+                    )
                     Spacer(Modifier.height(6.dp))
                     Button(
-                        onClick = onRemindClick,
+                        onClick = {
+                            if (cta != EventCta.NONE && event.hasValidJoinLink) {
+                                if (!context.openUrlInBrowser(event.joinLink)) onEventClick()
+                            } else {
+                                onEventClick()
+                            }
+                        },
                         shape = BadgeShape,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.surface,
@@ -302,7 +334,7 @@ private fun FeaturedEvent(
                         modifier = Modifier.fillMaxWidth().height(40.dp)
                     ) {
                         Text(
-                            text = "Book the Event Now",
+                            text = actionLabel,
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -322,19 +354,17 @@ private fun UpcomingEvents(
     val context = LocalContext.current
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
-            text = "Upcoming in Your Locality",
+            text = stringResource(R.string.events_upcoming),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
         events.forEach { event ->
             EventCards(
-                name = event.title,
-                meta = event.meta,
-                fee = event.fee,
-                action = event.action,
-                imageUrl = event.imageUrl,
+                event = event,
                 onCardClick = { onEventClick(event.id) },
-                onJoinClick = { context.openUrlInBrowser(event.joinLink) }
+                onActionClick = {
+                    if (event.hasValidJoinLink) context.openUrlInBrowser(event.joinLink)
+                }
             )
         }
     }
@@ -342,15 +372,12 @@ private fun UpcomingEvents(
 
 @Composable
 private fun EventCards(
-    name: String,
-    meta: String,
-    fee: String,
-    action: String,
-    // API-ready: pass remote image URL/model here later; null = placeholder below
-    imageUrl: String? = null,
+    event: Event,
     onCardClick: () -> Unit = {},
-    onJoinClick: () -> Unit = {}
+    onActionClick: () -> Unit = {}
 ) {
+    val price = event.priceDisplay()
+    val actionRes = cardActionLabelRes(event.cta())
     Card(
         onClick = onCardClick,
         modifier = Modifier.fillMaxWidth(),
@@ -368,10 +395,10 @@ private fun EventCards(
                     modifier = Modifier.fillMaxSize().background(SageSoft),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (imageUrl != null) {
+                    if (event.imageUrl != null) {
                         AsyncImage(
-                            model = imageUrl,
-                            contentDescription = name,
+                            model = event.imageUrl,
+                            contentDescription = event.title,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
                         )
@@ -390,32 +417,42 @@ private fun EventCards(
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 Text(
-                    text = name.ifBlank { stringResource(R.string.untitled) },
+                    text = event.title.ifBlank { stringResource(R.string.untitled) },
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = meta.ifBlank { stringResource(R.string.no_location) },
+                    text = event.meta.ifBlank { stringResource(R.string.no_location) },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = fee.ifBlank { stringResource(R.string.no_fee) },
+                    text = stringResource(eventKindLabelRes(event.primaryKind)) + " · " +
+                        stringResource(scopeLabelRes(event.geographicScope)),
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.tertiary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
+                if (price != null) {
+                    Text(
+                        text = eventPriceValue(price.label, price.value),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
+                }
             }
-            if (action.isNotBlank()) {
+            if (actionRes != null && event.hasValidJoinLink) {
                 Text(
-                    text = action,
+                    text = stringResource(actionRes),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary,
                     maxLines = 1,
-                    modifier = Modifier.clickable(onClick = onJoinClick)
+                    modifier = Modifier.clickable(onClick = onActionClick)
                 )
             }
         }

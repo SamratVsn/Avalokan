@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ExploreOff
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SearchOff
-import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -49,6 +48,9 @@ import com.example.avalokan.R
 import com.example.avalokan.domain.model.Place
 import com.example.avalokan.ui.components.DiscoverLoadingState
 import com.example.avalokan.ui.components.StateMessage
+import com.example.avalokan.ui.common.heritageFilterHelpRes
+import com.example.avalokan.ui.common.heritageFilterLabel
+import com.example.avalokan.ui.common.placeBadgeLabel
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
 import com.example.avalokan.ui.theme.Spacing
@@ -129,30 +131,13 @@ private fun DiscoverContent(
         Spacer(Modifier.height(Spacing.small))
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = stringResource(R.string.discover),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary
             )
-            IconButton(
-                onClick = { /* TODO: filters */ },
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = CircleShape
-                    )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Tune,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
         }
         SearchField(
             query = query, onQuery = onQuery,
@@ -257,9 +242,11 @@ private fun Suggestions(
     modifier: Modifier = Modifier
 ){
     val activeFilter = filters.getOrNull(selected) ?: filters.firstOrNull() ?: "All"
+    val activeFilterLabel = heritageFilterLabel(activeFilter)
     val suggestionCategories = availableCategories
         .filter { it != "All" && it != activeFilter }
         .take(4)
+    val suggestionLabels = suggestionCategories.associateWith { heritageFilterLabel(it) }
 
     Column(
         modifier = modifier,
@@ -275,7 +262,7 @@ private fun Suggestions(
                 FilterChip(
                     selected = isSelected,
                     onClick = { onSelect(index) },
-                    label = { Text(text = label, style = MaterialTheme.typography.bodyMedium, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium) },
+                    label = { Text(text = heritageFilterLabel(label), style = MaterialTheme.typography.bodyMedium, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium) },
                     shape = BadgeShape,
                     modifier = Modifier.then(
                         if (isSelected) Modifier.shadow(4.dp, BadgeShape)
@@ -297,6 +284,15 @@ private fun Suggestions(
                 )
             }
         }
+        val helpRes = heritageFilterHelpRes(activeFilter)
+        if (helpRes != null) {
+            Text(
+                text = stringResource(helpRes),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 24.dp)
+            )
+        }
         when {
             // First paint: the cache is empty but the network may still answer.
             isLoading && sites.isEmpty() -> DiscoverLoadingState()
@@ -307,11 +303,7 @@ private fun Suggestions(
             ) {
                 sites.forEach { site ->
                     SearchPlaceCard(
-                        title = site.name,
-                        meta = site.meta,
-                        rating = site.rating,
-                        desc = site.description,
-                        imageUrl = site.imageUrl,
+                        place = site,
                         isSaved = savedIds.contains(site.id),
                         onSaveClick = { onToggleSave(site.id) },
                         onCardClick = { onPlaceClick(site.id) }
@@ -342,6 +334,7 @@ private fun Suggestions(
                     onSecondaryAction = { onSuggestionSelect("All") },
                     suggestions = suggestionCategories,
                     suggestionsLabel = stringResource(R.string.try_these),
+                    suggestionLabels = suggestionLabels,
                     onSuggestionClick = onSuggestionSelect
                 )
                 if (recommended.isNotEmpty()) {
@@ -357,12 +350,13 @@ private fun Suggestions(
             // Places loaded fine; this filter simply has none.
             else -> StateMessage(
                 icon = Icons.Default.ExploreOff,
-                title = stringResource(R.string.nothing_in_category_title, activeFilter),
-                message = stringResource(R.string.nothing_in_category_message, activeFilter),
+                title = stringResource(R.string.nothing_in_category_title, activeFilterLabel),
+                message = stringResource(R.string.nothing_in_category_message, activeFilterLabel),
                 actionLabel = stringResource(R.string.show_all_places),
                 onAction = { onSelect(0) },
                 suggestions = suggestionCategories,
                 suggestionsLabel = stringResource(R.string.try_these),
+                suggestionLabels = suggestionLabels,
                 onSuggestionClick = onSuggestionSelect
             )
         }
@@ -390,11 +384,7 @@ private fun PopularNow(
         )
         places.forEach { place ->
             SearchPlaceCard(
-                title = place.name,
-                meta = place.meta,
-                rating = place.rating,
-                desc = place.description,
-                imageUrl = place.imageUrl,
+                place = place,
                 isSaved = savedIds.contains(place.id),
                 onSaveClick = { onToggleSave(place.id) },
                 onCardClick = { onPlaceClick(place.id) }
@@ -405,24 +395,22 @@ private fun PopularNow(
 
 @Composable
 private fun SearchPlaceCard(
-    title: String,
-    meta: String,
-    rating: String,
-    desc: String,
-    imageUrl: String? = null,
+    place: Place,
     isSaved: Boolean = false,
     onSaveClick: () -> Unit = {},
     onCardClick: () -> Unit = {}
-){
+) {
+    val classificationBadge = placeBadgeLabel(place)
     com.example.avalokan.ui.components.HeritageCard(
-        title = title,
-        subtitle = meta.ifBlank { stringResource(R.string.no_location) }.uppercase(),
+        title = place.name,
+        subtitle = place.meta.ifBlank { stringResource(R.string.no_location) }.uppercase(),
         subtitleStyle = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
-        rating = rating.takeIf { it.isNotBlank() },
-        description = desc.ifBlank { stringResource(R.string.no_description) },
+        badge = classificationBadge,
+        rating = place.rating.takeIf { it.isNotBlank() },
+        description = place.description.ifBlank { stringResource(R.string.no_description) },
         imageHeight = 180.dp,
         imageCorner = 28.dp,
-        imageUrl = imageUrl,
+        imageUrl = place.imageUrl,
         showSave = true,
         isSaved = isSaved,
         onSaveClick = onSaveClick,
@@ -452,7 +440,8 @@ private fun DiscoverPreview(){
                     description = "The heart of old Kathmandu city.",
                     meta = "Kathmandu • Historical Site",
                     category = "Historical",
-                    rating = "4.8"
+                    rating = "4.8",
+                    typologies = listOf("DURBAR", "PAGODA")
                 ),
                 Place(
                     id = "lumbini-garden",
@@ -460,7 +449,8 @@ private fun DiscoverPreview(){
                     description = "The sacred birthplace of Lord Buddha.",
                     meta = "Lumbini • Spiritual Site",
                     category = "Cultural",
-                    rating = "4.9"
+                    rating = "4.9",
+                    typologies = listOf("BUDDHIST_SACRED_SITE", "PILGRIMAGE_LANDSCAPE")
                 )
             ),
             totalPlaces = 2,
@@ -469,7 +459,7 @@ private fun DiscoverPreview(){
             onPlaceClick = {},
             onRetry = {},
             isLoading = false,
-            availableCategories = listOf("All", "Historical", "Cultural"),
+            availableCategories = listOf("All", "PAGODA_NEWA", "STUPA_MONASTERY"),
             recommended = emptyList(),
             onClearQuery = {},
             onSuggestionSelect = {},

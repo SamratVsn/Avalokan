@@ -3,6 +3,7 @@ package com.example.avalokan.ui.discover
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.avalokan.data.local.PreferencesStore
+import com.example.avalokan.domain.classification.HeritageGroup
 import com.example.avalokan.domain.model.Place
 import com.example.avalokan.domain.repository.PlaceRepository
 import com.example.avalokan.ui.common.CONTENT_LOADING_TIMEOUT_MS
@@ -19,14 +20,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-val DiscoverCategories = listOf(
-    "All",
-    "Historical",
-    "Spiritual",
-    "Cultural",
-    "Nature",
-    "Adventure",
-)
+val DiscoverCategories: List<String> =
+    listOf("All") + HeritageGroup.entries.map { it.key }
 
 
 @HiltViewModel
@@ -67,7 +62,9 @@ class DiscoverViewModel @Inject constructor(
     private data class DiscoverState(
         val sites: List<Place> = emptyList(),
         val total: Int = 0,
-        val availableCategories: List<String> = emptyList(),
+        // Matches the chips' first paint, so the initial subscription does not
+        // briefly emit an empty category row before the cache resolves.
+        val availableCategories: List<String> = listOf("All"),
         val recommended: List<Place> = emptyList()
     )
 
@@ -76,15 +73,16 @@ class DiscoverViewModel @Inject constructor(
         _query,
         _selectedCategory
     ) { remote, query, selected ->
-        val category = DiscoverCategories.getOrElse(selected) { "All" }
+        val categoryKey = DiscoverCategories.getOrElse(selected) { "All" }
+        val typologyGroup = HeritageGroup.fromKey(categoryKey)
         DiscoverState(
             sites = remote.filter { site ->
-                (category == "All" || site.category.equals(category, ignoreCase = true)) &&
-                        (query.isBlank() || site.name.contains(query.trim(), ignoreCase = true))
+                site.matches(typologyGroup) && site.matchesQuery(query)
             },
             total = remote.size,
             availableCategories = DiscoverCategories.filter { filter ->
-                filter == "All" || remote.any { it.category.equals(filter, ignoreCase = true) }
+                val group = HeritageGroup.fromKey(filter)
+                filter == "All" || remote.any { it.matches(group) }
             },
             recommended = remote
                 .sortedWith(

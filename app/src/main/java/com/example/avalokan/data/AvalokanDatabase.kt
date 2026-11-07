@@ -24,7 +24,7 @@ import com.example.avalokan.data.story.StoryItem
 @ColumnTypeConverters(Converters::class)
 @Database(
     entities = [PlaceItem::class, EventItem::class, StoryItem::class],
-    version = 9,
+    version = 10,
     exportSchema = true,
 )
 abstract class AvalokanDatabase : RoomDatabase() {

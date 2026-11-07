@@ -3,14 +3,15 @@ package com.example.avalokan.ui.theme
 import androidx.compose.ui.graphics.Color
 
 fun discoverCategoryAccent(category: String): Color = when (category) {
-    "Historical" -> HistoricalAccent
-    "Spiritual", "Cultural" -> CulturalAccent
-    "Nature" -> NatureAccent
-    "Adventure" -> SandDark
+    "PAGODA_NEWA" -> HistoricalAccent
+    "STUPA_MONASTERY" -> CulturalAccent
+    "SHIKHARA_GRANTHAKUTA" -> PrimaryGreenDark
+    "SACRED_WATER" -> NatureAccent
+    "SACRED_LANDSCAPE" -> SandDark
     else -> PrimaryGreen
 }
 
 fun discoverCategoryOnAccent(category: String): Color = when (category) {
-    "Adventure" -> TextPrimary
+    "SACRED_LANDSCAPE" -> TextPrimary
     else -> OnPrimary
 }

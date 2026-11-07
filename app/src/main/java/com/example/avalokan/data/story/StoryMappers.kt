@@ -22,4 +22,10 @@ internal fun StoryItem.toDomain(): Story = Story(
     lastVerifiedAt = lastVerifiedAt,
     verificationStatus = verificationStatus,
     placeIds = placeIds,
+    primaryCategory = primaryCategory,
+    secondaryCategories = secondaryCategories,
+    typologies = typologies,
+    tags = tags,
+    relatedEventIds = relatedEventIds,
+    period = period,
 )

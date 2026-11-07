@@ -1,5 +1,6 @@
 package com.example.avalokan.data.place
 
+import androidx.room3.ColumnInfo
 import androidx.room3.Entity
 import androidx.room3.PrimaryKey
 
@@ -40,5 +41,14 @@ data class PlaceItem(
     val sourceLabel: String = "",
     val sourceUrl: String = "",
     val lastVerifiedAt: String = "",
-    val verificationStatus: String = ""
+    val verificationStatus: String = "",
+    // Multi-dimensional classification (see HeritageClassification.kt).
+    @ColumnInfo(defaultValue = "''") val primaryCategory: String = "",
+    @ColumnInfo(defaultValue = "''") val secondaryCategories: List<String> = emptyList(),
+    @ColumnInfo(defaultValue = "''") val typologies: List<String> = emptyList(),
+    @ColumnInfo(defaultValue = "''") val attributes: List<String> = emptyList(),
+    @ColumnInfo(defaultValue = "''") val tags: List<String> = emptyList(),
+    @ColumnInfo(defaultValue = "''") val locality: String = "",
+    @ColumnInfo(defaultValue = "''") val relatedPlaceIds: List<String> = emptyList(),
+    @ColumnInfo(defaultValue = "''") val relatedEventIds: List<String> = emptyList()
 )

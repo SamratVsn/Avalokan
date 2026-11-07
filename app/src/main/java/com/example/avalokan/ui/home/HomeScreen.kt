@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
 import com.example.avalokan.domain.model.Place
+import com.example.avalokan.ui.common.placeBadgeLabel
 import com.example.avalokan.ui.components.HomeLoadingState
 import com.example.avalokan.ui.components.StateMessage
 import com.example.avalokan.ui.theme.AvalokanTheme
@@ -343,7 +344,7 @@ private fun HistoricalGems(
                 PlaceCard(
                     title = place.name,
                     subtitle = place.description.ifBlank { stringResource(R.string.no_description) },
-                    badge = place.badge,
+                    badge = placeBadgeLabel(place).orEmpty(),
                     imageUrl = place.imageUrl,
                     onCardClick = { onPlaceClick(place.id) }
                 )
@@ -405,7 +406,7 @@ private fun RecentDiscoveries(
                 com.example.avalokan.ui.components.HeritageCard(
                     title = place.name,
                     subtitle = place.meta.ifBlank { stringResource(R.string.no_location) },
-                    badge = place.badge.takeIf { it.isNotBlank() },
+                    badge = placeBadgeLabel(place),
                     rating = place.rating,
                     imageUrl = place.imageUrl,
                     onCardClick = { onPlaceClick(place.id) }

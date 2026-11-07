@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 
-/** Places used by the view-model tests: one Historical, one Cultural. */
+/** Places used by the view-model tests: two typologies, one shared group. */
 internal val TestPlaces = listOf(
     Place(
         id = "kathmandu-durbar",
@@ -20,7 +20,9 @@ internal val TestPlaces = listOf(
         description = "desc",
         meta = "Kathmandu • Historical Site",
         category = "Historical",
-        rating = "4.8"
+        rating = "4.8",
+        typologies = listOf("DURBAR", "PAGODA"),
+        primaryCategory = "HISTORIC_URBAN_HERITAGE"
     ),
     Place(
         id = "lumbini-garden",
@@ -28,7 +30,9 @@ internal val TestPlaces = listOf(
         description = "desc",
         meta = "Lumbini • Spiritual Site",
         category = "Cultural",
-        rating = "4.9"
+        rating = "4.9",
+        typologies = listOf("BUDDHIST_SACRED_SITE", "PILGRIMAGE_LANDSCAPE"),
+        primaryCategory = "BUDDHIST_HERITAGE_SITE"
     )
 )
 
@@ -75,6 +79,7 @@ internal class FakePlaceRepository(
 internal class FakePreferencesStore : PreferencesStore {
     private val saved = MutableStateFlow(emptySet<String>())
     private val favorites = MutableStateFlow(emptySet<String>())
+    private val visited = MutableStateFlow(emptySet<String>())
     private val avatar = MutableStateFlow<String?>(null)
 
     override val notificationsEnabled: Flow<Boolean> = flowOf(true)
@@ -82,6 +87,7 @@ internal class FakePreferencesStore : PreferencesStore {
     override val avatarLocalUri: Flow<String?> = avatar
     override val savedPlaceIds: Flow<Set<String>> = saved
     override val favoriteEventIds: Flow<Set<String>> = favorites
+    override val visitedPlaceIds: Flow<Set<String>> = visited
 
     override suspend fun setNotificationsEnabled(enabled: Boolean) = Unit
     override suspend fun setThemeChoice(choice: String) = Unit
@@ -98,9 +104,14 @@ internal class FakePreferencesStore : PreferencesStore {
         favorites.value = ids
     }
 
+    override suspend fun setVisitedPlaceIds(ids: Set<String>) {
+        visited.value = ids
+    }
+
     override suspend fun clearAll() {
         saved.value = emptySet()
         favorites.value = emptySet()
+        visited.value = emptySet()
         avatar.value = null
     }
 }

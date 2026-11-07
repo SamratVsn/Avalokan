@@ -3,6 +3,7 @@ package com.example.avalokan.data.di
 import android.content.Context
 import androidx.room3.Room
 import com.example.avalokan.data.AvalokanDatabase
+import com.example.avalokan.data.MIGRATION_9_10
 import com.example.avalokan.data.event.EventDao
 import com.example.avalokan.data.event.FirestoreEventRepository
 import com.example.avalokan.data.local.AvatarStore
@@ -39,6 +40,7 @@ object AppModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AvalokanDatabase =
         Room.databaseBuilder(context, AvalokanDatabase::class.java, "avalokan.db")
+            .addMigrations(MIGRATION_9_10)
             // CONTRACT: this database is a disposable cache of Firestore
             // content (places, events, stories). Wiping it on a schema change
             // is safe and self-heals from the next snapshot. If user-created
