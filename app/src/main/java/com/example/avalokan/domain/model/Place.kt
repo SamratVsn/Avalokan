@@ -48,6 +48,33 @@ data class Place(
     val lastVerifiedAt: String = "",
     val verificationStatus: String = "",
 ) {
+    /**
+     * Provenance is recorded, not inferred. A blank source means the practical
+     * fields on this place have no citation and must not be shown as facts.
+     */
+    val hasSource: Boolean
+        get() = sourceLabel.isNotBlank() || sourceUrl.isNotBlank()
+
+    val hasProvenance: Boolean
+        get() = hasSource || lastVerifiedAt.isNotBlank()
+
+    val isMarkedOutdated: Boolean
+        get() = verificationStatus.trim().equals("OUTDATED", ignoreCase = true)
+
+    private val isMarkedUnverified: Boolean
+        get() = verificationStatus.trim().uppercase() in setOf("UNVERIFIED", "NEEDS_SOURCE")
+
+    /** Practical details are published only when a citation exists and is current. */
+    val canShowPracticalInfo: Boolean
+        get() = hasProvenance && !isMarkedOutdated && !isMarkedUnverified
+
+    /**
+     * A rating is only presentable when a source is recorded for the place and
+     * the record is not flagged as unverified or outdated.
+     */
+    val sourcedRating: String?
+        get() = rating.trim().takeIf { it.isNotEmpty() && hasSource && canShowPracticalInfo }
+
     val primary: PlacePrimaryCategory?
         get() = PlacePrimaryCategory.fromKey(primaryCategory)
 

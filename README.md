@@ -13,7 +13,7 @@ Avalokan brings together the places worth visiting, the stories behind them, and
 
 | Place details | Events |
 | :---: | :---: |
-| <img src="docs/screenshots/place-detail.png" width="300" alt="Place detail screen with entry fee, hours, rating, and saved state" /> | <img src="docs/screenshots/events.png" width="300" alt="Events screen with a featured festival and upcoming events" /> |
+| <img src="docs/screenshots/place-detail.png" width="300" alt="Place detail screen with sourced practical details and saved state" /> | <img src="docs/screenshots/events.png" width="300" alt="Events screen with a featured festival and upcoming events" /> |
 | Facts, description, directions, sharing, and saving | Featured festival and upcoming events with organizer links |
 
 ## About
@@ -24,7 +24,7 @@ Avalokan puts that experience in one place: browse heritage sites, read editoria
 
 ## Features
 
-- **Explore heritage places** — browse historical, cultural, and spiritual sites with descriptions, entry fees, hours, ratings, and practical details.
+- **Explore heritage places** — browse historical, cultural, and spiritual sites with descriptions and practical details shown only when they have a recorded source.
 - **Search and filter** — find places by name and narrow the list by category.
 - **Read stories** — a featured Story of the Day and full editorial story screens.
 - **Find events** — a featured festival, an upcoming events list, and a Book Now action that opens the organizer's link when one is available.

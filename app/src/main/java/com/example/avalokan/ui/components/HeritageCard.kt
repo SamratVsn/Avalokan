@@ -45,6 +45,8 @@ fun HeritageCard(
     subtitle: String,
     badge: String? = null,
     rating: String? = null,
+    /** Citation for [rating]. A rating without one is never rendered. */
+    ratingSource: String? = null,
     description: String? = null,
     descriptionLines: Int = 3,
     subtitleStyle: TextStyle? = null,
@@ -61,6 +63,8 @@ fun HeritageCard(
 ) {
     val widthMod = if (cardWidth != null) Modifier.width(cardWidth) else Modifier
     val clickMod = if (onCardClick != null) Modifier.clickable(onClick = onCardClick) else Modifier
+    // Unsourced ratings are hidden rather than presented as a quality signal.
+    val shownRating = rating?.takeIf { it.isNotBlank() && !ratingSource.isNullOrBlank() }
     if (cardContainer) {
         Card(
             modifier = modifier.fillMaxWidth().then(clickMod),
@@ -87,7 +91,7 @@ fun HeritageCard(
                         subtitle = subtitle,
                         subtitleStyle = subtitleStyle,
                         badge = badge,
-                        rating = rating,
+                        rating = shownRating,
                         description = description,
                         descriptionLines = descriptionLines
                     )
@@ -114,7 +118,7 @@ fun HeritageCard(
                 subtitle = subtitle,
                 subtitleStyle = subtitleStyle,
                 badge = badge,
-                rating = rating,
+                rating = shownRating,
                 description = description,
                 descriptionLines = descriptionLines
             )

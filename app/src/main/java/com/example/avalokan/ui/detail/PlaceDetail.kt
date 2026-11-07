@@ -18,9 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -32,7 +29,6 @@ import androidx.compose.material.icons.filled.Directions
 import androidx.compose.material.icons.filled.Landscape
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -128,7 +124,7 @@ fun PlaceDetailScreen(
     ) {
         PlaceDetailContent(
             title = placeTitle,
-            rating = place?.rating.orEmpty(),
+            rating = place?.sourcedRating.orEmpty(),
             description = place?.description.orEmpty(),
             badge = place?.badge.orEmpty(),
             classificationBadges = place?.badges()
@@ -137,6 +133,10 @@ fun PlaceDetailScreen(
             entryFee = place?.entryFee.orEmpty(),
             bestTime = place?.bestTime.orEmpty(),
             hours = place?.hours.orEmpty(),
+            sourceLabel = place?.sourceLabel.orEmpty(),
+            sourceUrl = place?.sourceUrl.orEmpty(),
+            lastVerifiedAt = place?.lastVerifiedAt.orEmpty(),
+            showPracticalInfo = place?.canShowPracticalInfo == true,
             imageUrl = place?.imageUrl,
             isSaved = isSaved,
             isVisited = isVisited,
@@ -171,6 +171,11 @@ private fun PlaceDetailContent(
     entryFee: String = "",
     bestTime: String = "",
     hours: String = "",
+    sourceLabel: String = "",
+    sourceUrl: String = "",
+    lastVerifiedAt: String = "",
+    /** False hides every practical fact that has no recorded provenance. */
+    showPracticalInfo: Boolean = false,
     imageUrl: String? = null,
     isSaved: Boolean,
     onSaveClick: () -> Unit,
@@ -300,10 +305,11 @@ private fun PlaceDetailContent(
                                 style = MaterialTheme.typography.headlineMedium,
                                 modifier = Modifier.weight(1f)
                             )
+                            // Ratings appear only when [sourcedRating] supplied
+                            // one. No badge, rather than "No rating yet", keeps
+                            // an unrated place from looking like a scored one.
                             if (rating.isNotBlank()) {
                                 DetailBadge(text = "$rating ★")
-                            } else {
-                                DetailBadge(text = stringResource(R.string.no_rating))
                             }
                         }
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -341,25 +347,61 @@ private fun PlaceDetailContent(
                     }
                 }
                 item {
-                    // 2x2 quick-stats grid, with an explicit notice for missing values
-                    val notAvailable = stringResource(R.string.not_available)
-                    val stats = listOf(
-                        StatUi(Icons.Default.ConfirmationNumber, "Entry Fee", entryFee.ifBlank { notAvailable }),
-                        StatUi(Icons.Default.CalendarMonth, "Best Time", bestTime.ifBlank { notAvailable }),
-                        StatUi(Icons.Default.Schedule, "Hours", hours.ifBlank { notAvailable }),
-                        StatUi(Icons.Default.Star, "Rating", rating.ifBlank { stringResource(R.string.no_rating) })
-                    )
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
-                        modifier = Modifier.fillMaxWidth()
-                            .height(220.dp)
-                            .padding(horizontal = 24.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        userScrollEnabled = false
-                    ) {
-                        items(stats) { stat ->
-                            StatCard(stat)
+                    // Practical facts are shown only with provenance. A blank
+                    // value and an unverified value are both omitted; neither
+                    // is turned into a "Not available" pseudo-fact.
+                    val stats = buildList {
+                        if (entryFee.isNotBlank()) {
+                            add(StatUi(Icons.Default.ConfirmationNumber, "Entry Fee", entryFee))
+                        }
+                        if (bestTime.isNotBlank()) {
+                            add(StatUi(Icons.Default.CalendarMonth, "Best Time", bestTime))
+                        }
+                        if (hours.isNotBlank()) {
+                            add(StatUi(Icons.Default.Schedule, "Hours", hours))
+                        }
+                    }
+                    val source = sourceLabel.ifBlank { sourceUrl }
+                    if (showPracticalInfo && stats.isNotEmpty()) {
+                        Column(
+                            modifier = Modifier.padding(horizontal = 24.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            DetailSectionTitle(text = "Practical details")
+                            stats.chunked(2).forEach { row ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    row.forEach { stat ->
+                                        StatCard(stat, Modifier.weight(1f))
+                                    }
+                                    if (row.size == 1) {
+                                        Spacer(Modifier.weight(1f))
+                                    }
+                                }
+                            }
+                            if (source.isNotBlank() || lastVerifiedAt.isNotBlank()) {
+                                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                    if (source.isNotBlank()) {
+                                        Text(
+                                            text = stringResource(R.string.place_info_source, source),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    if (lastVerifiedAt.isNotBlank()) {
+                                        Text(
+                                            text = stringResource(
+                                                R.string.place_info_last_verified,
+                                                lastVerifiedAt
+                                            ),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -383,8 +425,9 @@ private fun PlaceDetailContent(
 }
 
 @Composable
-private fun StatCard(stat: StatUi) {
+private fun StatCard(stat: StatUi, modifier: Modifier = Modifier) {
     Card(
+        modifier = modifier,
         shape = StandardCardShape,
         border = androidx.compose.foundation.BorderStroke(
             1.dp,
@@ -446,6 +489,11 @@ private fun PlaceDetailPreview() {
             rating = "4.8",
             description = "Once the royal palace of the Malla kings.",
             badge = "UNESCO Site",
+            entryFee = "Rs. 1,000 (foreign visitors)",
+            hours = "9 AM – 5 PM",
+            sourceLabel = "Department of Archaeology",
+            lastVerifiedAt = "2026-10-01",
+            showPracticalInfo = true,
             isSaved = false,
             onSaveClick = {},
             onBackClick = {},

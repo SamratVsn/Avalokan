@@ -193,6 +193,22 @@ class DiscoverViewModelTest {
     }
 
     @Test
+    fun `recommended order preserves curated order instead of ranking by rating`() = runTest {
+        // TestPlaces is ordered Kathmandu (4.8) then Lumbini (4.9). Sorting by
+        // rating would put Lumbini first and turn an unsourced score into a
+        // recommendation signal.
+        val vm = DiscoverViewModel(FakePlaceRepository(), FakePreferencesStore())
+        vm.recommended.test {
+            skipItems(1) // stateIn replays its empty initial value first
+            assertEquals(
+                listOf("kathmandu-durbar", "lumbini-garden"),
+                awaitItem().map { it.id }
+            )
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun `suggestion select clears the query and switches category`() = runTest {
         val vm = DiscoverViewModel(FakePlaceRepository(), FakePreferencesStore())
         vm.onQueryChange("nothing matches this")

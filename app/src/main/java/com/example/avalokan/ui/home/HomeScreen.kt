@@ -407,7 +407,8 @@ private fun RecentDiscoveries(
                     title = place.name,
                     subtitle = place.meta.ifBlank { stringResource(R.string.no_location) },
                     badge = placeBadgeLabel(place),
-                    rating = place.rating,
+                    rating = place.sourcedRating,
+                    ratingSource = place.sourceLabel.ifBlank { place.sourceUrl },
                     imageUrl = place.imageUrl,
                     onCardClick = { onPlaceClick(place.id) }
                 )

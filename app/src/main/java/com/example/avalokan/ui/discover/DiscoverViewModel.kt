@@ -84,11 +84,10 @@ class DiscoverViewModel @Inject constructor(
                 val group = HeritageGroup.fromKey(filter)
                 filter == "All" || remote.any { it.matches(group) }
             },
+            // Editorial order: featured content first, then the repository's
+            // curated order. Never rank places by an unsourced rating.
             recommended = remote
-                .sortedWith(
-                    compareByDescending<Place> { it.featured }
-                        .thenByDescending { it.rating.toDoubleOrNull() ?: 0.0 }
-                )
+                .sortedByDescending { it.featured }
                 .take(3)
         )
     }

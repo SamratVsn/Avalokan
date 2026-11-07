@@ -4,6 +4,8 @@ Audit date: 2026-11-06
 Scope: live Firestore project `avalokan-1fa3a`, collections `places` (16), `events` (4), `stories` (1).
 Method: read every document with the Firestore REST API, compared the stored fields against the Nepal-centric taxonomy in `domain/classification/HeritageClassification.kt`, and checked the existing text for evidence of each recommendation. No document was modified for this audit.
 
+For per-document practical-data verification status, see [`content-audit.md`](content-audit.md).
+
 ## Why this audit exists
 
 The app previously used one flat `category`/`type` string for every kind of content. That made a Durbar Square, a lake, and a stupa indistinguishable in Discover, and it let a technology conference be presented with festival language because its legacy type was `Technical`. The taxonomy below separates five independent dimensions:

@@ -51,7 +51,7 @@
     <string name="clear_search">Clear search</string>
     <string name="retry">Retry</string>
     <string name="try_these">Try one of these</string>
-    <string name="popular_now">Popular right now</string>
+    <string name="popular_now">More to explore</string>
     <string name="browse_all_places">Browse all places</string>
     <string name="show_all_places">Show all places</string>
     <string name="explore_events">Explore events</string>
@@ -94,6 +94,8 @@
     <string name="no_date">Date not available</string>
     <string name="no_fee">Fee not available</string>
     <string name="no_rating">No rating yet</string>
+    <string name="place_info_source">Source: %1$s</string>
+    <string name="place_info_last_verified">Last verified: %1$s</string>
     <string name="no_author">Author not available</string>
     <string name="no_read_time">Read time not available</string>
     <string name="no_bio">No bio added yet.</string>

@@ -1,7 +1,9 @@
 package com.example.avalokan
 
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -29,6 +31,7 @@ class HeritageCardTest {
                     subtitle = "Lalitpur • Historical Site",
                     badge = "UNESCO Site",
                     rating = "4.8",
+                    ratingSource = "Department of Archaeology",
                     description = "Artistic heritage of Lalitpur.",
                     showSave = true,
                     isSaved = false,
@@ -46,5 +49,20 @@ class HeritageCardTest {
             .performClick()
 
         assertTrue(saved)
+    }
+
+    @Test
+    fun hidesRatingWithoutASource() {
+        compose.setContent {
+            AvalokanTheme {
+                HeritageCard(
+                    title = "Patan Durbar Square",
+                    subtitle = "Lalitpur • Historical Site",
+                    rating = "4.8",
+                )
+            }
+        }
+
+        compose.onAllNodesWithText("4.8").assertCountEquals(0)
     }
 }
