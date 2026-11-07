@@ -18,10 +18,17 @@ interface PreferencesStore {
     val savedPlaceIds: Flow<Set<String>>
     val favoriteEventIds: Flow<Set<String>>
 
+    /**
+     * Places the user explicitly marked as visited. Empty by default; a place
+     * detail view is never counted as a visit on its own.
+     */
+    val visitedPlaceIds: Flow<Set<String>>
+
     suspend fun setNotificationsEnabled(enabled: Boolean)
     suspend fun setThemeChoice(choice: String)
     suspend fun setAvatarLocalUri(uri: String?)
     suspend fun setSavedPlaceIds(ids: Set<String>)
     suspend fun setFavoriteEventIds(ids: Set<String>)
+    suspend fun setVisitedPlaceIds(ids: Set<String>)
     suspend fun clearAll()
 }

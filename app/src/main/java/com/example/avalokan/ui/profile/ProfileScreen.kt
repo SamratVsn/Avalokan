@@ -224,9 +224,9 @@ private fun UserSection(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                UserSectionInfo(stats.visited, "VISITED")
-                UserSectionInfo(stats.saved, "SAVED")
-                UserSectionInfo(stats.events, "EVENTS")
+                UserSectionInfo(stats.visited, stringResource(R.string.profile_stat_visited))
+                UserSectionInfo(stats.saved, stringResource(R.string.profile_stat_saved))
+                UserSectionInfo(stats.favorites, stringResource(R.string.profile_stat_favorites))
             }
         }
     }

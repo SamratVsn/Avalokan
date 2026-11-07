@@ -31,7 +31,7 @@ import javax.inject.Inject
 data class ProfileStats(
     val visited: Int = 0,
     val saved: Int = 0,
-    val events: Int = 0
+    val favorites: Int = 0
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -100,11 +100,28 @@ class ProfileViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     /**
-     * Derived from [savedPlaces] and [favoriteEvents] so counters match the lists below.
-     * VISITED stays at 0 until the app tracks visits.
+     * Only explicit "Mark as visited" actions are stored. Opening a detail
+     * screen is not a visit, so it can never inflate this list.
      */
-    val stats: StateFlow<ProfileStats> = combine(savedPlaces, favoriteEvents) { places, events ->
-        ProfileStats(visited = 0, saved = places.size, events = events.size)
+    val visitedPlaces: StateFlow<List<Place>> = combine(
+        placeRepository.observePlaces(),
+        userPreferences.visitedPlaceIds
+    ) { remote, ids ->
+        ids.mapNotNull { id -> remote.find { it.id == id } }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    /**
+     * Derived from [visitedPlaces], [savedPlaces] and [favoriteEvents] so every
+     * counter matches the lists shown below it.
+     */
+    val stats: StateFlow<ProfileStats> = combine(
+        visitedPlaces, savedPlaces, favoriteEvents
+    ) { visited, places, events ->
+        ProfileStats(
+            visited = visited.size,
+            saved = places.size,
+            favorites = events.size
+        )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProfileStats())
 
     /**

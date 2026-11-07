@@ -32,6 +32,9 @@ class PlaceDetailViewModel @Inject constructor(
     val savedIds: StateFlow<Set<String>> = userPreferences.savedPlaceIds
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
+    val visitedIds: StateFlow<Set<String>> = userPreferences.visitedPlaceIds
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
+
     private val _events = MutableSharedFlow<PlaceDetailEvent>()
     val events: SharedFlow<PlaceDetailEvent> = _events.asSharedFlow()
 
@@ -44,6 +47,20 @@ class PlaceDetailViewModel @Inject constructor(
         } else true
         viewModelScope.launch { userPreferences.setSavedPlaceIds(current) }
         return nowSaved
+    }
+
+    /**
+     * Explicit visit toggle. This is the only writer to the visited set, so a
+     * detail-screen view can never be mistaken for an actual visit.
+     */
+    fun toggleVisited(): Boolean {
+        val current = visitedIds.value.toMutableSet()
+        val nowVisited = if (!current.add(placeId)) {
+            current.remove(placeId)
+            false
+        } else true
+        viewModelScope.launch { userPreferences.setVisitedPlaceIds(current) }
+        return nowVisited
     }
 
     fun onBackClick() {

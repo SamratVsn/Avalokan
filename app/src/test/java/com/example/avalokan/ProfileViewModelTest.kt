@@ -62,7 +62,82 @@ class ProfileViewModelTest {
             var latest = awaitItem()
             while (latest.saved != 2) latest = awaitItem()
             assertEquals(0, latest.visited)
-            assertEquals(0, latest.events)
+            assertEquals(0, latest.favorites)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `favorite stat matches the favorite events list`() = runTest {
+        val prefs = FakePreferencesStore()
+        prefs.setFavoriteEventIds(setOf("dashain-festival"))
+        val vm = ProfileViewModel(prefs, FakePlaceRepository(), FakeEventRepository(), FakeUserRepository(), FakeAvatarStore())
+
+        vm.stats.test {
+            var latest = awaitItem()
+            while (latest.favorites != 1) latest = awaitItem()
+            assertEquals(1, latest.favorites)
+            assertEquals(0, latest.saved)
+            assertEquals(0, latest.visited)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `visited stat is driven by the explicit visited set`() = runTest {
+        val prefs = FakePreferencesStore()
+        prefs.setVisitedPlaceIds(setOf("kathmandu-durbar"))
+        val vm = ProfileViewModel(prefs, FakePlaceRepository(), FakeEventRepository(), FakeUserRepository(), FakeAvatarStore())
+
+        vm.stats.test {
+            var latest = awaitItem()
+            while (latest.visited != 1) latest = awaitItem()
+            assertEquals(1, latest.visited)
+            assertEquals(0, latest.saved)
+            assertEquals(0, latest.favorites)
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        vm.visitedPlaces.test {
+            // The shared StateFlow may already hold the resolved list, so wait
+            // for a non-empty emission instead of assuming an initial replay.
+            var latest = awaitItem()
+            while (latest.isEmpty()) latest = awaitItem()
+            assertEquals(listOf("kathmandu-durbar"), latest.map { it.id })
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `all three profile counters come from their own persisted lists`() = runTest {
+        val prefs = FakePreferencesStore()
+        prefs.setSavedPlaceIds(setOf("lumbini-garden"))
+        prefs.setFavoriteEventIds(setOf("heritage-walk"))
+        prefs.setVisitedPlaceIds(setOf("kathmandu-durbar"))
+        val vm = ProfileViewModel(prefs, FakePlaceRepository(), FakeEventRepository(), FakeUserRepository(), FakeAvatarStore())
+
+        vm.stats.test {
+            var latest = awaitItem()
+            while (latest.visited != 1 || latest.saved != 1 || latest.favorites != 1) {
+                latest = awaitItem()
+            }
+            assertEquals(1, latest.visited)
+            assertEquals(1, latest.saved)
+            assertEquals(1, latest.favorites)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `visited ids that match no place are not counted`() = runTest {
+        val prefs = FakePreferencesStore()
+        prefs.setVisitedPlaceIds(setOf("kathmandu-durbar", "a-place-that-was-deleted"))
+        val vm = ProfileViewModel(prefs, FakePlaceRepository(), FakeEventRepository(), FakeUserRepository(), FakeAvatarStore())
+
+        vm.stats.test {
+            var latest = awaitItem()
+            while (latest.visited != 1) latest = awaitItem()
+            assertEquals(1, latest.visited)
             cancelAndIgnoreRemainingEvents()
         }
     }
