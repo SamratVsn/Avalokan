@@ -3,18 +3,22 @@ package com.example.avalokan
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.example.avalokan.ui.category.CategoryPlacesViewModel
+import com.example.avalokan.ui.common.ContentState
 import com.example.avalokan.ui.navigation.NavDestination
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.io.IOException
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CategoryPlacesViewModelTest {
@@ -31,8 +35,11 @@ class CategoryPlacesViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun viewModel(category: String) = CategoryPlacesViewModel(
-        FakePlaceRepository(),
+    private fun viewModel(
+        category: String,
+        repository: FakePlaceRepository = FakePlaceRepository()
+    ) = CategoryPlacesViewModel(
+        repository,
         FakePreferencesStore(),
         SavedStateHandle(mapOf(NavDestination.CategoryPlaces.ARG to category))
     )
@@ -68,26 +75,48 @@ class CategoryPlacesViewModelTest {
     }
 
     @Test
-    fun `an empty category exposes nothing but still reports the loaded total`() = runTest {
+    fun `an empty category exposes nothing but still reports content`() = runTest {
         val vm = viewModel("Adventure")
-        vm.totalPlaces.test {
-            skipItems(1)
-            assertEquals(2, awaitItem())
+        vm.contentState.test {
+            skipItems(1) // loading
+            assertEquals(ContentState.Content(TestPlaces), awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
-        // Nothing matched, yet places did load, so the screen must show the
-        // "nothing in this category" state instead of a load failure.
-        assertFalse(vm.isLoading.value)
+        // Nothing matched this category, yet places did load, so the screen
+        // must show the "nothing in this category" state instead of a failure.
         assertEquals(emptyList<String>(), vm.places.value.map { it.id })
     }
 
     @Test
-    fun `loading stops once the first non-empty emission arrives`() = runTest {
+    fun `content state is loading until the first repository emission`() = runTest {
         val vm = viewModel("Historical")
-        vm.places.test {
-            skipItems(1)
-            awaitItem()
-            assertFalse(vm.isLoading.value)
+        vm.contentState.test {
+            assertEquals(ContentState.Loading, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `content state becomes empty when the repository answers with nothing`() = runTest {
+        val vm = viewModel("Historical", FakePlaceRepository(emptyList()))
+        vm.contentState.test {
+            assertEquals(ContentState.Loading, awaitItem())
+            advanceUntilIdle()
+            assertEquals(ContentState.Empty, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `content state reports an error when the repository stream fails`() = runTest {
+        val repository = FakePlaceRepository(
+            placesFlow = flow { throw IOException("offline") }
+        )
+        val vm = viewModel("Historical", repository)
+        vm.contentState.test {
+            assertEquals(ContentState.Loading, awaitItem())
+            advanceUntilIdle()
+            assertTrue(awaitItem() is ContentState.Error)
             cancelAndIgnoreRemainingEvents()
         }
     }

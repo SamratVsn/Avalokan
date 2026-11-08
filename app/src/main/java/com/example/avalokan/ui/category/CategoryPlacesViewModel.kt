@@ -6,14 +6,16 @@ import androidx.lifecycle.viewModelScope
 import com.example.avalokan.data.local.PreferencesStore
 import com.example.avalokan.domain.model.Place
 import com.example.avalokan.domain.repository.PlaceRepository
-import com.example.avalokan.ui.common.CONTENT_LOADING_TIMEOUT_MS
+import com.example.avalokan.ui.common.ContentState
+import com.example.avalokan.ui.common.asListContentState
+import com.example.avalokan.ui.common.dataOrNull
 import com.example.avalokan.ui.navigation.NavDestination
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -24,7 +26,9 @@ import javax.inject.Inject
  *
  * The category comes from the navigation argument, so the same screen serves
  * Historical, Cultural and any future category without hardcoding content.
- * Only places whose category matches are exposed to the UI.
+ * Only places whose category matches are exposed to the UI, while
+ * [contentState] keeps the unfiltered repository state so the screen can tell
+ * "this category is empty" apart from "nothing loaded at all".
  */
 @HiltViewModel
 class CategoryPlacesViewModel @Inject constructor(
@@ -35,44 +39,33 @@ class CategoryPlacesViewModel @Inject constructor(
     val category: String =
         savedStateHandle.get<String>(NavDestination.CategoryPlaces.ARG).orEmpty()
 
-    private val allPlaces: StateFlow<List<Place>> = placeRepository.observePlaces()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    /**
+     * Bumping this restarts the repository stream. The initial value starts the
+     * normal subscription; retry uses it to recover from a failed first load.
+     */
+    private val reload = MutableStateFlow(0)
 
-    val places: StateFlow<List<Place>> = allPlaces
-        .map { places ->
-            places.filter {
+    val contentState: StateFlow<ContentState<List<Place>>> = reload
+        .flatMapLatest { placeRepository.observePlaces().asListContentState() }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5_000),
+            ContentState.Loading
+        )
+
+    val places: StateFlow<List<Place>> = contentState
+        .map { state ->
+            state.dataOrNull.orEmpty().filter {
                 category.isNotBlank() && it.category.equals(category, ignoreCase = true)
             }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    /** Total loaded places, so "category is empty" can be told apart from "load failed". */
-    val totalPlaces: StateFlow<Int> = allPlaces
-        .map { it.size }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
-
     val savedIds: StateFlow<Set<String>> = userPreferences.savedPlaceIds
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
-    private val _isLoading = MutableStateFlow(true)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
-
-    init {
-        viewModelScope.launch {
-            // Any cached place means the filter can be evaluated, even when
-            // this particular category has no entries.
-            allPlaces.collect { places ->
-                if (places.isNotEmpty()) _isLoading.value = false
-            }
-        }
-        viewModelScope.launch {
-            delay(CONTENT_LOADING_TIMEOUT_MS)
-            _isLoading.value = false
-        }
-    }
 
     fun refresh() {
         if (_isRefreshing.value) return
@@ -84,9 +77,14 @@ class CategoryPlacesViewModel @Inject constructor(
                 // Snapshot listeners keep streaming; the retry just ends.
             } finally {
                 _isRefreshing.value = false
-                _isLoading.value = false
             }
         }
+    }
+
+    /** Restarts the repository stream and forces a server read. */
+    fun retry() {
+        reload.value += 1
+        refresh()
     }
 
     fun toggleSave(placeId: String) {

@@ -6,28 +6,39 @@ import androidx.lifecycle.viewModelScope
 import com.example.avalokan.data.local.PreferencesStore
 import com.example.avalokan.domain.model.Place
 import com.example.avalokan.domain.repository.PlaceRepository
+import com.example.avalokan.ui.common.ContentState
+import com.example.avalokan.ui.common.asItemContentState
 import com.example.avalokan.ui.navigation.NavDestination
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class PlaceDetailViewModel @Inject constructor(
-    placeRepository: PlaceRepository,
+    private val placeRepository: PlaceRepository,
     private val userPreferences: PreferencesStore,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val placeId: String =
         savedStateHandle.get<String>(NavDestination.PlaceDetail.ARG).orEmpty()
 
-    val place: StateFlow<Place?> = placeRepository.observePlace(placeId)
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+    private val reload = MutableStateFlow(0)
+
+    val placeState: StateFlow<ContentState<Place>> = reload
+        .flatMapLatest { placeRepository.observePlace(placeId).asItemContentState() }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5_000),
+            ContentState.Loading
+        )
 
     val savedIds: StateFlow<Set<String>> = userPreferences.savedPlaceIds
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
@@ -61,6 +72,18 @@ class PlaceDetailViewModel @Inject constructor(
         } else true
         viewModelScope.launch { userPreferences.setVisitedPlaceIds(current) }
         return nowVisited
+    }
+
+    /** Restarts the item stream and forces a server read. */
+    fun retry() {
+        reload.value += 1
+        viewModelScope.launch {
+            try {
+                placeRepository.refresh()
+            } catch (_: Exception) {
+                // Snapshot listeners keep streaming; the retry just ends.
+            }
+        }
     }
 
     fun onBackClick() {

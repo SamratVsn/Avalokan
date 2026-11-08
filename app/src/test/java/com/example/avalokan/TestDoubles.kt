@@ -6,8 +6,10 @@ import com.example.avalokan.data.user.UserProfile
 import com.example.avalokan.data.user.UserRepository
 import com.example.avalokan.domain.model.Event
 import com.example.avalokan.domain.model.Place
+import com.example.avalokan.domain.model.Story
 import com.example.avalokan.domain.repository.EventRepository
 import com.example.avalokan.domain.repository.PlaceRepository
+import com.example.avalokan.domain.repository.StoryRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -53,26 +55,52 @@ internal val TestEvents = listOf(
     )
 )
 
+internal val TestStories = listOf(
+    Story(
+        id = "boudhanath",
+        title = "The Sacred Echoes of Boudhanath",
+        subtitle = "A living mandala",
+        description = "desc"
+    )
+)
+
 internal class FakeEventRepository(
-    private val events: List<Event> = TestEvents
+    private val events: List<Event> = TestEvents,
+    private val eventsFlow: Flow<List<Event>> = flowOf(events),
+    private val eventFlow: Flow<Event?>? = null,
 ) : EventRepository {
-    override fun observeEvents(): Flow<List<Event>> = flowOf(events)
+    override fun observeEvents(): Flow<List<Event>> = eventsFlow
     override fun observeEvent(id: String): Flow<Event?> =
-        flowOf(events.find { it.id == id })
+        eventFlow ?: flowOf(events.find { it.id == id })
 
     override suspend fun clearCache() = Unit
     override suspend fun refresh() = Unit
 }
 
 internal class FakePlaceRepository(
-    private val places: List<Place> = TestPlaces
+    private val places: List<Place> = TestPlaces,
+    private val placesFlow: Flow<List<Place>> = flowOf(places),
+    private val placeFlow: Flow<Place?>? = null,
 ) : PlaceRepository {
-    override fun observePlaces(): Flow<List<Place>> = flowOf(places)
+    override fun observePlaces(): Flow<List<Place>> = placesFlow
     override fun observePlace(id: String): Flow<Place?> =
-        flowOf(places.find { it.id == id })
+        placeFlow ?: flowOf(places.find { it.id == id })
 
     override suspend fun clearCache() = Unit
 
+    override suspend fun refresh() = Unit
+}
+
+internal class FakeStoryRepository(
+    private val stories: List<Story> = TestStories,
+    private val storiesFlow: Flow<List<Story>> = flowOf(stories),
+    private val storyFlow: Flow<Story?>? = null,
+) : StoryRepository {
+    override fun observeStories(): Flow<List<Story>> = storiesFlow
+    override fun observeStory(id: String): Flow<Story?> =
+        storyFlow ?: flowOf(stories.find { it.id == id })
+
+    override suspend fun clearCache() = Unit
     override suspend fun refresh() = Unit
 }
 

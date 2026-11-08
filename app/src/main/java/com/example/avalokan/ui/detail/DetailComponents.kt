@@ -25,60 +25,45 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.avalokan.R
+import com.example.avalokan.ui.common.ContentState
 import com.example.avalokan.ui.components.PhotoOverlayIconButton
 import com.example.avalokan.ui.components.StateMessage
 import com.example.avalokan.ui.theme.BadgeShape
 import com.example.avalokan.ui.theme.Spacing
-import kotlinx.coroutines.delay
 
 /**
- * True once [itemPresent] has stayed false long enough that we're no longer
- * waiting on an expected load. Lets a detail screen show a brief loading
- * indicator before it commits to a friendly "couldn't load" message.
+ * Renders a detail screen's body across its four real states: content once the
+ * item arrives, a loading indicator while it is still coming in, a not-found
+ * screen when the repository answered with nothing, and a retryable error when
+ * the load actually failed.
  */
 @Composable
-fun isStillMissing(itemPresent: Boolean, timeoutMillis: Long = 4_000): Boolean {
-    var timedOut by remember(itemPresent) { mutableStateOf(false) }
-    LaunchedEffect(itemPresent) {
-        if (itemPresent) {
-            timedOut = false
-        } else {
-            timedOut = false
-            delay(timeoutMillis)
-            timedOut = true
-        }
-    }
-    return !itemPresent && timedOut
-}
-
-/**
- * Renders a detail screen's body across its three real states: content once the
- * item arrives, a loading indicator while it's still coming in, and a friendly
- * error screen if it never does.
- */
-@Composable
-fun DetailBody(
-    itemPresent: Boolean,
+fun <T> DetailBody(
+    state: ContentState<T>,
     kind: String,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
+    onRetry: (() -> Unit)? = null,
+    content: @Composable (T) -> Unit
 ) {
-    when {
-        itemPresent -> content()
-        isStillMissing(itemPresent) -> DetailMissing(kind = kind, onBackClick = onBackClick, modifier = modifier)
-        else -> DetailLoading(kind = kind, onBackClick = onBackClick, modifier = modifier)
+    when (state) {
+        ContentState.Loading -> DetailLoading(kind = kind, onBackClick = onBackClick, modifier = modifier)
+        ContentState.Empty -> DetailMissing(kind = kind, onBackClick = onBackClick, modifier = modifier)
+        is ContentState.Error -> DetailError(
+            kind = kind,
+            onBackClick = onBackClick,
+            onRetry = onRetry,
+            modifier = modifier
+        )
+        is ContentState.Content -> content(state.data)
     }
 }
 
@@ -110,7 +95,7 @@ fun DetailLoading(kind: String, onBackClick: () -> Unit, modifier: Modifier = Mo
             )
             Spacer(Modifier.height(Spacing.medium))
             Text(
-                text = "Loading $kind…",
+                text = stringResource(R.string.detail_loading, kind),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -126,10 +111,34 @@ fun DetailMissing(kind: String, onBackClick: () -> Unit, modifier: Modifier = Mo
         DetailBackButton(onBackClick = onBackClick)
         StateMessage(
             icon = Icons.Default.SearchOff,
-            title = "We couldn’t load this $kind",
-            message = "It may have been removed, or your connection is offline. Go back and try again.",
-            actionLabel = "Go back",
+            title = stringResource(R.string.detail_not_found_title, kind),
+            message = stringResource(R.string.detail_not_found_message),
+            actionLabel = stringResource(R.string.detail_go_back),
             onAction = onBackClick,
+            modifier = Modifier.align(Alignment.Center)
+        )
+    }
+}
+
+@Composable
+fun DetailError(
+    kind: String,
+    onBackClick: () -> Unit,
+    onRetry: (() -> Unit)? = null,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)
+    ) {
+        DetailBackButton(onBackClick = onBackClick)
+        StateMessage(
+            icon = Icons.Default.SearchOff,
+            title = stringResource(R.string.detail_load_error_title, kind),
+            message = stringResource(R.string.detail_load_error_message),
+            actionLabel = if (onRetry != null) stringResource(R.string.detail_try_again) else null,
+            onAction = onRetry,
+            secondaryActionLabel = stringResource(R.string.detail_go_back),
+            onSecondaryAction = onBackClick,
             modifier = Modifier.align(Alignment.Center)
         )
     }

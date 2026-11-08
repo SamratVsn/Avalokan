@@ -81,16 +81,22 @@ fun StoryDetailScreen(
     onBackClick: () -> Unit = {},
     viewModel: StoryDetailViewModel = hiltViewModel()
 ) {
-    val storyItem = viewModel.story.collectAsState().value
-    if (storyItem == null) {
-        if (isStillMissing(itemPresent = false)) {
-            DetailMissing(kind = "story", onBackClick = onBackClick)
-        } else {
-            DetailLoading(kind = "story", onBackClick = onBackClick)
-        }
-        return
+    val storyState by viewModel.storyState.collectAsState()
+    DetailBody(
+        state = storyState,
+        kind = "story",
+        onBackClick = onBackClick,
+        onRetry = viewModel::retry
+    ) { story ->
+        StoryDetailContent(story = story, onBackClick = onBackClick)
     }
-    val story = storyItem
+}
+
+@Composable
+private fun StoryDetailContent(
+    story: Story,
+    onBackClick: () -> Unit
+) {
     val blocks = remember(story.description) { parseStoryBody(story.description) }
     val fallbackTitle = stringResource(R.string.untitled)
     val shareTitle = story.title.ifBlank { fallbackTitle }
@@ -150,7 +156,7 @@ fun StoryDetailScreen(
                                 .background(MaterialTheme.colorScheme.surfaceVariant),
                             contentAlignment = Alignment.Center
                         ) {
-                            val heroImage = storyItem.imageUrl
+                            val heroImage = story.imageUrl
                             if (heroImage != null) {
                                 coil.compose.AsyncImage(
                                     model = heroImage,

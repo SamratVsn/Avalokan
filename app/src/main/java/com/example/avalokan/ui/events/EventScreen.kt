@@ -55,8 +55,10 @@ import com.example.avalokan.domain.model.Event
 import com.example.avalokan.domain.model.EventCta
 import com.example.avalokan.domain.model.cta
 import com.example.avalokan.domain.model.priceDisplay
+import com.example.avalokan.ui.common.ContentState
 import com.example.avalokan.ui.common.cardActionLabelRes
 import com.example.avalokan.ui.common.ctaLabelRes
+import com.example.avalokan.ui.common.dataOrNull
 import com.example.avalokan.ui.common.eventKindLabelRes
 import com.example.avalokan.ui.common.eventPriceValue
 import com.example.avalokan.ui.common.openUrlInBrowser
@@ -80,9 +82,8 @@ fun EventScreen(
     onExplorePlacesClick: () -> Unit = {},
     viewModel: EventsViewModel = hiltViewModel()
 ) {
-    val events by viewModel.events.collectAsState()
+    val contentState by viewModel.contentState.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
 
     PullToRefreshBox(
         isRefreshing = isRefreshing,
@@ -90,10 +91,9 @@ fun EventScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         EventContent(
-            events = events,
+            contentState = contentState,
             onEventClick = onEventClick,
-            onRetry = viewModel::refresh,
-            isLoading = isLoading,
+            onRetry = viewModel::retry,
             onExplorePlacesClick = onExplorePlacesClick
         )
     }
@@ -101,12 +101,12 @@ fun EventScreen(
 
 @Composable
 private fun EventContent(
-    events: List<Event>,
+    contentState: ContentState<List<Event>>,
     onEventClick: (String) -> Unit,
     onRetry: () -> Unit,
-    isLoading: Boolean,
     onExplorePlacesClick: () -> Unit
 ) {
+    val events = contentState.dataOrNull.orEmpty()
     Column(
         modifier = Modifier.fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
@@ -117,36 +117,48 @@ private fun EventContent(
     ) {
         Spacer(Modifier.height(Spacing.small))
         TopTexts(events = events, modifier = Modifier.padding(horizontal = 24.dp))
-        if (isLoading && events.isEmpty()) {
-            EventsLoadingState()
-        } else if (events.isEmpty()) {
-            StateMessage(
+        when (contentState) {
+            ContentState.Loading -> EventsLoadingState()
+
+            is ContentState.Error -> StateMessage(
                 icon = Icons.Default.EventBusy,
-                title = stringResource(R.string.no_events_title),
-                message = stringResource(R.string.no_events_message),
+                title = stringResource(R.string.load_events_error_title),
+                message = stringResource(R.string.load_events_error_message),
                 actionLabel = stringResource(R.string.retry),
                 onAction = onRetry,
                 secondaryActionLabel = stringResource(R.string.explore_places),
                 onSecondaryAction = onExplorePlacesClick
             )
-        } else {
-            // Featured presentation is restricted to explicitly classified
-            // festival content; a technology event never becomes "Featured".
-            val featured = events.firstOrNull { it.isFeaturedEligible }
-            if (featured != null) {
-                FeaturedEvent(
-                    event = featured,
-                    modifier = Modifier.padding(horizontal = 24.dp),
-                    onEventClick = { onEventClick(featured.id) }
-                )
-            }
-            val upcoming = events.filterNot { it.id == featured?.id }
-            if (upcoming.isNotEmpty()) {
-                UpcomingEvents(
-                    events = upcoming,
-                    modifier = Modifier.padding(horizontal = 24.dp).padding(top = 20.dp),
-                    onEventClick = onEventClick
-                )
+
+            // The repository answered, and it has no events. That is an empty
+            // schedule, not a connection failure.
+            ContentState.Empty -> StateMessage(
+                icon = Icons.Default.EventBusy,
+                title = stringResource(R.string.no_events_title),
+                message = stringResource(R.string.no_events_message),
+                actionLabel = stringResource(R.string.explore_places),
+                onAction = onExplorePlacesClick
+            )
+
+            is ContentState.Content -> {
+                // Featured presentation is restricted to explicitly classified
+                // festival content; a technology event never becomes "Featured".
+                val featured = contentState.data.firstOrNull { it.isFeaturedEligible }
+                if (featured != null) {
+                    FeaturedEvent(
+                        event = featured,
+                        modifier = Modifier.padding(horizontal = 24.dp),
+                        onEventClick = { onEventClick(featured.id) }
+                    )
+                }
+                val upcoming = contentState.data.filterNot { it.id == featured?.id }
+                if (upcoming.isNotEmpty()) {
+                    UpcomingEvents(
+                        events = upcoming,
+                        modifier = Modifier.padding(horizontal = 24.dp).padding(top = 20.dp),
+                        onEventClick = onEventClick
+                    )
+                }
             }
         }
     }
@@ -464,14 +476,15 @@ private fun EventCards(
 private fun EventsPreview() {
     AvalokanTheme {
         EventContent(
-            events = listOf(
-                Event("bhaktapur-pottery", "Bhaktapur Pottery Workshop", "", "Bhaktapur Square • 10:00 AM", "FREE ENTRY", "Join >"),
-                Event("samay-baji", "Alla & Samay Baji Festival", "", "Patan Square • 5:00 PM", "$15 ENTRY", "Join >"),
-                Event("thangka-demo", "Live Thangka Art Demo", "", "Boudha • 11:00 AM", "DONATION BASED", "Join >")
+            contentState = ContentState.Content(
+                listOf(
+                    Event("bhaktapur-pottery", "Bhaktapur Pottery Workshop", "", "Bhaktapur Square • 10:00 AM", "FREE ENTRY", "Join >"),
+                    Event("samay-baji", "Alla & Samay Baji Festival", "", "Patan Square • 5:00 PM", "$15 ENTRY", "Join >"),
+                    Event("thangka-demo", "Live Thangka Art Demo", "", "Boudha • 11:00 AM", "DONATION BASED", "Join >")
+                )
             ),
             onEventClick = {},
             onRetry = {},
-            isLoading = false,
             onExplorePlacesClick = {}
         )
     }

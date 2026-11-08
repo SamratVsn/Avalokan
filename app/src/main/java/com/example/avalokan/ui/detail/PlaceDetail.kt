@@ -61,6 +61,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.avalokan.R
+import com.example.avalokan.ui.common.dataOrNull
 import com.example.avalokan.ui.common.placeBadgeLabelRes
 import com.example.avalokan.ui.components.PhotoOverlayIconButton
 import com.example.avalokan.ui.components.PhotoOverlayOutlinedButton
@@ -77,7 +78,8 @@ fun PlaceDetailScreen(
     onBackClick: () -> Unit = {},
     viewModel: PlaceDetailViewModel = hiltViewModel()
 ) {
-    val place by viewModel.place.collectAsState()
+    val placeState by viewModel.placeState.collectAsState()
+    val place = placeState.dataOrNull
     val context = LocalContext.current
     val snackbarHost = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -95,49 +97,49 @@ fun PlaceDetailScreen(
         }
     }
 
-    val placeTitle = place?.name.orEmpty()
-    // Location comes from the place itself ("Lalitpur • Historical Site"),
-    // never a hardcoded city — places can be anywhere in Nepal.
-    val placeLocation = place?.meta?.substringBefore("•")?.trim().orEmpty()
-    val onShareClick = {
-        val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(
-                Intent.EXTRA_TEXT,
-                "Check out this heritage site: $placeTitle on Nepal Heritage Explorer!"
-            )
-        }
-        context.startActivity(Intent.createChooser(intent, "Share place"))
-    }
-    val onDirectionsClick = {
-        val query = Uri.encode(
-            listOf(placeTitle, placeLocation, "Nepal")
-                .filter { it.isNotBlank() }
-                .joinToString(", ")
-        )
-        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=$query")))
-    }
     DetailBody(
-        itemPresent = place != null,
+        state = placeState,
         kind = "place",
-        onBackClick = onBackClick
-    ) {
+        onBackClick = onBackClick,
+        onRetry = viewModel::retry
+    ) { loadedPlace ->
+        val placeTitle = loadedPlace.name
+        // Location comes from the place itself ("Lalitpur • Historical Site"),
+        // never a hardcoded city — places can be anywhere in Nepal.
+        val placeLocation = loadedPlace.meta.substringBefore("•").trim()
+        val onShareClick = {
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(
+                    Intent.EXTRA_TEXT,
+                    "Check out this heritage site: $placeTitle on Nepal Heritage Explorer!"
+                )
+            }
+            context.startActivity(Intent.createChooser(intent, "Share place"))
+        }
+        val onDirectionsClick = {
+            val query = Uri.encode(
+                listOf(placeTitle, placeLocation, "Nepal")
+                    .filter { it.isNotBlank() }
+                    .joinToString(", ")
+            )
+            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=$query")))
+        }
         PlaceDetailContent(
             title = placeTitle,
-            rating = place?.sourcedRating.orEmpty(),
-            description = place?.description.orEmpty(),
-            badge = place?.badge.orEmpty(),
-            classificationBadges = place?.badges()
-                ?.map { stringResource(placeBadgeLabelRes(it)) }
-                .orEmpty(),
-            entryFee = place?.entryFee.orEmpty(),
-            bestTime = place?.bestTime.orEmpty(),
-            hours = place?.hours.orEmpty(),
-            sourceLabel = place?.sourceLabel.orEmpty(),
-            sourceUrl = place?.sourceUrl.orEmpty(),
-            lastVerifiedAt = place?.lastVerifiedAt.orEmpty(),
-            showPracticalInfo = place?.canShowPracticalInfo == true,
-            imageUrl = place?.imageUrl,
+            rating = loadedPlace.sourcedRating.orEmpty(),
+            description = loadedPlace.description,
+            badge = loadedPlace.badge,
+            classificationBadges = loadedPlace.badges()
+                .map { stringResource(placeBadgeLabelRes(it)) },
+            entryFee = loadedPlace.entryFee,
+            bestTime = loadedPlace.bestTime,
+            hours = loadedPlace.hours,
+            sourceLabel = loadedPlace.sourceLabel,
+            sourceUrl = loadedPlace.sourceUrl,
+            lastVerifiedAt = loadedPlace.lastVerifiedAt,
+            showPracticalInfo = loadedPlace.canShowPracticalInfo,
+            imageUrl = loadedPlace.imageUrl,
             isSaved = isSaved,
             isVisited = isVisited,
             onSaveClick = {

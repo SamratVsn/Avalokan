@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
 import com.example.avalokan.domain.model.Place
+import com.example.avalokan.ui.common.ContentState
 import com.example.avalokan.ui.components.DiscoverLoadingState
 import com.example.avalokan.ui.components.StateMessage
 import com.example.avalokan.ui.common.heritageFilterHelpRes
@@ -66,10 +67,9 @@ fun DiscoverScreen(
     val query by viewModel.query.collectAsState()
     val selectedChip by viewModel.selectedCategory.collectAsState()
     val sites by viewModel.sites.collectAsState()
-    val totalPlaces by viewModel.totalPlaces.collectAsState()
+    val contentState by viewModel.contentState.collectAsState()
     val savedIds by viewModel.savedIds.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
     val availableCategories by viewModel.availableCategories.collectAsState()
     val recommended by viewModel.recommended.collectAsState()
 
@@ -85,12 +85,11 @@ fun DiscoverScreen(
             selected = selectedChip,
             onSelect = viewModel::onCategorySelect,
             sites = sites,
-            totalPlaces = totalPlaces,
+            contentState = contentState,
             savedIds = savedIds,
             onToggleSave = { viewModel.toggleSave(it) },
             onPlaceClick = onPlaceClick,
-            onRetry = viewModel::refresh,
-            isLoading = isLoading,
+            onRetry = viewModel::retry,
             availableCategories = availableCategories,
             recommended = recommended,
             onClearQuery = viewModel::clearQuery,
@@ -108,12 +107,11 @@ private fun DiscoverContent(
     selected: Int,
     onSelect: (Int) -> Unit,
     sites: List<Place>,
-    totalPlaces: Int,
+    contentState: ContentState<List<Place>>,
     savedIds: Set<String>,
     onToggleSave: (String) -> Unit,
     onPlaceClick: (String) -> Unit,
     onRetry: () -> Unit,
-    isLoading: Boolean,
     availableCategories: List<String>,
     recommended: List<Place>,
     onClearQuery: () -> Unit,
@@ -148,12 +146,11 @@ private fun DiscoverContent(
             onSelect = onSelect,
             query = query,
             sites = sites,
-            totalPlaces = totalPlaces,
+            contentState = contentState,
             savedIds = savedIds,
             onToggleSave = onToggleSave,
             onPlaceClick = onPlaceClick,
             onRetry = onRetry,
-            isLoading = isLoading,
             availableCategories = availableCategories,
             recommended = recommended,
             onClearQuery = onClearQuery,
@@ -228,12 +225,11 @@ private fun Suggestions(
     onSelect: (Int) -> Unit,
     query: String,
     sites: List<Place>,
-    totalPlaces: Int,
+    contentState: ContentState<List<Place>>,
     savedIds: Set<String>,
     onToggleSave: (String) -> Unit,
     onPlaceClick: (String) -> Unit,
     onRetry: () -> Unit,
-    isLoading: Boolean,
     availableCategories: List<String>,
     recommended: List<Place>,
     onClearQuery: () -> Unit,
@@ -293,26 +289,10 @@ private fun Suggestions(
                 modifier = Modifier.padding(horizontal = 24.dp)
             )
         }
-        when {
-            // First paint: the cache is empty but the network may still answer.
-            isLoading && sites.isEmpty() -> DiscoverLoadingState()
+        when (contentState) {
+            ContentState.Loading -> DiscoverLoadingState()
 
-            sites.isNotEmpty() -> Column(
-                modifier = Modifier.padding(horizontal = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                sites.forEach { site ->
-                    SearchPlaceCard(
-                        place = site,
-                        isSaved = savedIds.contains(site.id),
-                        onSaveClick = { onToggleSave(site.id) },
-                        onCardClick = { onPlaceClick(site.id) }
-                    )
-                }
-            }
-
-            // Nothing arrived from the repository at all — this really is a load failure.
-            totalPlaces == 0 -> StateMessage(
+            is ContentState.Error -> StateMessage(
                 icon = Icons.Default.ExploreOff,
                 title = stringResource(R.string.load_places_error_title),
                 message = stringResource(R.string.load_places_error_message),
@@ -322,43 +302,69 @@ private fun Suggestions(
                 onSecondaryAction = onExploreEventsClick
             )
 
-            // A search term is what excluded everything — offer a way forward.
-            query.isNotBlank() -> {
-                StateMessage(
-                    icon = Icons.Default.SearchOff,
-                    title = stringResource(R.string.no_results_title, query.trim()),
-                    message = stringResource(R.string.no_results_message),
-                    actionLabel = stringResource(R.string.clear_search),
-                    onAction = onClearQuery,
-                    secondaryActionLabel = stringResource(R.string.browse_all_places),
-                    onSecondaryAction = { onSuggestionSelect("All") },
+            // The repository answered, and it has no places. That is an empty
+            // catalogue, not a connection failure.
+            ContentState.Empty -> StateMessage(
+                icon = Icons.Default.ExploreOff,
+                title = stringResource(R.string.empty_places_title),
+                message = stringResource(R.string.empty_places_message),
+                actionLabel = stringResource(R.string.explore_events),
+                onAction = onExploreEventsClick
+            )
+
+            is ContentState.Content -> when {
+                sites.isNotEmpty() -> Column(
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    sites.forEach { site ->
+                        SearchPlaceCard(
+                            place = site,
+                            isSaved = savedIds.contains(site.id),
+                            onSaveClick = { onToggleSave(site.id) },
+                            onCardClick = { onPlaceClick(site.id) }
+                        )
+                    }
+                }
+
+                // A search term is what excluded everything — offer a way forward.
+                query.isNotBlank() -> {
+                    StateMessage(
+                        icon = Icons.Default.SearchOff,
+                        title = stringResource(R.string.no_results_title, query.trim()),
+                        message = stringResource(R.string.no_results_message),
+                        actionLabel = stringResource(R.string.clear_search),
+                        onAction = onClearQuery,
+                        secondaryActionLabel = stringResource(R.string.browse_all_places),
+                        onSecondaryAction = { onSuggestionSelect("All") },
+                        suggestions = suggestionCategories,
+                        suggestionsLabel = stringResource(R.string.try_these),
+                        suggestionLabels = suggestionLabels,
+                        onSuggestionClick = onSuggestionSelect
+                    )
+                    if (recommended.isNotEmpty()) {
+                        PopularNow(
+                            places = recommended,
+                            savedIds = savedIds,
+                            onToggleSave = onToggleSave,
+                            onPlaceClick = onPlaceClick
+                        )
+                    }
+                }
+
+                // Places loaded fine; this filter simply has none.
+                else -> StateMessage(
+                    icon = Icons.Default.ExploreOff,
+                    title = stringResource(R.string.nothing_in_category_title, activeFilterLabel),
+                    message = stringResource(R.string.nothing_in_category_message, activeFilterLabel),
+                    actionLabel = stringResource(R.string.show_all_places),
+                    onAction = { onSelect(0) },
                     suggestions = suggestionCategories,
                     suggestionsLabel = stringResource(R.string.try_these),
                     suggestionLabels = suggestionLabels,
                     onSuggestionClick = onSuggestionSelect
                 )
-                if (recommended.isNotEmpty()) {
-                    PopularNow(
-                        places = recommended,
-                        savedIds = savedIds,
-                        onToggleSave = onToggleSave,
-                        onPlaceClick = onPlaceClick
-                    )
-                }
             }
-
-            // Places loaded fine; this filter simply has none.
-            else -> StateMessage(
-                icon = Icons.Default.ExploreOff,
-                title = stringResource(R.string.nothing_in_category_title, activeFilterLabel),
-                message = stringResource(R.string.nothing_in_category_message, activeFilterLabel),
-                actionLabel = stringResource(R.string.show_all_places),
-                onAction = { onSelect(0) },
-                suggestions = suggestionCategories,
-                suggestionsLabel = stringResource(R.string.try_these),
-                suggestionLabels = suggestionLabels,
-                onSuggestionClick = onSuggestionSelect
-            )
         }
     }
 }
@@ -428,38 +434,38 @@ private fun SearchPlaceCard(
 @Composable
 private fun DiscoverPreview(){
     AvalokanTheme(){
+        val previewPlaces = listOf(
+            Place(
+                id = "kathmandu-durbar",
+                name = "Kathmandu Durbar Square",
+                description = "The heart of old Kathmandu city.",
+                meta = "Kathmandu • Historical Site",
+                category = "Historical",
+                rating = "4.8",
+                typologies = listOf("DURBAR", "PAGODA")
+            ),
+            Place(
+                id = "lumbini-garden",
+                name = "Lumbini Garden",
+                description = "The sacred birthplace of Lord Buddha.",
+                meta = "Lumbini • Spiritual Site",
+                category = "Cultural",
+                rating = "4.9",
+                typologies = listOf("BUDDHIST_SACRED_SITE", "PILGRIMAGE_LANDSCAPE")
+            )
+        )
         DiscoverContent(
             query = "",
             onQuery = {},
             filters = DiscoverCategories,
             selected = 0,
             onSelect = {},
-            sites = listOf(
-                Place(
-                    id = "kathmandu-durbar",
-                    name = "Kathmandu Durbar Square",
-                    description = "The heart of old Kathmandu city.",
-                    meta = "Kathmandu • Historical Site",
-                    category = "Historical",
-                    rating = "4.8",
-                    typologies = listOf("DURBAR", "PAGODA")
-                ),
-                Place(
-                    id = "lumbini-garden",
-                    name = "Lumbini Garden",
-                    description = "The sacred birthplace of Lord Buddha.",
-                    meta = "Lumbini • Spiritual Site",
-                    category = "Cultural",
-                    rating = "4.9",
-                    typologies = listOf("BUDDHIST_SACRED_SITE", "PILGRIMAGE_LANDSCAPE")
-                )
-            ),
-            totalPlaces = 2,
+            sites = previewPlaces,
+            contentState = ContentState.Content(previewPlaces),
             savedIds = emptySet(),
             onToggleSave = {},
             onPlaceClick = {},
             onRetry = {},
-            isLoading = false,
             availableCategories = listOf("All", "PAGODA_NEWA", "STUPA_MONASTERY"),
             recommended = emptyList(),
             onClearQuery = {},

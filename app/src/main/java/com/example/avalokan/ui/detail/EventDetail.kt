@@ -61,6 +61,7 @@ import com.example.avalokan.domain.model.cta
 import com.example.avalokan.domain.model.priceDisplay
 import com.example.avalokan.ui.common.aboutTitleRes
 import com.example.avalokan.ui.common.ctaLabelRes
+import com.example.avalokan.ui.common.dataOrNull
 import com.example.avalokan.ui.common.eventKindLabelRes
 import com.example.avalokan.ui.common.eventPriceValue
 import com.example.avalokan.ui.common.openUrlInBrowser
@@ -77,7 +78,8 @@ fun EventDetailScreen(
     onBackClick: () -> Unit = {},
     viewModel: EventDetailViewModel = hiltViewModel()
 ) {
-    val event by viewModel.event.collectAsState()
+    val eventState by viewModel.eventState.collectAsState()
+    val event = eventState.dataOrNull
     val favoriteIds by viewModel.favoriteIds.collectAsState()
     val context = LocalContext.current
     val snackbarHost = remember { SnackbarHostState() }
@@ -91,34 +93,32 @@ fun EventDetailScreen(
         }
     }
 
-    val eventTitle = event?.title.orEmpty()
-    val shareTitle = eventTitle.ifBlank { stringResource(R.string.untitled) }
     val linkUnavailable = stringResource(R.string.booking_unavailable)
-    val eventType = EventType.from(event?.type, event?.primaryKind)
-    val onShareClick = {
-        val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(
-                Intent.EXTRA_TEXT,
-                "Check out this heritage event: $shareTitle on Avalokan, a Nepal Heritage Explorer!"
-            )
-        }
-        context.startActivity(Intent.createChooser(intent, "Share event"))
-    }
     DetailBody(
-        itemPresent = event != null,
+        state = eventState,
         kind = "event",
-        onBackClick = onBackClick
-    ) {
+        onBackClick = onBackClick,
+        onRetry = viewModel::retry
+    ) { loadedEvent ->
+        val shareTitle = loadedEvent.title.ifBlank { stringResource(R.string.untitled) }
+        val onShareClick = {
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(
+                    Intent.EXTRA_TEXT,
+                    "Check out this heritage event: $shareTitle on Avalokan, a Nepal Heritage Explorer!"
+                )
+            }
+            context.startActivity(Intent.createChooser(intent, "Share event"))
+        }
         EventDetailContent(
-            event = event ?: PreviewEvent,
-            eventType = eventType,
+            event = loadedEvent,
+            eventType = EventType.from(loadedEvent.type, loadedEvent.primaryKind),
             isFavorite = isFavorite,
             onFavoriteClick = { viewModel.toggleFavorite() },
             onShareClick = onShareClick,
             onOpenLink = {
-                val link = event?.joinLink.orEmpty()
-                if (!context.openUrlInBrowser(link)) {
+                if (!context.openUrlInBrowser(loadedEvent.joinLink)) {
                     scope.launch { snackbarHost.showSnackbar(linkUnavailable) }
                 }
             },

@@ -2,10 +2,12 @@ package com.example.avalokan
 
 import app.cash.turbine.test
 import com.example.avalokan.domain.model.Place
+import com.example.avalokan.ui.common.ContentState
 import com.example.avalokan.ui.discover.DiscoverCategories
 import com.example.avalokan.ui.discover.DiscoverViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -17,6 +19,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.io.IOException
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DiscoverViewModelTest {
@@ -124,17 +127,17 @@ class DiscoverViewModelTest {
     }
 
     @Test
-    fun `totalPlaces counts every place the repository loaded`() = runTest {
+    fun `content state counts every place the repository loaded`() = runTest {
         val vm = DiscoverViewModel(FakePlaceRepository(), FakePreferencesStore())
-        vm.totalPlaces.test {
-            skipItems(1) // stateIn replays its zero initial value first
-            assertEquals(2, awaitItem())
+        vm.contentState.test {
+            assertEquals(ContentState.Loading, awaitItem()) // initial stateIn value
+            assertEquals(ContentState.Content(TestPlaces), awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun `a filter with no matches empties sites but still counts loaded places`() = runTest {
+    fun `a filter with no matches empties sites but still reports content`() = runTest {
         val vm = DiscoverViewModel(FakePlaceRepository(), FakePreferencesStore())
         vm.sites.test {
             skipItems(1)
@@ -143,33 +146,58 @@ class DiscoverViewModelTest {
             assertEquals(emptyList<String>(), awaitItem().map { it.id })
             // Nothing matched, yet the repository did load both places — the
             // screen needs this to avoid claiming a connection failure.
-            vm.totalPlaces.test {
-                skipItems(1)
-                assertEquals(2, awaitItem())
-                cancelAndIgnoreRemainingEvents()
-            }
+            assertEquals(ContentState.Content(TestPlaces), vm.contentState.value)
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun `totalPlaces does not shrink when a query filters everything out`() = runTest {
+    fun `content state does not shrink when a query filters everything out`() = runTest {
         val vm = DiscoverViewModel(FakePlaceRepository(), FakePreferencesStore())
-        vm.totalPlaces.test {
-            skipItems(1)
-            assertEquals(2, awaitItem())
+        vm.contentState.test {
+            assertEquals(ContentState.Loading, awaitItem())
+            assertEquals(ContentState.Content(TestPlaces), awaitItem())
             vm.onQueryChange("no such place at all")
+            expectNoEvents()
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun `loading stops once the first non-empty emission arrives`() = runTest {
+    fun `content state is loading, content, empty or error as the repository changes`() = runTest {
         val vm = DiscoverViewModel(FakePlaceRepository(), FakePreferencesStore())
-        vm.sites.test {
-            skipItems(1)
-            awaitItem()
-            assertFalse(vm.isLoading.value)
+        vm.contentState.test {
+            assertEquals(ContentState.Loading, awaitItem())
+            assertEquals(ContentState.Content(TestPlaces), awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        val emptyVm = DiscoverViewModel(FakePlaceRepository(emptyList()), FakePreferencesStore())
+        emptyVm.contentState.test {
+            assertEquals(ContentState.Loading, awaitItem())
+            advanceUntilIdle()
+            assertEquals(ContentState.Empty, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        val errorVm = DiscoverViewModel(
+            FakePlaceRepository(placesFlow = flow { throw IOException("offline") }),
+            FakePreferencesStore()
+        )
+        errorVm.contentState.test {
+            assertEquals(ContentState.Loading, awaitItem())
+            advanceUntilIdle()
+            assertTrue(awaitItem() is ContentState.Error)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `loading settles once the first non-empty emission arrives`() = runTest {
+        val vm = DiscoverViewModel(FakePlaceRepository(), FakePreferencesStore())
+        vm.contentState.test {
+            assertEquals(ContentState.Loading, awaitItem())
+            assertTrue(awaitItem() is ContentState.Content)
             cancelAndIgnoreRemainingEvents()
         }
     }

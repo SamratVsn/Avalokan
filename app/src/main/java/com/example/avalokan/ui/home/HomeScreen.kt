@@ -24,7 +24,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.ExploreOff
-import androidx.compose.material.icons.filled.Landscape
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -35,6 +34,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -53,8 +53,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
 import com.example.avalokan.domain.model.Place
+import com.example.avalokan.domain.model.Story
+import com.example.avalokan.ui.common.ContentState
+import com.example.avalokan.ui.common.dataOrNull
 import com.example.avalokan.ui.common.placeBadgeLabel
 import com.example.avalokan.ui.components.HomeLoadingState
+import com.example.avalokan.ui.components.SkeletonBlock
 import com.example.avalokan.ui.components.StateMessage
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
@@ -76,10 +80,9 @@ fun AvalokanHome(
     onViewAllPlacesClick: () -> Unit = {},
     viewModel: HomeScreenViewModel = hiltViewModel()
 ) {
-    val places by viewModel.places.collectAsState()
-    val heroStory by viewModel.heroStory.collectAsState()
+    val placesState by viewModel.placesState.collectAsState()
+    val heroStoryState by viewModel.heroStoryState.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
 
     PullToRefreshBox(
         isRefreshing = isRefreshing,
@@ -87,38 +90,31 @@ fun AvalokanHome(
         modifier = modifier.fillMaxSize()
     ) {
         HomeContent(
-            heroStoryId = heroStory?.id ?: viewModel.heroStoryId,
-            heroTitle = heroStory?.title,
-            heroSubtitle = heroStory?.subtitle,
-            heroImageUrl = heroStory?.imageUrl,
-            places = places,
+            heroStoryState = heroStoryState,
+            placesState = placesState,
             onStoryClick = onStoryClick,
             onPlaceClick = onPlaceClick,
             onExploreEventsClick = onExploreEventsClick,
             onViewAllCategoryClick = onViewAllCategoryClick,
             onViewAllPlacesClick = onViewAllPlacesClick,
-            onRetry = viewModel::refresh,
-            isLoading = isLoading
+            onRetry = viewModel::retry
         )
     }
 }
 
 @Composable
 private fun HomeContent(
-    heroStoryId: String,
-    heroTitle: String?,
-    heroSubtitle: String?,
-    heroImageUrl: String?,
-    places: List<Place>,
+    heroStoryState: ContentState<Story>,
+    placesState: ContentState<List<Place>>,
     onStoryClick: (String) -> Unit,
     onPlaceClick: (String) -> Unit,
     onExploreEventsClick: () -> Unit,
     onViewAllCategoryClick: (String) -> Unit,
     onViewAllPlacesClick: () -> Unit,
     onRetry: () -> Unit,
-    isLoading: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val places = placesState.dataOrNull.orEmpty()
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -132,15 +128,14 @@ private fun HomeContent(
         TopIcons()
         StoryCard(
             modifier = Modifier.padding(horizontal = 24.dp),
-            title = heroTitle,
-            subtitle = heroSubtitle,
-            imageUrl = heroImageUrl,
-            onReadClick = { onStoryClick(heroStoryId) }
+            storyState = heroStoryState,
+            onReadClick = { story -> onStoryClick(story.id) },
+            onRetry = onRetry
         )
-        if (isLoading && places.isEmpty()) {
-            HomeLoadingState()
-        } else if (places.isEmpty()) {
-            StateMessage(
+        when (placesState) {
+            ContentState.Loading -> HomeLoadingState()
+
+            is ContentState.Error -> StateMessage(
                 icon = Icons.Default.ExploreOff,
                 title = stringResource(R.string.load_places_error_title),
                 message = stringResource(R.string.load_places_error_message),
@@ -149,9 +144,17 @@ private fun HomeContent(
                 secondaryActionLabel = stringResource(R.string.explore_events),
                 onSecondaryAction = onExploreEventsClick
             )
-        } else {
-            HistoricalGems(
-                places = places,
+
+            ContentState.Empty -> StateMessage(
+                icon = Icons.Default.ExploreOff,
+                title = stringResource(R.string.empty_places_title),
+                message = stringResource(R.string.empty_places_message),
+                actionLabel = stringResource(R.string.explore_events),
+                onAction = onExploreEventsClick
+            )
+
+            is ContentState.Content -> HistoricalGems(
+                places = placesState.data,
                 onPlaceClick = onPlaceClick,
                 onViewAllClick = { onViewAllCategoryClick("Historical") }
             )
@@ -160,7 +163,7 @@ private fun HomeContent(
             modifier = Modifier.padding(horizontal = 24.dp),
             onExploreClick = onExploreEventsClick
         )
-        if (places.any { it.featured }) {
+        if (placesState is ContentState.Content && places.any { it.featured }) {
             RecentDiscoveries(
                 modifier = Modifier.padding(horizontal = 24.dp),
                 places = places,
@@ -215,12 +218,12 @@ private fun TopIcons(modifier: Modifier = Modifier) {
 
 @Composable
 private fun StoryCard(
+    storyState: ContentState<Story>,
     modifier: Modifier = Modifier,
-    title: String? = null,
-    subtitle: String? = null,
-    imageUrl: String? = null,
-    onReadClick: () -> Unit = {}
+    onReadClick: (Story) -> Unit = {},
+    onRetry: () -> Unit = {}
 ) {
+    val story = storyState.dataOrNull
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = EditorialLargeCardShape,
@@ -240,10 +243,10 @@ private fun StoryCard(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                if (imageUrl != null) {
+                if (story?.imageUrl != null) {
                     coil.compose.AsyncImage(
-                        model = imageUrl,
-                        contentDescription = title,
+                        model = story.imageUrl,
+                        contentDescription = story.title,
                         contentScale = androidx.compose.ui.layout.ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
                     )
@@ -260,47 +263,127 @@ private fun StoryCard(
                         )
                     )
             )
-            Surface(
-                modifier = Modifier.align(Alignment.TopStart).padding(12.dp),
-                shape = BadgeShape,
-                color = MaterialTheme.colorScheme.tertiary,
-                contentColor = MaterialTheme.colorScheme.onTertiary
-            ) {
-                Text(
-                    text = stringResource(R.string.storyOfTheDay).uppercase(),
-                    style = MaterialTheme.typography.labelSmall,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                )
+            if (storyState is ContentState.Content) {
+                Surface(
+                    modifier = Modifier.align(Alignment.TopStart).padding(12.dp),
+                    shape = BadgeShape,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    contentColor = MaterialTheme.colorScheme.onTertiary
+                ) {
+                    Text(
+                        text = stringResource(R.string.storyOfTheDay).uppercase(),
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
             }
             Column(
                 modifier = Modifier.align(Alignment.BottomStart).padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Text(
-                    text = title?.takeIf { it.isNotBlank() } ?: stringResource(R.string.no_story_title),
-                    style = MaterialTheme.typography.headlineLarge.copy(fontSize = 24.sp, lineHeight = 30.sp),
-                    color = OnImage, maxLines = 3, overflow = TextOverflow.Ellipsis)
-                Text(
-                    text = subtitle?.takeIf { it.isNotBlank() } ?: stringResource(R.string.no_story_summary),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = OnImage.copy(alpha = 0.85f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Spacer(Modifier.height(2.dp))
-                Button(
-                    onClick = onReadClick,
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.primary
-                    ),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.readStory),
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    Icon(Icons.AutoMirrored.Filled.ArrowForward, null, Modifier.size(12.dp))
+                when (storyState) {
+                    ContentState.Loading -> {
+                        // A story is still on its way. Show shaped placeholders
+                        // instead of the empty copy, which would be a lie here.
+                        SkeletonBlock(
+                            Modifier.fillMaxWidth(0.72f).height(24.dp)
+                        )
+                        SkeletonBlock(
+                            Modifier.fillMaxWidth(0.5f).height(12.dp)
+                        )
+                    }
+
+                    ContentState.Empty -> {
+                        Text(
+                            text = stringResource(R.string.no_story_title),
+                            style = MaterialTheme.typography.headlineLarge.copy(
+                                fontSize = 24.sp,
+                                lineHeight = 30.sp
+                            ),
+                            color = OnImage,
+                            maxLines = 3,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = stringResource(R.string.no_story_summary),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = OnImage.copy(alpha = 0.85f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+
+                    is ContentState.Error -> {
+                        Text(
+                            text = stringResource(R.string.load_story_error_title),
+                            style = MaterialTheme.typography.headlineLarge.copy(
+                                fontSize = 24.sp,
+                                lineHeight = 30.sp
+                            ),
+                            color = OnImage,
+                            maxLines = 3,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = stringResource(R.string.load_story_error_message),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = OnImage.copy(alpha = 0.85f),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        TextButton(
+                            onClick = onRetry,
+                            contentPadding = PaddingValues(horizontal = 0.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.retry),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = OnImage
+                            )
+                        }
+                    }
+
+                    is ContentState.Content -> {
+                        val loadedStory = storyState.data
+                        Text(
+                            text = loadedStory.title.takeIf { it.isNotBlank() }
+                                ?: stringResource(R.string.untitled),
+                            style = MaterialTheme.typography.headlineLarge.copy(
+                                fontSize = 24.sp,
+                                lineHeight = 30.sp
+                            ),
+                            color = OnImage,
+                            maxLines = 3,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = loadedStory.subtitle.takeIf { it.isNotBlank() }
+                                ?: stringResource(R.string.no_description),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = OnImage.copy(alpha = 0.85f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Spacer(Modifier.height(2.dp))
+                        Button(
+                            onClick = { onReadClick(loadedStory) },
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.surface,
+                                contentColor = MaterialTheme.colorScheme.primary
+                            ),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.readStory),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            Icon(Icons.AutoMirrored.Filled.ArrowForward, null, Modifier.size(12.dp))
+                        }
+                    }
                 }
             }
         }
@@ -480,23 +563,27 @@ private fun EventSuggestion(
 private fun HomeScreenPreview(){
     AvalokanTheme() {
         HomeContent(
-            heroStoryId = "boudhanath",
-            heroTitle = null,
-            heroSubtitle = null,
-            heroImageUrl = null,
-            places = listOf(
-                Place("patan-durbar", "Patan Durbar Square", "Artistic heritage of Lalitpur.", "Lalitpur • Historical Site", "Historical", "4.8"),
-                Place("swayambhu", "Swayambhu", "The Ancient Hill.", "Kathmandu • Spiritual Site", "Historical", "4.7"),
-                Place("boudha-stupa", "Boudha Stupa", "Boudhanath • Spiritual Site.", "Boudhanath • Spiritual Site", "Cultural", "4.9"),
-                Place("bhaktapur-pottery", "Bhaktapur Pottery Square", "Bhaktapur • Craft Quarter.", "Bhaktapur • Craft Quarter", "Cultural", "4.7")
+            heroStoryState = ContentState.Content(
+                Story(
+                    id = "boudhanath",
+                    title = "The Sacred Echoes of Boudhanath",
+                    subtitle = "A living mandala in the Kathmandu Valley"
+                )
+            ),
+            placesState = ContentState.Content(
+                listOf(
+                    Place("patan-durbar", "Patan Durbar Square", "Artistic heritage of Lalitpur.", "Lalitpur • Historical Site", "Historical", "4.8"),
+                    Place("swayambhu", "Swayambhu", "The Ancient Hill.", "Kathmandu • Spiritual Site", "Historical", "4.7"),
+                    Place("boudha-stupa", "Boudha Stupa", "Boudhanath • Spiritual Site.", "Boudhanath • Spiritual Site", "Cultural", "4.9"),
+                    Place("bhaktapur-pottery", "Bhaktapur Pottery Square", "Bhaktapur • Craft Quarter.", "Bhaktapur • Craft Quarter", "Cultural", "4.7")
+                )
             ),
             onStoryClick = {},
             onPlaceClick = {},
             onExploreEventsClick = {},
             onViewAllCategoryClick = {},
             onViewAllPlacesClick = {},
-            onRetry = {},
-            isLoading = false
+            onRetry = {}
         )
     }
 }

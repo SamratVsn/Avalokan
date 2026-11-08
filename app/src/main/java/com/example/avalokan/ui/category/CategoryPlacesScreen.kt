@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
 import com.example.avalokan.domain.model.Place
+import com.example.avalokan.ui.common.ContentState
 import com.example.avalokan.ui.common.placeBadgeLabel
 import com.example.avalokan.ui.components.DiscoverLoadingState
 import com.example.avalokan.ui.components.HeritageCard
@@ -52,23 +53,22 @@ fun CategoryPlacesScreen(
     viewModel: CategoryPlacesViewModel = hiltViewModel()
 ) {
     val places by viewModel.places.collectAsState()
-    val totalPlaces by viewModel.totalPlaces.collectAsState()
+    val contentState by viewModel.contentState.collectAsState()
     val savedIds by viewModel.savedIds.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
 
     CategoryPlacesContent(
         title = categoryTitle(viewModel.category),
         category = viewModel.category,
         places = places,
-        totalPlaces = totalPlaces,
+        contentState = contentState,
         savedIds = savedIds,
         isRefreshing = isRefreshing,
-        isLoading = isLoading,
         onBackClick = onBackClick,
         onPlaceClick = onPlaceClick,
         onToggleSave = viewModel::toggleSave,
         onRefresh = viewModel::refresh,
+        onRetry = viewModel::retry,
         onBrowseAllClick = onBrowseAllClick
     )
 }
@@ -95,14 +95,14 @@ private fun CategoryPlacesContent(
     title: String,
     category: String,
     places: List<Place>,
-    totalPlaces: Int,
+    contentState: ContentState<List<Place>>,
     savedIds: Set<String>,
     isRefreshing: Boolean,
-    isLoading: Boolean,
     onBackClick: () -> Unit,
     onPlaceClick: (String) -> Unit,
     onToggleSave: (String) -> Unit,
     onRefresh: () -> Unit,
+    onRetry: () -> Unit,
     onBrowseAllClick: () -> Unit
 ) {
     Column(
@@ -156,53 +156,64 @@ private fun CategoryPlacesContent(
             onRefresh = onRefresh,
             modifier = Modifier.fillMaxSize()
         ) {
-            when {
-                // First paint: cache is empty but the network may still answer.
-                isLoading && places.isEmpty() -> DiscoverLoadingState()
+            when (contentState) {
+                ContentState.Loading -> DiscoverLoadingState()
 
-                places.isNotEmpty() -> LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(
-                        start = 24.dp,
-                        end = 24.dp,
-                        top = 4.dp,
-                        bottom = Spacing.large
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(places, key = { it.id }) { place ->
-                        CategoryPlaceCard(
-                            place = place,
-                            isSaved = savedIds.contains(place.id),
-                            onToggleSave = { onToggleSave(place.id) },
-                            onPlaceClick = { onPlaceClick(place.id) }
-                        )
-                    }
-                }
-
-                // Nothing arrived from the repository at all: a real load failure.
-                totalPlaces == 0 -> StateMessage(
+                is ContentState.Error -> StateMessage(
                     icon = Icons.Default.ExploreOff,
                     title = stringResource(R.string.load_places_error_title),
                     message = stringResource(R.string.load_places_error_message),
                     actionLabel = stringResource(R.string.retry),
-                    onAction = onRefresh
+                    onAction = onRetry,
+                    secondaryActionLabel = stringResource(R.string.browse_all_places),
+                    onSecondaryAction = onBrowseAllClick
                 )
 
-                // Places loaded, but none carry this category.
-                else -> StateMessage(
+                // The repository answered, and it has no places at all.
+                ContentState.Empty -> StateMessage(
                     icon = Icons.Default.ExploreOff,
-                    title = stringResource(
-                        R.string.nothing_in_category_title,
-                        category.ifBlank { title }
-                    ),
-                    message = stringResource(
-                        R.string.nothing_in_category_message,
-                        category.ifBlank { title }
-                    ),
+                    title = stringResource(R.string.empty_places_title),
+                    message = stringResource(R.string.empty_places_message),
                     actionLabel = stringResource(R.string.browse_all_places),
                     onAction = onBrowseAllClick
                 )
+
+                is ContentState.Content -> if (places.isNotEmpty()) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            start = 24.dp,
+                            end = 24.dp,
+                            top = 4.dp,
+                            bottom = Spacing.large
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(places, key = { it.id }) { place ->
+                            CategoryPlaceCard(
+                                place = place,
+                                isSaved = savedIds.contains(place.id),
+                                onToggleSave = { onToggleSave(place.id) },
+                                onPlaceClick = { onPlaceClick(place.id) }
+                            )
+                        }
+                    }
+                } else {
+                    // Places loaded, but none carry this category.
+                    StateMessage(
+                        icon = Icons.Default.ExploreOff,
+                        title = stringResource(
+                            R.string.nothing_in_category_title,
+                            category.ifBlank { title }
+                        ),
+                        message = stringResource(
+                            R.string.nothing_in_category_message,
+                            category.ifBlank { title }
+                        ),
+                        actionLabel = stringResource(R.string.browse_all_places),
+                        onAction = onBrowseAllClick
+                    )
+                }
             }
         }
     }
@@ -242,14 +253,14 @@ private fun CategoryPlacesPreview() {
             title = "Historical Gems",
             category = "Historical",
             places = emptyList(),
-            totalPlaces = 0,
+            contentState = ContentState.Empty,
             savedIds = emptySet(),
             isRefreshing = false,
-            isLoading = false,
             onBackClick = {},
             onPlaceClick = {},
             onToggleSave = {},
             onRefresh = {},
+            onRetry = {},
             onBrowseAllClick = {}
         )
     }

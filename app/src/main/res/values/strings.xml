@@ -78,8 +78,23 @@
 
     <string name="load_places_error_title">We couldn’t load places</string>
     <string name="load_places_error_message">Your connection may be off. Reconnect and try again to explore heritage sites across Nepal.</string>
+    <string name="empty_places_title">Nothing to explore yet</string>
+    <string name="empty_places_message">Published heritage places will appear here as soon as they’re added.</string>
     <string name="no_events_title">No events right now</string>
-    <string name="no_events_message">There’s nothing scheduled at the moment. Check your connection, or explore heritage places while you wait.</string>
+    <string name="no_events_message">There’s nothing scheduled at the moment. Explore heritage places while you wait.</string>
+    <string name="load_events_error_title">We couldn’t load events</string>
+    <string name="load_events_error_message">Your connection may be off. Reconnect and try again to see events around Nepal.</string>
+    <string name="load_story_error_title">We couldn’t load the story</string>
+    <string name="load_story_error_message">Pull down to refresh and try again.</string>
+
+    <!-- Detail screen states -->
+    <string name="detail_loading">Loading %1$s…</string>
+    <string name="detail_not_found_title">We couldn’t find this %1$s</string>
+    <string name="detail_not_found_message">It may have been removed, or the link is out of date.</string>
+    <string name="detail_load_error_title">We couldn’t load this %1$s</string>
+    <string name="detail_load_error_message">Check your connection and try again.</string>
+    <string name="detail_go_back">Go back</string>
+    <string name="detail_try_again">Try again</string>
 
     <string name="saved_places_empty">No saved places yet</string>
     <string name="saved_places_empty_hint">Tap the bookmark on any heritage site to keep it here.</string>

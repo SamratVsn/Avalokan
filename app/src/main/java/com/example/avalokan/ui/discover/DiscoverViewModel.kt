@@ -6,16 +6,17 @@ import com.example.avalokan.data.local.PreferencesStore
 import com.example.avalokan.domain.classification.HeritageGroup
 import com.example.avalokan.domain.model.Place
 import com.example.avalokan.domain.repository.PlaceRepository
-import com.example.avalokan.ui.common.CONTENT_LOADING_TIMEOUT_MS
+import com.example.avalokan.ui.common.ContentState
+import com.example.avalokan.ui.common.asListContentState
+import com.example.avalokan.ui.common.dataOrNull
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -35,33 +36,33 @@ class DiscoverViewModel @Inject constructor(
     private val _selectedCategory = MutableStateFlow(0)
     val selectedCategory: StateFlow<Int> = _selectedCategory.asStateFlow()
 
-    private val _isLoading = MutableStateFlow(true)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    /**
+     * Bumping this restarts the repository stream. The initial value starts the
+     * normal subscription; retry uses it to recover from a failed first load.
+     */
+    private val reload = MutableStateFlow(0)
 
-    init {
-        viewModelScope.launch {
-            // A populated Room cache resolves this almost immediately. The
-            // timeout only covers a cold, empty, offline start where the
-            // repository may never emit.
-            delay(CONTENT_LOADING_TIMEOUT_MS)
-            _isLoading.value = false
-        }
-    }
+    /**
+     * The unfiltered repository state. This is what lets the UI tell "nothing
+     * loaded at all" apart from "this filter has no matches".
+     */
+    val contentState: StateFlow<ContentState<List<Place>>> = reload
+        .flatMapLatest { placeRepository.observePlaces().asListContentState() }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5_000),
+            ContentState.Loading
+        )
 
     val savedIds: StateFlow<Set<String>> = userPreferences.savedPlaceIds
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
     /**
-     * Single upstream subscription shared by every derived flow, so the
+     * Single derived subscription shared by the filter-dependent flows, so the
      * repository is only observed once.
-     *
-     * [DiscoverState.total] is the number of places actually loaded, before
-     * category/query filtering — it lets the UI tell "nothing matched this
-     * filter" apart from "nothing loaded at all".
      */
     private data class DiscoverState(
         val sites: List<Place> = emptyList(),
-        val total: Int = 0,
         // Matches the chips' first paint, so the initial subscription does not
         // briefly emit an empty category row before the cache resolves.
         val availableCategories: List<String> = listOf("All"),
@@ -69,17 +70,17 @@ class DiscoverViewModel @Inject constructor(
     )
 
     private val discoverState: StateFlow<DiscoverState> = combine(
-        placeRepository.observePlaces(),
+        contentState,
         _query,
         _selectedCategory
-    ) { remote, query, selected ->
+    ) { content, query, selected ->
+        val remote = content.dataOrNull.orEmpty()
         val categoryKey = DiscoverCategories.getOrElse(selected) { "All" }
         val typologyGroup = HeritageGroup.fromKey(categoryKey)
         DiscoverState(
             sites = remote.filter { site ->
                 site.matches(typologyGroup) && site.matchesQuery(query)
             },
-            total = remote.size,
             availableCategories = DiscoverCategories.filter { filter ->
                 val group = HeritageGroup.fromKey(filter)
                 filter == "All" || remote.any { it.matches(group) }
@@ -91,18 +92,11 @@ class DiscoverViewModel @Inject constructor(
                 .take(3)
         )
     }
-        .onEach { state ->
-            if (state.total > 0) _isLoading.value = false
-        }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DiscoverState())
 
     val sites: StateFlow<List<Place>> = discoverState
         .map { it.sites }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
-
-    val totalPlaces: StateFlow<Int> = discoverState
-        .map { it.total }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 
     /** Categories that actually have at least one place — safe to suggest. */
     val availableCategories: StateFlow<List<String>> = discoverState
@@ -146,9 +140,14 @@ class DiscoverViewModel @Inject constructor(
                 // Snapshot listeners keep streaming; the retry just ends.
             } finally {
                 _isRefreshing.value = false
-                _isLoading.value = false
             }
         }
+    }
+
+    /** Restarts the repository stream and forces a server read. */
+    fun retry() {
+        reload.value += 1
+        refresh()
     }
 
     fun toggleSave(siteId: String): Boolean {
