@@ -20,3 +20,6 @@ app/google-services.json
 
 # brag-generated launch video output
 /brag-output/
+
+# local docs
+/docs/
