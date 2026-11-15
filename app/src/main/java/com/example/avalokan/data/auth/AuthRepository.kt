@@ -132,7 +132,7 @@ class AuthRepository @Inject constructor(
             AuthResult.Error(friendlyMessage(error))
         }
     }
-    //sp
+    //sp cd
     suspend fun signUpEmail(email: String, password: String): AuthResult {
         if (!isValidEmail(email)) {
             return AuthResult.Error(
