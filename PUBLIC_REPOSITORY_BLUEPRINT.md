@@ -484,7 +484,7 @@ Do **not** copy the private project wholesale. Build a documentation-first showc
 ```text
 avalokan-showcase/
 ├── README.md
-├── LICENSE                     # Only after a licence decision; omit until then
+├── LICENSE                     # AGPL-3.0-or-later
 ├── CONTRIBUTING.md             # Optional; only if contributions are genuinely welcome
 ├── CODE_OF_CONDUCT.md          # Optional; adopt a standard text, do not invent one
 ├── SECURITY.md                 # How to report a vulnerability; no real contact secrets
@@ -536,7 +536,7 @@ avalokan-showcase/
 | Path | Purpose | Notes |
 |---|---|---|
 | `README.md` | First impression, scope, features, stack, architecture summary, links | Use the draft in Section 9. |
-| `LICENSE` | Legal terms for reuse | Leave unresolved; see Sections 6 and 12. |
+| `LICENSE` | Legal terms for reuse | AGPL-3.0-or-later (decided 2026-11-15). |
 | `CONTRIBUTING.md` | Contribution workflow | Only include if the repo accepts contributions. |
 | `CODE_OF_CONDUCT.md` | Community expectations | Use an established template with attribution if adopted. |
 | `SECURITY.md` | Vulnerability reporting and scope | Must not contain a private email if one is not intended to be public. |
@@ -879,10 +879,13 @@ open external organiser links rather than processing bookings.
 
 ## Licence
 
-This repository does not currently include an open-source licence. The licensing
-decision is unresolved; no reuse rights should be assumed. Third-party fonts,
-icons, and assets remain subject to their respective licences — see
-[NOTICE.md](NOTICE.md).
+Avalokan is free software licensed under the GNU Affero General Public License,
+version 3 or later (AGPL-3.0-or-later). The complete licence text is in
+[LICENSE](LICENSE). Third-party libraries, fonts, icons, and assets remain
+subject to their respective licences — see
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The Avalokan name, logo, and
+official branding are not granted by the software licence — see
+[TRADEMARKS.md](TRADEMARKS.md).
 ````
 
 ---
@@ -947,7 +950,7 @@ Do not publish the `brag-output/` directory or its audio assets until licensing 
 
 - [ ] Decide the public repository name and owner/organisation.
 - [ ] Decide whether the repo is documentation-only or includes a runnable sample module.
-- [ ] Decide the licence, or keep the `LICENSE` decision explicitly unresolved.
+- [x] Licence decided: AGPL-3.0-or-later (2026-11-15).
 - [ ] Decide whether to reuse the author links and branding from the private README.
 - [ ] Decide the demo application ID / package name for samples.
 - [ ] Decide whether a demo Firebase project will be created (recommended if any sample runs).
@@ -1028,7 +1031,7 @@ Do not publish the `brag-output/` directory or its audio assets until licensing 
 
 | # | Limitation / decision | Evidence | Impact on the public repository | Action needed |
 |---|---|---|---|---|
-| 1 | Licence is unresolved | Private README says no open-source licence is included | No reuse rights can be assumed; a `LICENSE` file would be misleading | Decide before publishing; until then, state that the decision is unresolved. |
+| 1 | ~~Licence is unresolved~~ Resolved 2026-11-15 | `LICENSE` now contains AGPL-3.0-or-later | Reuse is permitted under AGPL terms; third-party and branding carve-outs still apply | Keep `THIRD_PARTY_NOTICES.md` and `TRADEMARKS.md` current. |
 | 2 | Public repository name and identity are undecided | No separate repo exists yet | README links, package names, and screenshots depend on this | Choose a name and owner. |
 | 3 | `applicationId` / namespace is `com.example.avalokan` | Build configuration | Looks like a placeholder and ties samples to the private app | Use a neutral package for public samples; keep the production ID private. |
 | 4 | Source `versionName` is `1.0` while commits say `1.4.0` | `app/build.gradle.kts` vs. commit message | Public version claims would be inconsistent | Reconcile or omit version numbers. |
@@ -1056,7 +1059,7 @@ Do not publish the `brag-output/` directory or its audio assets until licensing 
 
 ### Open questions that should be answered explicitly
 
-1. **Licence:** MIT, Apache-2.0, a source-available custom licence, or no licence? Until answered, keep the decision unresolved and do not add a `LICENSE` file that implies rights.
+1. **Licence:** ~~MIT, Apache-2.0, a source-available custom licence, or no licence?~~ Answered 2026-11-15: AGPL-3.0-or-later.
 2. **Repository model:** documentation plus illustrative snippets, or a minimal runnable sample project with a demo Firebase backend?
 3. **Identity:** keep the “Avalokan” name and existing author links, or present the showcase under a neutral portfolio identity?
 4. **Visuals:** recapture screenshots with owned demo content, or publish only diagrams and no product screenshots?

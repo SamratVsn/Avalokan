@@ -24,3 +24,12 @@ app/google-services.json
 # local docs
 /docs/
 /docs
+
+# Signing material and build outputs must never be committed.
+# NOTE: app/avalokan_app.jks and app/release/avalokan.apk are already tracked
+# and must be removed from the index separately; ignoring them here does not
+# untrack or purge them from Git history.
+*.jks
+*.keystore
+*.apk
+*.aab

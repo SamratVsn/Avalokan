@@ -97,11 +97,21 @@ Some parts are intentionally simple for now: the Book Now action opens the organ
 
 ## Contributing
 
-Contributions and suggestions are welcome, especially around accessibility, Android architecture, and heritage content. Fork the repository, create a branch, make your changes, run the tests, and open a pull request describing what changed.
+Contributions and suggestions are welcome, especially around accessibility,
+Android architecture, and heritage content. Fork the repository, create a
+branch, make your changes, run the tests, and open a pull request describing
+what changed.
+
+Unless you explicitly state otherwise, contributions you submit are accepted
+under the same AGPL-3.0-or-later terms that cover this project.
 
 ## Credits
 
 Screenshots were captured from the running app.
+
+Avalokan bundles the Inter and Montserrat typefaces under the SIL Open Font
+License 1.1 and uses Material icons under Apache-2.0. See
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the full inventory.
 
 ## Author
 
@@ -109,6 +119,24 @@ Screenshots were captured from the running app.
 
 [Portfolio](https://samratparajuli0.com.np) · [GitHub](https://github.com/SamratVsn) · [LinkedIn](https://www.linkedin.com/in/samratvsn/)
 
-## License
+## Licence
 
-This repository does not currently include an open-source license.
+Avalokan is free software licensed under the **GNU Affero General Public
+License, version 3 or later (AGPL-3.0-or-later)**. The complete, unmodified
+licence text is in [LICENSE](LICENSE).
+
+You may use, study, modify, and redistribute the code under those terms. If you
+run a modified version as a network service, section 13 of the AGPL requires you
+to offer that service's users the Corresponding Source.
+
+Original Avalokan source is © 2026 Samrat Parajuli. Third-party libraries,
+fonts, and icons remain under their own licences; see
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The Avalokan name, logo, and
+official branding are **not** granted by the software licence; see
+[TRADEMARKS.md](TRADEMARKS.md).
+
+**Not covered by the AGPL:** Firebase, Google Play services, Google Identity,
+and related Google SDKs are proprietary components governed by Google's terms.
+They are not open source, and combining them with this AGPL application raises
+an unresolved compliance question. Read
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) before redistributing builds.

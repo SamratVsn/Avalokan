@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2026 Samrat Parajuli
+ *
+ * This file is part of Avalokan.
+ *
+ * Avalokan is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * Avalokan is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Avalokan. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
 package com.example.avalokan.ui.detail
 
 import android.content.Intent
@@ -9,9 +30,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -153,6 +177,7 @@ private fun EventDetailContent(
     val cta = event.cta()
     val ctaRes = ctaLabelRes(cta)
     val showFooter = price != null || ctaRes != null
+    val navigationBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.surface,
@@ -163,6 +188,7 @@ private fun EventDetailContent(
                 Surface(shadowElevation = 12.dp, color = MaterialTheme.colorScheme.surface) {
                     Row(
                         modifier = Modifier.fillMaxWidth()
+                            .navigationBarsPadding()
                             .padding(horizontal = 16.dp, vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = if (price == null) {
@@ -212,7 +238,9 @@ private fun EventDetailContent(
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize().padding(innerPadding),
-                contentPadding = PaddingValues(bottom = 24.dp)
+                contentPadding = PaddingValues(
+                    bottom = 24.dp + if (showFooter) 0.dp else navigationBarBottom
+                )
             ) {
                 item {
                     // 350dp hero; the white sheet below slides 30dp over it.
@@ -351,8 +379,7 @@ private fun EventDetailContent(
                 contentDescription = "Back",
                 onClick = onBackClick,
                 modifier = Modifier.align(Alignment.TopStart)
-                    .statusBarsPadding()
-                    .padding(top = 8.dp, start = 16.dp)
+                    .detailBackButtonPadding()
             )
         }
     }

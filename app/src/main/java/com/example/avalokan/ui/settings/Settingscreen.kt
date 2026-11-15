@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2026 Samrat Parajuli
+ *
+ * This file is part of Avalokan.
+ *
+ * Avalokan is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * Avalokan is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Avalokan. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
 package com.example.avalokan.ui.settings
 
 import android.Manifest
@@ -12,6 +33,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,6 +54,7 @@ import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Person
@@ -68,6 +91,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.BuildConfig
 import com.example.avalokan.R
 import com.example.avalokan.data.local.PreferencesStore
+import com.example.avalokan.ui.common.openUrlInBrowser
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.DangerBg
 import com.example.avalokan.ui.theme.DangerRed
@@ -79,6 +103,11 @@ import com.example.avalokan.ui.theme.Spacing
 import com.example.avalokan.ui.theme.StandardCardShape
 import com.example.avalokan.ui.theme.Terracotta
 import com.example.avalokan.ui.theme.TextSecondary
+
+private const val SOURCE_CODE_URL = "https://github.com/SamratVsn/Avalokan"
+private const val LICENCE_URL = "https://www.gnu.org/licenses/agpl-3.0.html"
+private const val THIRD_PARTY_NOTICES_URL =
+    "https://github.com/SamratVsn/Avalokan/blob/master/THIRD_PARTY_NOTICES.md"
 
 @Composable
 fun SettingsScreen(
@@ -100,8 +129,12 @@ fun SettingsScreen(
         context.startActivity(Intent.createChooser(intent, "Send suggestion"))
     }
     var showAboutDialog by rememberSaveable { mutableStateOf(false) }
+    var showLicencesDialog by rememberSaveable { mutableStateOf(false) }
     if (showAboutDialog) {
         AboutDialog(onDismiss = { showAboutDialog = false })
+    }
+    if (showLicencesDialog) {
+        OpenSourceLicencesDialog(onDismiss = { showLicencesDialog = false })
     }
 
     fun hasNotificationPermission(): Boolean =
@@ -131,6 +164,7 @@ fun SettingsScreen(
         onResetSettings = viewModel::resetSettings,
         onSendSuggestions = onSendSuggestions,
         onAboutClick = { showAboutDialog = true },
+        onLicencesClick = { showLicencesDialog = true },
         onLogoutClick = onLogoutClick,
         onLoginClick = onLoginClick,
         onBackClick = onBackClick,
@@ -150,6 +184,7 @@ private fun SettingsContent(
     onResetSettings: () -> Unit,
     onSendSuggestions: () -> Unit,
     onAboutClick: () -> Unit,
+    onLicencesClick: () -> Unit,
     onLogoutClick: () -> Unit,
     onLoginClick: () -> Unit
 ) {
@@ -209,6 +244,7 @@ private fun SettingsContent(
             SuppNFeed(
                 onSendSuggestions = onSendSuggestions,
                 onAboutClick = onAboutClick,
+                onLicencesClick = onLicencesClick,
                 modifier = Modifier.padding(horizontal = Spacing.sidePadding)
             )
             StorageSection(
@@ -480,6 +516,7 @@ private fun AppearanceSection(
 private fun SuppNFeed(
     onSendSuggestions: () -> Unit,
     onAboutClick: () -> Unit,
+    onLicencesClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -511,6 +548,17 @@ private fun SuppNFeed(
                     name = stringResource(R.string.appVersion),
                     trailing = BuildConfig.VERSION_NAME,
                     onClick = onAboutClick
+                )
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant
+                )
+                SettingRow(
+                    icon = Icons.Default.Code,
+                    iconBg = NeutralBg,
+                    iconTint = TextSecondary,
+                    name = stringResource(R.string.open_source_licences),
+                    onClick = onLicencesClick
                 )
             }
         }
@@ -606,6 +654,48 @@ private fun SettingRow(
 }
 
 @Composable
+private fun OpenSourceLicencesDialog(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = stringResource(R.string.open_source_licences)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = stringResource(R.string.licence_copyright),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = stringResource(R.string.licence_summary),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = stringResource(R.string.licence_third_party),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                TextButton(
+                    onClick = { context.openUrlInBrowser(LICENCE_URL) },
+                    contentPadding = PaddingValues(0.dp)
+                ) { Text(text = stringResource(R.string.view_licence)) }
+                TextButton(
+                    onClick = { context.openUrlInBrowser(SOURCE_CODE_URL) },
+                    contentPadding = PaddingValues(0.dp)
+                ) { Text(text = stringResource(R.string.view_source)) }
+                TextButton(
+                    onClick = { context.openUrlInBrowser(THIRD_PARTY_NOTICES_URL) },
+                    contentPadding = PaddingValues(0.dp)
+                ) { Text(text = stringResource(R.string.third_party_notices)) }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text(text = stringResource(R.string.close_action)) }
+        }
+    )
+}
+
+@Composable
 private fun AboutDialog(onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -636,6 +726,11 @@ private fun AboutDialog(onDismiss: () -> Unit) {
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                Text(
+                    text = stringResource(R.string.licence_about_line),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         },
         confirmButton = {
@@ -659,6 +754,7 @@ private fun SettingsPreview() {
             onResetSettings = {},
             onSendSuggestions = {},
             onAboutClick = {},
+            onLicencesClick = {},
             onLogoutClick = {},
             onLoginClick = {}
         )

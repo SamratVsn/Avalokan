@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2026 Samrat Parajuli
+ *
+ * This file is part of Avalokan.
+ *
+ * Avalokan is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * Avalokan is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Avalokan. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
 package com.example.avalokan.ui.detail
 
 import androidx.compose.foundation.background
@@ -7,13 +28,17 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -74,10 +99,21 @@ fun BoxScope.DetailBackButton(onBackClick: () -> Unit) {
         contentDescription = "Back",
         onClick = onBackClick,
         modifier = Modifier.align(Alignment.TopStart)
-            .statusBarsPadding()
-            .padding(top = 8.dp, start = 16.dp)
+            .detailBackButtonPadding()
     )
 }
+
+/**
+ * Keeps floating detail controls clear of the status bar and display cutout on
+ * the top and start edges. Only those two sides are consumed so the control's
+ * visual position does not change on the end or bottom edges.
+ */
+@Composable
+internal fun Modifier.detailBackButtonPadding(): Modifier = this
+    .windowInsetsPadding(
+        WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Start)
+    )
+    .padding(top = 8.dp, start = 16.dp)
 
 @Composable
 fun DetailLoading(kind: String, onBackClick: () -> Unit, modifier: Modifier = Modifier) {

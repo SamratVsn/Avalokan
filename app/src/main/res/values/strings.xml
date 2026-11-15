@@ -224,4 +224,15 @@
     <string name="story_curated_by">Curated by %1$s</string>
     <string name="story_source">Source</string>
     <string name="story_last_verified">Last verified: %1$s</string>
+
+    <!-- Licensing and attribution -->
+    <string name="open_source_licences">Open-source licences</string>
+    <string name="licence_copyright">Copyright (C) 2026 Samrat Parajuli</string>
+    <string name="licence_summary">Avalokan is free software, licensed under the GNU Affero General Public License, version 3 or later.</string>
+    <string name="licence_third_party">Bundled libraries, fonts, and icons remain under their own licences.</string>
+    <string name="view_licence">Read the licence</string>
+    <string name="view_source">Source code</string>
+    <string name="third_party_notices">Third-party notices</string>
+    <string name="close_action">Close</string>
+    <string name="licence_about_line">Licensed under AGPL-3.0-or-later.</string>
 </resources>
