@@ -37,6 +37,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -59,7 +61,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -68,6 +75,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
 import com.example.avalokan.domain.model.Place
 import com.example.avalokan.ui.common.ContentState
+import com.example.avalokan.ui.common.KeyboardBackHandling
+import com.example.avalokan.ui.common.dismissKeyboardOnScroll
+import com.example.avalokan.ui.common.dismissKeyboardOnTap
+import com.example.avalokan.ui.common.rememberKeyboardDismisser
 import com.example.avalokan.ui.components.DiscoverLoadingState
 import com.example.avalokan.ui.components.StateMessage
 import com.example.avalokan.ui.common.heritageFilterHelpRes
@@ -94,6 +105,16 @@ fun DiscoverScreen(
     val availableCategories by viewModel.availableCategories.collectAsState()
     val recommended by viewModel.recommended.collectAsState()
 
+    // Back closes the IME before it leaves Discover, and a hidden IME drops focus.
+    KeyboardBackHandling()
+    val dismissKeyboard = rememberKeyboardDismisser()
+    // Every route to a place goes through here so the keyboard never stays
+    // open over the detail screen.
+    val openPlace: (String) -> Unit = { id ->
+        dismissKeyboard()
+        onPlaceClick(id)
+    }
+
     PullToRefreshBox(
         isRefreshing = isRefreshing,
         onRefresh = viewModel::refresh,
@@ -109,7 +130,15 @@ fun DiscoverScreen(
             contentState = contentState,
             savedIds = savedIds,
             onToggleSave = { viewModel.toggleSave(it) },
-            onPlaceClick = onPlaceClick,
+            onPlaceClick = openPlace,
+            onSearch = {
+                dismissKeyboard()
+                // A single unambiguous match opens directly, exactly as tapping
+                // its card would. Otherwise the keyboard gets out of the way so
+                // the ranked list (or the empty state) is fully visible.
+                if (query.isNotBlank() && sites.size == 1) openPlace(sites.single().id)
+            },
+            onDismissKeyboard = dismissKeyboard,
             onRetry = viewModel::retry,
             availableCategories = availableCategories,
             recommended = recommended,
@@ -132,6 +161,8 @@ private fun DiscoverContent(
     savedIds: Set<String>,
     onToggleSave: (String) -> Unit,
     onPlaceClick: (String) -> Unit,
+    onSearch: () -> Unit,
+    onDismissKeyboard: () -> Unit,
     onRetry: () -> Unit,
     availableCategories: List<String>,
     recommended: List<Place>,
@@ -139,11 +170,15 @@ private fun DiscoverContent(
     onSuggestionSelect: (String) -> Unit,
     onExploreEventsClick: () -> Unit
 ) {
+    // No imePadding here: the search field sits at the top, so the IME never
+    // covers it, and resizing the list would make content jump.
     Column(
         modifier = Modifier.fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
+            .dismissKeyboardOnScroll(onDismissKeyboard)
             .verticalScroll(rememberScrollState())
+            .dismissKeyboardOnTap(onDismissKeyboard)
             .padding(bottom = Spacing.large),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -160,6 +195,7 @@ private fun DiscoverContent(
         }
         SearchField(
             query = query, onQuery = onQuery,
+            onSearch = onSearch,
             modifier = Modifier.padding(horizontal = 24.dp)
         )
         Suggestions(
@@ -185,11 +221,14 @@ private fun DiscoverContent(
 private fun SearchField(
     query: String,
     onQuery: (String) -> Unit,
+    onSearch: () -> Unit,
     modifier: Modifier = Modifier
 ){
     OutlinedTextField(
         value = query,
         onValueChange = onQuery,
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+        keyboardActions = KeyboardActions(onSearch = { onSearch() }),
         modifier = modifier.fillMaxWidth()
             .height(56.dp),
         placeholder = {
@@ -338,6 +377,7 @@ private fun Suggestions(
                     modifier = Modifier.padding(horizontal = 24.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
+                    ResultCount(count = sites.size, query = query)
                     sites.forEach { site ->
                         SearchPlaceCard(
                             place = site,
@@ -388,6 +428,22 @@ private fun Suggestions(
             }
         }
     }
+}
+
+/** How many places the current query and filter produced. */
+@Composable
+private fun ResultCount(count: Int, query: String) {
+    val trimmed = query.trim()
+    Text(
+        text = if (trimmed.isEmpty()) {
+            pluralStringResource(R.plurals.discover_result_count, count, count)
+        } else {
+            pluralStringResource(R.plurals.discover_result_count_for_query, count, count, trimmed)
+        },
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }
+    )
 }
 
 /** Real content shown under a failed search, so the screen still leads somewhere. */
@@ -486,6 +542,8 @@ private fun DiscoverPreview(){
             savedIds = emptySet(),
             onToggleSave = {},
             onPlaceClick = {},
+            onSearch = {},
+            onDismissKeyboard = {},
             onRetry = {},
             availableCategories = listOf("All", "PAGODA_NEWA", "STUPA_MONASTERY"),
             recommended = emptyList(),

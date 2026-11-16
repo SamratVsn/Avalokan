@@ -111,14 +111,36 @@ data class Place(
     fun matches(group: HeritageGroup?): Boolean =
         group == null || heritageGroups.contains(group)
 
-    fun matchesQuery(query: String): Boolean {
-        val needle = query.trim()
-        if (needle.isEmpty()) return true
-        return name.contains(needle, ignoreCase = true) ||
-            meta.contains(needle, ignoreCase = true) ||
-            locality.contains(needle, ignoreCase = true) ||
-            heritageTypologies.any { it.name.contains(needle, ignoreCase = true) } ||
-            tags.any { it.contains(needle, ignoreCase = true) }
+    fun matchesQuery(query: String): Boolean = searchRank(query) != null
+
+    /**
+     * How well this place matches a free-text [query], or null when it does not
+     * match at all. Lower is better, so callers can sort by it:
+     * name, then location (meta, locality, district, province), then
+     * classification (category, heritage type, typologies, tags), then prose
+     * (description, significance). A blank query matches everything equally.
+     */
+    fun searchRank(query: String): Int? {
+        val needle = normalizeSearchText(query)
+        if (needle.isEmpty()) return SearchRank.NAME
+        fun hit(vararg fields: String) = fields.any { normalizeSearchText(it).contains(needle) }
+        fun hitAny(fields: Iterable<String>) = fields.any { normalizeSearchText(it).contains(needle) }
+        return when {
+            hit(name) -> SearchRank.NAME
+            hit(meta, locality, district, province) -> SearchRank.LOCATION
+            hit(category, heritageType, primaryCategory, unescoStatus, era) ||
+                hitAny(secondaryCategories) || hitAny(typologies) || hitAny(tags) ||
+                hitAny(heritageGroups.map { it.key }) -> SearchRank.CLASSIFICATION
+            hit(description, significance) -> SearchRank.DESCRIPTION
+            else -> null
+        }
+    }
+
+    object SearchRank {
+        const val NAME = 0
+        const val LOCATION = 1
+        const val CLASSIFICATION = 2
+        const val DESCRIPTION = 3
     }
 
     /** Verified-only badges, in priority order, capped so cards stay readable. */
@@ -154,3 +176,13 @@ data class Place(
         get() = unescoStatus.contains("world heritage", ignoreCase = true) ||
             tags.any { it.contains("UNESCO", ignoreCase = true) }
 }
+
+/**
+ * Case-folds, turns stored key separators (`PAGODA_NEWA`) into spaces and
+ * collapses runs of whitespace, so "  newa  pagoda" and "PAGODA_NEWA"-style
+ * keys compare on the same footing.
+ */
+internal fun normalizeSearchText(value: String): String =
+    value.replace('_', ' ').trim().lowercase().replace(Whitespace, " ")
+
+private val Whitespace = Regex("\\s+")

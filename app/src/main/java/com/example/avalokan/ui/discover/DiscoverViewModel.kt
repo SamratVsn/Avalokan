@@ -99,9 +99,14 @@ class DiscoverViewModel @Inject constructor(
         val categoryKey = DiscoverCategories.getOrElse(selected) { "All" }
         val typologyGroup = HeritageGroup.fromKey(categoryKey)
         DiscoverState(
-            sites = remote.filter { site ->
-                site.matches(typologyGroup) && site.matchesQuery(query)
-            },
+            // Ranked: name matches first, then location, classification and
+            // description. sortedBy is stable, so curated order is kept within
+            // each tier (and for a blank query, where every rank is equal).
+            sites = remote
+                .filter { site -> site.matches(typologyGroup) }
+                .mapNotNull { site -> site.searchRank(query)?.let { rank -> site to rank } }
+                .sortedBy { (_, rank) -> rank }
+                .map { (site, _) -> site },
             availableCategories = DiscoverCategories.filter { filter ->
                 val group = HeritageGroup.fromKey(filter)
                 filter == "All" || remote.any { it.matches(group) }

@@ -72,6 +72,14 @@
     </plurals>
 
     <string name="no_results_title">No matches for “%1$s”</string>
+    <plurals name="discover_result_count">
+        <item quantity="one">%1$d place</item>
+        <item quantity="other">%1$d places</item>
+    </plurals>
+    <plurals name="discover_result_count_for_query">
+        <item quantity="one">%1$d place for “%2$s”</item>
+        <item quantity="other">%1$d places for “%2$s”</item>
+    </plurals>
     <string name="no_results_message">We couldn’t find a place matching that. Check the spelling, try a broader term, or start from one of these.</string>
     <string name="nothing_in_category_title">Nothing in %1$s yet</string>
     <string name="nothing_in_category_message">No places are tagged %1$s right now. Try another category to keep exploring.</string>

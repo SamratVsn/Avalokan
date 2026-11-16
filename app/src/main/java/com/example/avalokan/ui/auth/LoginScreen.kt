@@ -30,8 +30,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
@@ -49,9 +53,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -59,6 +66,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
+import com.example.avalokan.ui.common.KeyboardBackHandling
+import com.example.avalokan.ui.common.dismissKeyboardOnTap
+import com.example.avalokan.ui.common.rememberKeyboardDismisser
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.Spacing
 import com.example.avalokan.ui.theme.StandardButtonShape
@@ -105,10 +115,18 @@ private fun LoginContent(
     onGoogleSubmit: (String) -> Unit
 ) {
     val serverClientId = stringResource(R.string.google_server_client_id)
+    val focusManager = LocalFocusManager.current
+    val dismissKeyboard = rememberKeyboardDismisser()
+    KeyboardBackHandling()
+    // A form with actions below the fields: imePadding + scroll keeps the
+    // submit button reachable above the keyboard on small screens.
     Column(
         modifier = Modifier.fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
+            .imePadding()
+            .verticalScroll(rememberScrollState())
+            .dismissKeyboardOnTap(dismissKeyboard)
             .padding(horizontal = 24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -133,7 +151,13 @@ private fun LoginContent(
             onValueChange = onEmailChange,
             label = { Text(text = stringResource(R.string.email)) },
             leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Next
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = { focusManager.moveFocus(FocusDirection.Down) }
+            ),
             singleLine = true,
             enabled = !isLoading,
             shape = StandardCardShape,
@@ -153,7 +177,16 @@ private fun LoginContent(
             },
             leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
             visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    dismissKeyboard()
+                    if (!isLoading && canSubmitEmail) onEmailSubmit()
+                }
+            ),
             singleLine = true,
             enabled = !isLoading,
             shape = StandardCardShape,
@@ -167,7 +200,10 @@ private fun LoginContent(
             )
         }
         Button(
-            onClick = onEmailSubmit,
+            onClick = {
+                dismissKeyboard()
+                onEmailSubmit()
+            },
             enabled = !isLoading && canSubmitEmail,
             shape = StandardButtonShape,
             colors = ButtonDefaults.buttonColors(
@@ -190,7 +226,10 @@ private fun LoginContent(
             }
         }
         OutlinedButton(
-            onClick = { onGoogleSubmit(serverClientId) },
+            onClick = {
+                dismissKeyboard()
+                onGoogleSubmit(serverClientId)
+            },
             enabled = !isLoading,
             shape = StandardButtonShape,
             modifier = Modifier.fillMaxWidth().height(48.dp)

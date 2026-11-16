@@ -22,9 +22,13 @@
 package com.example.avalokan.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -62,6 +66,20 @@ fun AvalokanNavHost(
     navController: NavHostController,
     modifier : Modifier = Modifier
 ){
+    // Safety net for every destination, current and future: a keyboard opened
+    // on one screen never survives a navigation onto the next. Screens still
+    // dismiss explicitly before navigating; this catches anything they miss.
+    val keyboard = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+    DisposableEffect(navController, keyboard, focusManager) {
+        val listener = NavController.OnDestinationChangedListener { _, _, _ ->
+            keyboard?.hide()
+            focusManager.clearFocus(force = true)
+        }
+        navController.addOnDestinationChangedListener(listener)
+        onDispose { navController.removeOnDestinationChangedListener(listener) }
+    }
+
     NavHost(
         navController = navController,
         startDestination = Home.route,

@@ -29,6 +29,8 @@ import com.example.avalokan.ui.discover.DiscoverViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -264,5 +266,113 @@ class DiscoverViewModelTest {
         vm.onSuggestionSelect("PAGODA_NEWA")
         assertEquals("", vm.query.value)
         assertEquals(DiscoverCategories.indexOf("PAGODA_NEWA"), vm.selectedCategory.value)
+    }
+
+    // --- Free-text search across name, meta, category and description -----
+
+    private val searchPlaces = listOf(
+        Place(
+            id = "kumbheshwar",
+            name = "Kumbheshwar",
+            description = "Five-tiered shrine to Shiva.",
+            meta = "Lalitpur • Temple",
+            category = "Religious"
+        ),
+        Place(
+            id = "patan-durbar",
+            name = "Patan Durbar Square",
+            description = "Royal palace complex of the Malla kings, rich in Newari woodcarving.",
+            meta = "Lalitpur • Historical Site",
+            category = "Historical",
+            typologies = listOf("DURBAR", "PAGODA")
+        ),
+        Place(
+            id = "pashupatinath",
+            name = "Pashupatinath",
+            description = "A sprawling temple complex on the Bagmati.",
+            meta = "Kathmandu • Pilgrimage",
+            category = "Spiritual"
+        ),
+        Place(
+            id = "golden-temple",
+            name = "Golden Temple",
+            description = "Buddhist monastery courtyard.",
+            meta = "Lalitpur • Monastery",
+            category = "Cultural"
+        )
+    )
+
+    private fun TestScope.resultsFor(query: String): List<String> {
+        val vm = DiscoverViewModel(FakePlaceRepository(searchPlaces), FakePreferencesStore())
+        vm.onQueryChange(query)
+        backgroundScope.launch { vm.sites.collect {} }
+        advanceUntilIdle()
+        assertTrue(vm.contentState.value is ContentState.Content)
+        return vm.sites.value.map { it.id }
+    }
+
+    @Test
+    fun `search matches place names`() = runTest {
+        assertEquals(listOf("patan-durbar"), resultsFor("patan"))
+    }
+
+    @Test
+    fun `search matches location in meta`() = runTest {
+        assertEquals(
+            setOf("kumbheshwar", "patan-durbar", "golden-temple"),
+            resultsFor("Lalitpur").toSet()
+        )
+    }
+
+    @Test
+    fun `search matches category`() = runTest {
+        assertEquals(listOf("kumbheshwar"), resultsFor("religious"))
+        assertEquals(listOf("pashupatinath"), resultsFor("spiritual"))
+    }
+
+    @Test
+    fun `search matches description`() = runTest {
+        assertEquals(listOf("patan-durbar"), resultsFor("newari"))
+        assertEquals(listOf("patan-durbar"), resultsFor("malla"))
+    }
+
+    @Test
+    fun `search matches heritage typology keys as words`() = runTest {
+        assertEquals(listOf("patan-durbar"), resultsFor("pagoda"))
+    }
+
+    @Test
+    fun `search ranks name matches before meta, category and description matches`() = runTest {
+        // Golden Temple is last in curated order but the only name match; the
+        // meta match (Kumbheshwar) beats the description match (Pashupatinath).
+        assertEquals(
+            listOf("golden-temple", "kumbheshwar", "pashupatinath"),
+            resultsFor("temple")
+        )
+    }
+
+    @Test
+    fun `search ignores case and surrounding or repeated whitespace`() = runTest {
+        assertEquals(listOf("patan-durbar"), resultsFor("  PATAN   durbar  "))
+    }
+
+    @Test
+    fun `blank query keeps curated order`() = runTest {
+        assertEquals(searchPlaces.map { it.id }, resultsFor("   "))
+    }
+
+    @Test
+    fun `search with no match returns nothing while content stays loaded`() = runTest {
+        assertEquals(emptyList<String>(), resultsFor("pokhara"))
+    }
+
+    @Test
+    fun `search combines with the active category filter`() = runTest {
+        val vm = DiscoverViewModel(FakePlaceRepository(searchPlaces), FakePreferencesStore())
+        vm.onCategorySelect(DiscoverCategories.indexOf("PAGODA_NEWA"))
+        vm.onQueryChange("lalitpur")
+        backgroundScope.launch { vm.sites.collect {} }
+        advanceUntilIdle()
+        assertEquals(listOf("patan-durbar"), vm.sites.value.map { it.id })
     }
 }
