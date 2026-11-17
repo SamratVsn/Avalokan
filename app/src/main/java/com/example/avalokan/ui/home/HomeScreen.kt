@@ -43,7 +43,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.ExploreOff
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Button
@@ -65,6 +64,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -78,6 +78,7 @@ import com.example.avalokan.domain.model.Story
 import com.example.avalokan.ui.common.ContentState
 import com.example.avalokan.ui.common.dataOrNull
 import com.example.avalokan.ui.common.placeBadgeLabel
+import com.example.avalokan.ui.common.placeCategoryTitle
 import com.example.avalokan.ui.components.HomeLoadingState
 import com.example.avalokan.ui.components.SkeletonBlock
 import com.example.avalokan.ui.components.StateMessage
@@ -103,6 +104,7 @@ fun AvalokanHome(
 ) {
     val placesState by viewModel.placesState.collectAsState()
     val heroStoryState by viewModel.heroStoryState.collectAsState()
+    val categories by viewModel.categories.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
 
     PullToRefreshBox(
@@ -113,6 +115,7 @@ fun AvalokanHome(
         HomeContent(
             heroStoryState = heroStoryState,
             placesState = placesState,
+            categories = categories,
             onStoryClick = onStoryClick,
             onPlaceClick = onPlaceClick,
             onExploreEventsClick = onExploreEventsClick,
@@ -127,6 +130,7 @@ fun AvalokanHome(
 private fun HomeContent(
     heroStoryState: ContentState<Story>,
     placesState: ContentState<List<Place>>,
+    categories: List<HomeCategory>,
     onStoryClick: (String) -> Unit,
     onPlaceClick: (String) -> Unit,
     onExploreEventsClick: () -> Unit,
@@ -174,23 +178,26 @@ private fun HomeContent(
                 onAction = onExploreEventsClick
             )
 
-            is ContentState.Content -> HistoricalGems(
-                places = placesState.data,
-                onPlaceClick = onPlaceClick,
-                onViewAllClick = { onViewAllCategoryClick("Historical") }
-            )
-        }
-        EventSuggestion(
-            modifier = Modifier.padding(horizontal = 24.dp),
-            onExploreClick = onExploreEventsClick
-        )
-        if (placesState is ContentState.Content && places.any { it.featured }) {
-            RecentDiscoveries(
-                modifier = Modifier.padding(horizontal = 24.dp),
-                places = places,
-                onPlaceClick = onPlaceClick,
-                onViewAllClick = onViewAllPlacesClick
-            )
+            is ContentState.Content -> {
+                ExploreCategories(
+                    categories = categories,
+                    onCategoryClick = onViewAllCategoryClick,
+                    onBrowseAllClick = onViewAllPlacesClick
+                )
+                HistoricalGems(
+                    places = placesState.data,
+                    onPlaceClick = onPlaceClick,
+                    onViewAllClick = { onViewAllCategoryClick("Historical") }
+                )
+                if (places.any { it.featured }) {
+                    EditorialPicks(
+                        modifier = Modifier.padding(horizontal = 24.dp),
+                        places = places,
+                        onPlaceClick = onPlaceClick,
+                        onViewAllClick = onViewAllPlacesClick
+                    )
+                }
+            }
         }
     }
 }
@@ -412,34 +419,50 @@ private fun StoryCard(
 }
 
 @Composable
+private fun SectionHeader(
+    title: String,
+    actionLabel: String,
+    onAction: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = actionLabel,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.clickable(onClick = onAction)
+        )
+    }
+}
+
+@Composable
 private fun HistoricalGems(
     places: List<Place>,
     onPlaceClick: (String) -> Unit = {},
     onViewAllClick: () -> Unit = {}
 ) {
+    val historical = places.filter { it.category.equals("Historical", ignoreCase = true) }
+    if (historical.isEmpty()) return
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.historicalGems),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = stringResource(R.string.viewAll),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.clickable(onClick = onViewAllClick)
-            )
-        }
+        SectionHeader(
+            title = stringResource(R.string.historicalGems),
+            actionLabel = stringResource(R.string.viewAll),
+            onAction = onViewAllClick,
+            modifier = Modifier.padding(horizontal = 24.dp)
+        )
         LazyRow(
             contentPadding = PaddingValues(horizontal = 24.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            val historical = places.filter { it.category == "Historical" }
             items(
                 count = historical.size,
                 key = { index -> historical[index].id }
@@ -477,8 +500,103 @@ private fun PlaceCard(
     )
 }
 
+/**
+ * Every category that has content, as a two-column grid. Deliberately not a
+ * carousel: this is the main breadth entry point, so all categories are visible
+ * without horizontal scrolling.
+ */
 @Composable
-private fun RecentDiscoveries(
+private fun ExploreCategories(
+    categories: List<HomeCategory>,
+    onCategoryClick: (String) -> Unit,
+    onBrowseAllClick: () -> Unit
+) {
+    if (categories.isEmpty()) return
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
+        SectionHeader(
+            title = stringResource(R.string.explore_by_category),
+            actionLabel = stringResource(R.string.viewAll),
+            onAction = onBrowseAllClick,
+            modifier = Modifier.padding(horizontal = 24.dp)
+        )
+        Column(
+            modifier = Modifier.padding(horizontal = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            categories.chunked(2).forEach { row ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    row.forEach { category ->
+                        CategoryTile(
+                            category = category,
+                            onClick = { onCategoryClick(category.name) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    if (row.size == 1) Spacer(Modifier.weight(1f))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CategoryTile(
+    category: HomeCategory,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier,
+        shape = StandardCardShape,
+        color = MaterialTheme.colorScheme.surfaceVariant
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth()
+                .clickable(onClick = onClick)
+                .padding(horizontal = 14.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = placeCategoryTitle(category.name),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = pluralStringResource(
+                        R.plurals.places_count,
+                        category.count,
+                        category.count
+                    ),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(14.dp)
+            )
+        }
+    }
+}
+
+/**
+ * Editorial picks, driven by the curator's `featured` flag. No ratings are
+ * shown: "featured" is an editorial decision, not a popularity score.
+ */
+@Composable
+private fun EditorialPicks(
     modifier: Modifier = Modifier,
     places: List<Place> = emptyList(),
     onPlaceClick: (String) -> Unit = {},
@@ -488,90 +606,21 @@ private fun RecentDiscoveries(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(Spacing.small)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Featured Suggestions",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = stringResource(R.string.viewAll),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.clickable(onClick = onViewAllClick)
-            )
-        }
+        SectionHeader(
+            title = stringResource(R.string.editorial_picks),
+            actionLabel = stringResource(R.string.viewAll),
+            onAction = onViewAllClick
+        )
         places.filter { it.featured }
             .forEach { place ->
                 com.example.avalokan.ui.components.HeritageCard(
                     title = place.name,
                     subtitle = place.meta.ifBlank { stringResource(R.string.no_location) },
                     badge = placeBadgeLabel(place),
-                    rating = place.sourcedRating,
-                    ratingSource = place.sourceLabel.ifBlank { place.sourceUrl },
                     imageUrl = place.imageUrl,
                     onCardClick = { onPlaceClick(place.id) }
                 )
             }
-    }
-}
-
-@Composable
-private fun EventSuggestion(
-    modifier: Modifier = Modifier,
-    onExploreClick: () -> Unit = {}
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = StandardCardShape,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
-    ) {
-        Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(
-                    text = stringResource(R.string.localED),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                )
-                Text(
-                    text = stringResource(R.string.joinEventDesc),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(Modifier.height(4.dp))
-                Button(
-                    onClick = onExploreClick,
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    ),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.exploreEB),
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    Icon(Icons.AutoMirrored.Filled.ArrowForward, null, Modifier.size(12.dp))
-                }
-            }
-            Surface(shape = StandardCardShape, color = MaterialTheme.colorScheme.surface, shadowElevation = 8.dp) {
-                Icon(
-                    Icons.Default.CalendarMonth,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.tertiary,
-                    modifier = Modifier.padding(12.dp).size(28.dp)
-                )
-            }
-        }
     }
 }
 
@@ -598,6 +647,10 @@ private fun HomeScreenPreview(){
                     Place("boudha-stupa", "Boudha Stupa", "Boudhanath • Spiritual Site.", "Boudhanath • Spiritual Site", "Cultural", "4.9"),
                     Place("bhaktapur-pottery", "Bhaktapur Pottery Square", "Bhaktapur • Craft Quarter.", "Bhaktapur • Craft Quarter", "Cultural", "4.7")
                 )
+            ),
+            categories = listOf(
+                HomeCategory("Historical", 2),
+                HomeCategory("Cultural", 2)
             ),
             onStoryClick = {},
             onPlaceClick = {},

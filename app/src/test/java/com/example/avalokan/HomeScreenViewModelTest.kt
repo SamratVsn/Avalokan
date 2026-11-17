@@ -23,7 +23,9 @@ package com.example.avalokan
 
 import app.cash.turbine.test
 import com.example.avalokan.ui.common.ContentState
+import com.example.avalokan.ui.home.HomeCategory
 import com.example.avalokan.ui.home.HomeScreenViewModel
+import com.example.avalokan.ui.home.categorySummaries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
@@ -114,5 +116,52 @@ class HomeScreenViewModelTest {
             assertEquals(ContentState.Empty, awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    // --- Explore by category ---------------------------------------------
+
+    @Test
+    fun `home categories group content by stored category`() = runTest {
+        val vm = viewModel()
+        vm.categories.test {
+            assertEquals(emptyList<HomeCategory>(), awaitItem())
+            advanceUntilIdle()
+            assertEquals(
+                listOf(HomeCategory("Historical", 1), HomeCategory("Cultural", 1)),
+                awaitItem()
+            )
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `categories keep reading order and merge case variants`() {
+        val base = TestPlaces.first()
+        val places = listOf(
+            base.copy(id = "1", category = "cultural"),
+            base.copy(id = "2", category = "Wellness"),
+            base.copy(id = "3", category = "Historical"),
+            base.copy(id = "4", category = "Historical"),
+            base.copy(id = "5", category = "Wellness"),
+            base.copy(id = "6", category = "Wellness")
+        )
+        assertEquals(
+            listOf(
+                HomeCategory("Historical", 2),
+                HomeCategory("Cultural", 1),
+                HomeCategory("Wellness", 3)
+            ),
+            places.categorySummaries()
+        )
+    }
+
+    @Test
+    fun `places without a category are not offered as an entry point`() {
+        val base = TestPlaces.first()
+        val places = listOf(
+            base.copy(id = "1", category = ""),
+            base.copy(id = "2", category = "   ")
+        )
+        assertTrue(places.categorySummaries().isEmpty())
     }
 }

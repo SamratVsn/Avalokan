@@ -11,6 +11,8 @@
     <string name="namaste">Namaste</string>
     <string name="explore">Explore Nepal</string>
     <string name="notifications">Notifications</string>
+    <string name="explore_by_category">Explore by category</string>
+    <string name="editorial_picks">Editor’s picks</string>
     <string name="storyOfTheDay">Story of the Day</string>
     <string name="readStory">Read Story</string>
     <string name="historicalGems">Historical Gems</string>

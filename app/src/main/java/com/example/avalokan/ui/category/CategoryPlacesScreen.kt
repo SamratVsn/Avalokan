@@ -60,6 +60,7 @@ import com.example.avalokan.R
 import com.example.avalokan.domain.model.Place
 import com.example.avalokan.ui.common.ContentState
 import com.example.avalokan.ui.common.placeBadgeLabel
+import com.example.avalokan.ui.common.placeCategoryTitle
 import com.example.avalokan.ui.components.DiscoverLoadingState
 import com.example.avalokan.ui.components.HeritageCard
 import com.example.avalokan.ui.components.StateMessage
@@ -79,7 +80,7 @@ fun CategoryPlacesScreen(
     val isRefreshing by viewModel.isRefreshing.collectAsState()
 
     CategoryPlacesContent(
-        title = categoryTitle(viewModel.category),
+        title = placeCategoryTitle(viewModel.category),
         category = viewModel.category,
         places = places,
         contentState = contentState,
@@ -92,23 +93,6 @@ fun CategoryPlacesScreen(
         onRetry = viewModel::retry,
         onBrowseAllClick = onBrowseAllClick
     )
-}
-
-@Composable
-private fun categoryTitle(category: String): String {
-    val titleRes = when (category.lowercase()) {
-        "historical" -> R.string.category_historical
-        "cultural" -> R.string.category_cultural
-        "spiritual" -> R.string.category_spiritual
-        "nature" -> R.string.category_nature
-        "adventure" -> R.string.category_adventure
-        else -> null
-    }
-    return if (titleRes != null) {
-        stringResource(titleRes)
-    } else {
-        category.ifBlank { stringResource(R.string.explore_places) }
-    }
 }
 
 @Composable
