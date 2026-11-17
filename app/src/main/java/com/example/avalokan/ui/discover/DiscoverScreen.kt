@@ -125,7 +125,12 @@ fun DiscoverScreen(
             onQuery = viewModel::onQueryChange,
             filters = DiscoverCategories,
             selected = selectedChip,
-            onSelect = viewModel::onCategorySelect,
+            // Chips are clickable, so they consume the tap before the screen's
+            // outside-tap handler sees it. Dismiss explicitly here.
+            onSelect = { index ->
+                dismissKeyboard()
+                viewModel.onCategorySelect(index)
+            },
             sites = sites,
             contentState = contentState,
             savedIds = savedIds,
@@ -142,8 +147,14 @@ fun DiscoverScreen(
             onRetry = viewModel::retry,
             availableCategories = availableCategories,
             recommended = recommended,
-            onClearQuery = viewModel::clearQuery,
-            onSuggestionSelect = viewModel::onSuggestionSelect,
+            onClearQuery = {
+                dismissKeyboard()
+                viewModel.clearQuery()
+            },
+            onSuggestionSelect = { label ->
+                dismissKeyboard()
+                viewModel.onSuggestionSelect(label)
+            },
             onExploreEventsClick = onExploreEventsClick
         )
     }
