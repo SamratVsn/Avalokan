@@ -26,7 +26,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.avalokan.data.local.PreferencesStore
 import com.example.avalokan.domain.model.Place
+import com.example.avalokan.domain.model.Story
 import com.example.avalokan.domain.repository.PlaceRepository
+import com.example.avalokan.domain.repository.StoryRepository
 import com.example.avalokan.ui.common.ContentState
 import com.example.avalokan.ui.common.asItemContentState
 import com.example.avalokan.ui.navigation.NavDestination
@@ -37,14 +39,23 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/** Connected content resolved for one place: explicit links only. */
+data class PlaceRelatedContent(
+    val places: List<Place> = emptyList(),
+    val stories: List<Story> = emptyList()
+)
+
 @HiltViewModel
 class PlaceDetailViewModel @Inject constructor(
     private val placeRepository: PlaceRepository,
+    private val storyRepository: StoryRepository,
     private val userPreferences: PreferencesStore,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -66,6 +77,31 @@ class PlaceDetailViewModel @Inject constructor(
 
     val visitedIds: StateFlow<Set<String>> = userPreferences.visitedPlaceIds
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
+
+    /**
+     * Related content comes from recorded links only: `relatedPlaceIds` on the
+     * place and `placeIds` on stories. No proximity or similarity is inferred,
+     * so an empty result is the honest answer when nothing is linked.
+     *
+     * A failure in either stream must not take the whole detail page down, so
+     * each side degrades to an empty list.
+     */
+    val relatedContent: StateFlow<PlaceRelatedContent> = combine(
+        placeRepository.observePlaces().catch { emit(emptyList()) },
+        storyRepository.observeStories().catch { emit(emptyList()) }
+    ) { places, stories ->
+        val place = places.firstOrNull { it.id == placeId }
+        val relatedIds = place?.relatedPlaceIds.orEmpty()
+            .filter { it.isNotBlank() && it != placeId }
+        PlaceRelatedContent(
+            places = relatedIds.mapNotNull { id -> places.firstOrNull { it.id == id } },
+            stories = stories.filter { placeId in it.placeIds }
+        )
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5_000),
+        PlaceRelatedContent()
+    )
 
     private val _events = MutableSharedFlow<PlaceDetailEvent>()
     val events: SharedFlow<PlaceDetailEvent> = _events.asSharedFlow()

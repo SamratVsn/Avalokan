@@ -23,6 +23,8 @@ package com.example.avalokan
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
+import com.example.avalokan.domain.model.Place
+import com.example.avalokan.domain.model.Story
 import com.example.avalokan.ui.common.ContentState
 import com.example.avalokan.ui.detail.PlaceDetailViewModel
 import com.example.avalokan.ui.navigation.NavDestination
@@ -66,8 +68,10 @@ class PlaceDetailViewModelTest {
         prefs: FakePreferencesStore,
         placeId: String = "kathmandu-durbar",
         repository: FakePlaceRepository = FakePlaceRepository(),
+        stories: FakeStoryRepository = FakeStoryRepository(),
     ) = PlaceDetailViewModel(
         repository,
+        stories,
         prefs,
         SavedStateHandle(mapOf(NavDestination.PlaceDetail.ARG to placeId)),
     )
@@ -137,5 +141,82 @@ class PlaceDetailViewModelTest {
         }
 
         assertTrue(prefs.visitedPlaceIds.first().isEmpty())
+    }
+
+    @Test
+    fun `related places follow recorded ids and skip unresolvable ones`() = runTest {
+        val host = Place(
+            id = "kathmandu-durbar",
+            name = "Kathmandu Durbar Square",
+            description = "",
+            relatedPlaceIds = listOf("patan-durbar", "missing", "kathmandu-durbar")
+        )
+        val patan = Place(id = "patan-durbar", name = "Patan Durbar Square", description = "")
+        val vm = viewModel(
+            FakePreferencesStore(),
+            repository = FakePlaceRepository(listOf(host, patan))
+        )
+
+        vm.relatedContent.test {
+            skipItems(1) // initial empty state
+            val related = awaitItem()
+            assertEquals(listOf("patan-durbar"), related.places.map { it.id })
+            assertTrue(related.stories.isEmpty())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `only stories that reference this place are related`() = runTest {
+        val host = Place(
+            id = "kathmandu-durbar",
+            name = "Kathmandu Durbar Square",
+            description = ""
+        )
+        val linked = Story(
+            id = "durbar-story",
+            title = "The Living Square",
+            placeIds = listOf("kathmandu-durbar")
+        )
+        val unrelated = Story(
+            id = "other-story",
+            title = "Elsewhere",
+            placeIds = listOf("patan-durbar")
+        )
+        val vm = viewModel(
+            FakePreferencesStore(),
+            repository = FakePlaceRepository(listOf(host)),
+            stories = FakeStoryRepository(listOf(linked, unrelated))
+        )
+
+        vm.relatedContent.test {
+            skipItems(1)
+            val related = awaitItem()
+            assertEquals(listOf("durbar-story"), related.stories.map { it.id })
+            assertTrue(related.places.isEmpty())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `no recorded links means no related content`() = runTest {
+        val host = Place(
+            id = "kathmandu-durbar",
+            name = "Kathmandu Durbar Square",
+            description = ""
+        )
+        val vm = viewModel(
+            FakePreferencesStore(),
+            repository = FakePlaceRepository(listOf(host)),
+            stories = FakeStoryRepository(emptyList())
+        )
+
+        vm.relatedContent.test {
+            val related = awaitItem()
+            assertTrue(related.places.isEmpty())
+            assertTrue(related.stories.isEmpty())
+            expectNoEvents()
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 }

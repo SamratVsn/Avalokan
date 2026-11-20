@@ -175,6 +175,8 @@ fun AvalokanNavHost(
         ) {
             PlaceDetailScreen(
                 onBackClick = { navController.navigateUp() },
+                onPlaceClick = { id -> navController.navigate(PlaceDetail.createRoute(id)) },
+                onStoryClick = { id -> navController.navigate(StoryDetail.createRoute(id)) },
             )
         }
 

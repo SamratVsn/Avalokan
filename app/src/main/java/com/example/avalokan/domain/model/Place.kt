@@ -181,6 +181,14 @@ data class Place(
             .joinToString(" • ")
 
     /**
+     * The best region line available for prose and the detail hero. Structured
+     * district/province wins; otherwise fall back to the audited locality so a
+     * place is never shown without its part of Nepal when that is known.
+     */
+    val displayRegion: String
+        get() = regionLabel.ifBlank { locality.trim() }
+
+    /**
      * The short line a comparison card shows. Significance is editorial context
      * written for exactly this purpose; description is the fallback for older
      * documents that predate the field.

@@ -40,6 +40,9 @@ class PlaceProvenanceTest {
         sourceUrl: String = "",
         lastVerifiedAt: String = "",
         verificationStatus: String = "",
+        district: String = "",
+        province: String = "",
+        locality: String = "",
     ) = Place(
         id = "kathmandu-durbar",
         name = "Kathmandu Durbar Square",
@@ -47,11 +50,33 @@ class PlaceProvenanceTest {
         rating = rating,
         entryFee = "Rs. 1,000",
         hours = "9 AM – 5 PM",
+        district = district,
+        province = province,
+        locality = locality,
         sourceLabel = sourceLabel,
         sourceUrl = sourceUrl,
         lastVerifiedAt = lastVerifiedAt,
         verificationStatus = verificationStatus,
     )
+
+    @Test
+    fun `display region prefers district and province`() {
+        val subject = place(district = "Kathmandu", province = "Bagmati", locality = "Old city")
+
+        assertEquals("Kathmandu • Bagmati", subject.displayRegion)
+    }
+
+    @Test
+    fun `display region falls back to locality when structured fields are missing`() {
+        val subject = place(locality = "Bhaktapur")
+
+        assertEquals("Bhaktapur", subject.displayRegion)
+    }
+
+    @Test
+    fun `display region stays blank when nothing is recorded`() {
+        assertEquals("", place().displayRegion)
+    }
 
     @Test
     fun `rating without a source is not publishable`() {
