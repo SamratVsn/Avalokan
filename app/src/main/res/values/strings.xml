@@ -150,6 +150,37 @@
     <string name="go_to_booking_page">Go to booking page</string>
     <string name="booking_unavailable">Booking page not available</string>
 
+    <!-- Place detail -->
+    <string name="place_why_it_matters">Why it matters</string>
+    <string name="place_about">About this place</string>
+    <string name="place_about_living">About this living heritage site</string>
+    <string name="place_practical_info">Practical information</string>
+    <string name="place_visitor_info">Visitor information</string>
+    <string name="place_entry_fee">Entry fee</string>
+    <string name="place_best_time">Best time</string>
+    <string name="place_hours">Hours</string>
+    <string name="place_accessibility">Accessibility</string>
+    <string name="place_living_heritage_title">Living heritage</string>
+    <string name="place_living_heritage_body">This is an active site, not a museum exhibit. Worship, festivals and daily community life continue here.</string>
+    <string name="place_visit_respectfully">Visit respectfully</string>
+    <string name="place_etiquette">Etiquette</string>
+    <string name="place_location">Location</string>
+    <string name="place_region">Region</string>
+    <string name="place_coordinates">%1$s, %2$s</string>
+    <string name="place_map_preview">Map preview</string>
+    <string name="place_open_in_maps">Open in Maps</string>
+    <string name="place_related_story">Related story</string>
+    <string name="place_related_stories">Related stories</string>
+    <string name="place_connected_places">Connected places</string>
+    <string name="place_read_story">Read story</string>
+    <string name="place_directions">Get directions</string>
+    <string name="place_share">Share this place</string>
+    <string name="place_save">Save to Collection</string>
+    <string name="place_saved">Saved ✓</string>
+    <string name="place_saved_snackbar">Saved to Collection</string>
+    <string name="place_share_text">Check out %1$s on Avalokan.</string>
+    <string name="place_rating_sourced">%1$s ★</string>
+
     <!-- Heritage taxonomy: Discover filters -->
     <string name="filter_all">All</string>
     <string name="heritage_pagoda_newa">Pagoda &amp; Newa Architecture</string>
