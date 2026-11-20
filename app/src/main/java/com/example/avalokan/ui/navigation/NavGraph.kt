@@ -53,11 +53,13 @@ import com.example.avalokan.ui.navigation.NavDestination.Events
 import com.example.avalokan.ui.navigation.NavDestination.Login
 import com.example.avalokan.ui.navigation.NavDestination.PlaceDetail
 import com.example.avalokan.ui.navigation.NavDestination.Profile
+import com.example.avalokan.ui.navigation.NavDestination.SavedPlaces
 import com.example.avalokan.ui.navigation.NavDestination.Settings
 import com.example.avalokan.ui.navigation.NavDestination.StoryDetail
 import com.example.avalokan.ui.profile.EditProfileScreen
 import com.example.avalokan.ui.profile.ProfileScreen
 import com.example.avalokan.ui.profile.ProfileViewModel
+import com.example.avalokan.ui.profile.SavedPlacesScreen
 import com.example.avalokan.ui.settings.SettingsScreen
 import com.example.avalokan.ui.settings.SettingsViewModel
 
@@ -114,8 +116,20 @@ fun AvalokanNavHost(
         composable(route = Profile.route){
             ProfileScreen(
                 onSettingsClick = { navController.navigate(Settings.route) },
+                onEditProfileClick = { navController.navigate(EditProfile.route) },
+                onSeeAllSavedClick = { navController.navigate(SavedPlaces.route) },
+                onPlaceClick = { id -> navController.navigate(PlaceDetail.createRoute(id)) },
+                onEventClick = { id -> navController.navigate(EventDetail.createRoute(id)) },
                 onDiscoverClick = { navController.navigateTab(Discover.route) },
                 onEventsClick = { navController.navigateTab(Events.route) }
+            )
+        }
+
+        composable(route = SavedPlaces.route) {
+            SavedPlacesScreen(
+                onBackClick = { navController.navigateUp() },
+                onPlaceClick = { id -> navController.navigate(PlaceDetail.createRoute(id)) },
+                onDiscoverClick = { navController.navigateTab(Discover.route) }
             )
         }
 

@@ -106,11 +106,19 @@ class ProfileViewModel @Inject constructor(
     ) { local, remote -> local?.takeIf { it.isNotBlank() } ?: remote?.avatarUrl }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
+    val savedIds: StateFlow<Set<String>> = userPreferences.savedPlaceIds
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
+
+    /**
+     * Every saved place that still exists in the catalogue, most recently
+     * saved first. Ids whose place was removed are neither shown nor counted.
+     */
     val savedPlaces: StateFlow<List<Place>> = combine(
         placeRepository.observePlaces(),
         userPreferences.savedPlaceIds
     ) { remote, ids ->
-        ids.mapNotNull { id -> remote.find { it.id == id } }
+        val byId = remote.associateBy { it.id }
+        ids.reversed().mapNotNull { byId[it] }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val favoriteEvents: StateFlow<List<Event>> = combine(
@@ -128,7 +136,8 @@ class ProfileViewModel @Inject constructor(
         placeRepository.observePlaces(),
         userPreferences.visitedPlaceIds
     ) { remote, ids ->
-        ids.mapNotNull { id -> remote.find { it.id == id } }
+        val byId = remote.associateBy { it.id }
+        ids.reversed().mapNotNull { byId[it] }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     /**
@@ -159,6 +168,12 @@ class ProfileViewModel @Inject constructor(
             }
             userPreferences.setAvatarLocalUri(localUri)
         }
+    }
+
+    fun toggleSave(placeId: String) {
+        val current = savedIds.value.toMutableSet()
+        if (!current.add(placeId)) current.remove(placeId)
+        viewModelScope.launch { userPreferences.setSavedPlaceIds(current) }
     }
 
     fun updateName(name: String) {

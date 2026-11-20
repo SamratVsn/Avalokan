@@ -123,6 +123,13 @@
     <string name="saved_places_empty_hint">Tap the bookmark on any heritage site to keep it here.</string>
     <string name="favorite_events_empty_title">No favorite events yet</string>
     <string name="favorite_events_empty_hint">Tap the heart on any event to keep it here.</string>
+    <string name="visitedPlaces">Visited Places</string>
+    <string name="visited_places_empty">No visited places yet</string>
+    <string name="visited_places_empty_hint">Open any place and tap “Mark as visited” to build your history.</string>
+    <string name="saved_place_removed">Removed %1$s from saved places</string>
+    <string name="undo">Undo</string>
+    <string name="profile_settings_hint">Theme, notifications and account</string>
+    <string name="profile_photo">Profile photo</string>
 
     <!-- Missing content notices -->
     <string name="not_available">Not available</string>

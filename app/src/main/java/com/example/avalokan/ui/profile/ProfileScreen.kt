@@ -26,6 +26,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,23 +35,30 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.BookmarkBorder
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Landscape
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -70,14 +78,27 @@ import coil.compose.AsyncImage
 import com.example.avalokan.R
 import com.example.avalokan.domain.model.Event
 import com.example.avalokan.domain.model.Place
-import androidx.compose.material.icons.filled.CalendarMonth
+import com.example.avalokan.ui.components.PlaceComparisonCard
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.Spacing
 import com.example.avalokan.ui.theme.StandardCardShape
 
+/** Width of a place card inside a horizontal Profile shelf. */
+private val ShelfCardWidth = 272.dp
+
+/**
+ * The user's personal exploration space: identity, then everything they chose
+ * to keep — saved places, places they marked as visited, favorite events —
+ * each linking back to its detail screen. Every count is derived from the same
+ * lists shown below it. No social or public-profile features.
+ */
 @Composable
 fun ProfileScreen(
     onSettingsClick: () -> Unit = {},
+    onEditProfileClick: () -> Unit = {},
+    onSeeAllSavedClick: () -> Unit = {},
+    onPlaceClick: (String) -> Unit = {},
+    onEventClick: (String) -> Unit = {},
     onDiscoverClick: () -> Unit = {},
     onEventsClick: () -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel()
@@ -87,6 +108,8 @@ fun ProfileScreen(
     val stats by viewModel.stats.collectAsState()
     val avatarUri by viewModel.avatarUri.collectAsState()
     val savedPlaces by viewModel.savedPlaces.collectAsState()
+    val savedIds by viewModel.savedIds.collectAsState()
+    val visitedPlaces by viewModel.visitedPlaces.collectAsState()
     val favoriteEvents by viewModel.favoriteEvents.collectAsState()
 
     ProfileContent(
@@ -95,8 +118,15 @@ fun ProfileScreen(
         stats = stats,
         avatarUri = avatarUri,
         savedPlaces = savedPlaces,
+        savedIds = savedIds,
+        visitedPlaces = visitedPlaces,
         favoriteEvents = favoriteEvents,
         onSettingsClick = onSettingsClick,
+        onEditProfileClick = onEditProfileClick,
+        onSeeAllSavedClick = onSeeAllSavedClick,
+        onPlaceClick = onPlaceClick,
+        onToggleSave = viewModel::toggleSave,
+        onEventClick = onEventClick,
         onDiscoverClick = onDiscoverClick,
         onEventsClick = onEventsClick
     )
@@ -109,8 +139,15 @@ private fun ProfileContent(
     stats: ProfileStats,
     avatarUri: String?,
     savedPlaces: List<Place>,
+    savedIds: Set<String>,
+    visitedPlaces: List<Place>,
     favoriteEvents: List<Event>,
     onSettingsClick: () -> Unit,
+    onEditProfileClick: () -> Unit,
+    onSeeAllSavedClick: () -> Unit,
+    onPlaceClick: (String) -> Unit,
+    onToggleSave: (String) -> Unit,
+    onEventClick: (String) -> Unit,
     onDiscoverClick: () -> Unit,
     onEventsClick: () -> Unit
 ) {
@@ -154,12 +191,41 @@ private fun ProfileContent(
             bio = bio,
             stats = stats,
             avatarUri = avatarUri,
+            onEditProfileClick = onEditProfileClick,
             modifier = Modifier.padding(horizontal = 24.dp)
         )
-        HeritageCollection(savedPlaces = savedPlaces, onDiscoverClick = onDiscoverClick)
+        PlaceShelf(
+            title = stringResource(R.string.savedPlaces),
+            places = savedPlaces,
+            savedIds = savedIds,
+            onSeeAllClick = onSeeAllSavedClick,
+            onPlaceClick = onPlaceClick,
+            onToggleSave = onToggleSave,
+            emptyIcon = Icons.Default.BookmarkBorder,
+            emptyTitle = stringResource(R.string.saved_places_empty),
+            emptyMessage = stringResource(R.string.saved_places_empty_hint),
+            onEmptyAction = onDiscoverClick
+        )
+        PlaceShelf(
+            title = stringResource(R.string.visitedPlaces),
+            places = visitedPlaces,
+            savedIds = savedIds,
+            onSeeAllClick = null,
+            onPlaceClick = onPlaceClick,
+            onToggleSave = onToggleSave,
+            emptyIcon = Icons.Default.Place,
+            emptyTitle = stringResource(R.string.visited_places_empty),
+            emptyMessage = stringResource(R.string.visited_places_empty_hint),
+            onEmptyAction = onDiscoverClick
+        )
         FavoriteEvents(
             favoriteEvents = favoriteEvents,
+            onEventClick = onEventClick,
             onEventsClick = onEventsClick,
+            modifier = Modifier.padding(horizontal = 24.dp)
+        )
+        SettingsEntry(
+            onClick = onSettingsClick,
             modifier = Modifier.padding(horizontal = 24.dp)
         )
     }
@@ -171,6 +237,7 @@ private fun UserSection(
     bio: String,
     stats: ProfileStats,
     avatarUri: String?,
+    onEditProfileClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -185,47 +252,30 @@ private fun UserSection(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            Box(contentAlignment = Alignment.BottomEnd) {
-                Surface(
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surface,
-                    shadowElevation = 4.dp,
-                    border = BorderStroke(
-                        2.dp,
-                        MaterialTheme.colorScheme.outlineVariant
+            Surface(
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.surface,
+                shadowElevation = 4.dp,
+                border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
+            ) {
+                if (avatarUri != null) {
+                    AsyncImage(
+                        model = avatarUri,
+                        contentDescription = stringResource(R.string.profile_photo),
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.size(72.dp).clip(CircleShape)
                     )
-                ) {
-                    if (avatarUri != null) {
-                        AsyncImage(
-                            model = avatarUri,
-                            contentDescription = "Profile photo",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.size(72.dp).clip(CircleShape)
+                } else {
+                    Box(
+                        modifier = Modifier.size(72.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = userName.firstOrNull()?.uppercase() ?: "G",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MaterialTheme.colorScheme.primary
                         )
-                    } else {
-                        Box(
-                            modifier = Modifier.size(72.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = userName.firstOrNull()?.uppercase() ?: "G",
-                                style = MaterialTheme.typography.headlineMedium,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
                     }
-                }
-                Surface(
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.padding(bottom = 4.dp, end = 4.dp)
-                ) {
-                    Icon(
-                        Icons.Default.Check,
-                        null,
-                        modifier = Modifier.padding(4.dp).size(12.dp)
-                    )
                 }
             }
             Spacer(Modifier.height(12.dp))
@@ -240,7 +290,17 @@ private fun UserSection(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.78f)
             )
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(12.dp))
+            FilledTonalButton(onClick = onEditProfileClick) {
+                Icon(
+                    Icons.Default.Edit,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(Modifier.width(6.dp))
+                Text(stringResource(R.string.editProfile))
+            }
+            Spacer(Modifier.height(12.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
@@ -273,52 +333,53 @@ private fun UserSectionInfo(number: Int, text: String) {
     }
 }
 
+/**
+ * A titled, horizontally scrolling shelf of every place in [places], using the
+ * same [PlaceComparisonCard] as Discover and the category listing.
+ */
 @Composable
-private fun HeritageCollection(
-    savedPlaces: List<Place>,
-    onDiscoverClick: () -> Unit
+private fun PlaceShelf(
+    title: String,
+    places: List<Place>,
+    savedIds: Set<String>,
+    onSeeAllClick: (() -> Unit)?,
+    onPlaceClick: (String) -> Unit,
+    onToggleSave: (String) -> Unit,
+    emptyIcon: ImageVector,
+    emptyTitle: String,
+    emptyMessage: String,
+    onEmptyAction: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.savedPlaces),
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text(
-                text = stringResource(R.string.manage),
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-        if (savedPlaces.isEmpty()) {
+        SectionHeader(
+            title = title,
+            count = places.size,
+            actionLabel = stringResource(R.string.manage),
+            onAction = onSeeAllClick?.takeIf { places.isNotEmpty() },
+            modifier = Modifier.padding(horizontal = 24.dp)
+        )
+        if (places.isEmpty()) {
             EmptyCollectionCard(
-                icon = Icons.Default.BookmarkBorder,
-                title = stringResource(R.string.saved_places_empty),
-                message = stringResource(R.string.saved_places_empty_hint),
+                icon = emptyIcon,
+                title = emptyTitle,
+                message = emptyMessage,
                 actionLabel = stringResource(R.string.discover_places),
-                onAction = onDiscoverClick,
+                onAction = onEmptyAction,
                 modifier = Modifier.padding(horizontal = 24.dp)
             )
         } else {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 24.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                savedPlaces.take(2).forEach { place ->
-                    CollectionCards(
-                        place.name.ifBlank { stringResource(R.string.untitled) },
-                        place.meta.substringBefore("•").trim()
-                            .ifBlank { stringResource(R.string.no_location) },
-                        modifier = Modifier.weight(1f)
+                items(places, key = { it.id }) { place ->
+                    PlaceComparisonCard(
+                        place = place,
+                        isSaved = place.id in savedIds,
+                        onSaveClick = { onToggleSave(place.id) },
+                        onClick = { onPlaceClick(place.id) },
+                        modifier = Modifier.width(ShelfCardWidth).animateItem()
                     )
-                }
-                if (savedPlaces.size == 1) {
-                    Spacer(modifier = Modifier.weight(1f))
                 }
             }
         }
@@ -326,54 +387,56 @@ private fun HeritageCollection(
 }
 
 @Composable
-private fun CollectionCards(place: String, loc: String, modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+private fun SectionHeader(
+    title: String,
+    count: Int,
+    actionLabel: String,
+    onAction: (() -> Unit)?,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth().height(40.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Card(shape = RoundedCornerShape(28.dp)) {
-            Box(
-                modifier = Modifier.fillMaxWidth().height(150.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Default.Landscape,
-                    null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(text = title, style = MaterialTheme.typography.titleMedium)
+            if (count > 0) {
+                Text(
+                    text = "$count",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
-        Text(
-            text = place,
-            style = MaterialTheme.typography.titleMedium.copy(fontSize = 14.sp),
-            fontWeight = FontWeight.Bold,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        Text(
-            text = loc,
-            style = MaterialTheme.typography.bodyMedium.copy(
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Normal
-            ),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+        if (onAction != null) {
+            TextButton(onClick = onAction) {
+                Text(
+                    text = actionLabel,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
     }
 }
 
 @Composable
 private fun FavoriteEvents(
     favoriteEvents: List<Event>,
+    onEventClick: (String) -> Unit,
     onEventsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(
-            text = stringResource(R.string.favoriteEvents),
-            style = MaterialTheme.typography.titleMedium
+        SectionHeader(
+            title = stringResource(R.string.favoriteEvents),
+            count = favoriteEvents.size,
+            actionLabel = stringResource(R.string.browse_events),
+            onAction = onEventsClick.takeIf { favoriteEvents.isNotEmpty() }
         )
         if (favoriteEvents.isEmpty()) {
             EmptyCollectionCard(
@@ -385,15 +448,16 @@ private fun FavoriteEvents(
             )
         } else {
             favoriteEvents.forEach { event ->
-                FavoriteEventRow(event)
+                FavoriteEventRow(event = event, onClick = { onEventClick(event.id) })
             }
         }
     }
 }
 
 @Composable
-private fun FavoriteEventRow(event: Event) {
+private fun FavoriteEventRow(event: Event, onClick: () -> Unit) {
     Card(
+        onClick = onClick,
         shape = StandardCardShape,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
@@ -409,11 +473,20 @@ private fun FavoriteEventRow(event: Event) {
                     .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    Icons.Default.CalendarMonth,
-                    null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                if (event.imageUrl != null) {
+                    AsyncImage(
+                        model = event.imageUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Icon(
+                        Icons.Default.CalendarMonth,
+                        null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
@@ -437,6 +510,58 @@ private fun FavoriteEventRow(event: Event) {
                     color = MaterialTheme.colorScheme.primary
                 )
             }
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun SettingsEntry(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Card(
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth(),
+        shape = StandardCardShape,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier.size(44.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Default.Settings,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    text = stringResource(R.string.settings),
+                    style = MaterialTheme.typography.titleMedium.copy(fontSize = 14.sp),
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = stringResource(R.string.profile_settings_hint),
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 12.sp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -521,8 +646,15 @@ private fun ProfilePreview() {
             stats = ProfileStats(),
             avatarUri = null,
             savedPlaces = emptyList(),
+            savedIds = emptySet(),
+            visitedPlaces = emptyList(),
             favoriteEvents = emptyList(),
             onSettingsClick = {},
+            onEditProfileClick = {},
+            onSeeAllSavedClick = {},
+            onPlaceClick = {},
+            onToggleSave = {},
+            onEventClick = {},
             onDiscoverClick = {},
             onEventsClick = {}
         )

@@ -58,6 +58,12 @@ sealed interface NavDestination {
         override val titleRes = R.string.editProfile
     }
 
+    /** Full list of saved places, reached from Profile's "See all". */
+    data object SavedPlaces : NavDestination {
+        override val route = "saved_places"
+        override val titleRes = R.string.savedPlaces
+    }
+
     data object EventDetail : NavDestination {
         const val ARG = "eventId"
         override val route = "event_detail/{eventId}"
