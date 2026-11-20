@@ -21,8 +21,10 @@
 
 package com.example.avalokan
 
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.example.avalokan.domain.model.Place
+import com.example.avalokan.domain.model.PlaceSort
 import com.example.avalokan.ui.common.ContentState
 import com.example.avalokan.ui.discover.DiscoverCategories
 import com.example.avalokan.ui.discover.DiscoverViewModel
@@ -374,5 +376,69 @@ class DiscoverViewModelTest {
         backgroundScope.launch { vm.sites.collect {} }
         advanceUntilIdle()
         assertEquals(listOf("patan-durbar"), vm.sites.value.map { it.id })
+    }
+
+    @Test
+    fun `sort reorders matches without changing which places match`() = runTest {
+        val places = listOf(
+            Place(id = "lumbini", name = "Lumbini Garden", description = ""),
+            Place(id = "kathmandu", name = "Kathmandu Durbar Square", description = ""),
+            Place(id = "bhaktapur", name = "Bhaktapur Durbar Square", description = "")
+        )
+        val vm = DiscoverViewModel(FakePlaceRepository(places), FakePreferencesStore())
+        vm.sites.test {
+            skipItems(1)
+            assertEquals(
+                listOf("lumbini", "kathmandu", "bhaktapur"),
+                awaitItem().map { it.id }
+            )
+            vm.onSortChange(PlaceSort.NAME)
+            assertEquals(
+                listOf("bhaktapur", "kathmandu", "lumbini"),
+                awaitItem().map { it.id }
+            )
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `sort applies after the category filter`() = runTest {
+        val places = listOf(
+            Place(
+                id = "lumbini-garden",
+                name = "Lumbini Garden",
+                description = "",
+                typologies = listOf("BUDDHIST_SACRED_SITE")
+            ),
+            Place(
+                id = "kathmandu-durbar",
+                name = "Kathmandu Durbar Square",
+                description = "",
+                typologies = listOf("DURBAR")
+            )
+        )
+        val vm = DiscoverViewModel(FakePlaceRepository(places), FakePreferencesStore())
+        vm.sites.test {
+            skipItems(1)
+            awaitItem()
+            vm.onSortChange(PlaceSort.NAME)
+            assertEquals(
+                listOf("kathmandu-durbar", "lumbini-garden"),
+                awaitItem().map { it.id }
+            )
+            vm.onCategorySelect(DiscoverCategories.indexOf("STUPA_MONASTERY"))
+            assertEquals(listOf("lumbini-garden"), awaitItem().map { it.id })
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `sort survives a new view model sharing the same saved state`() = runTest {
+        val handle = SavedStateHandle()
+        val first = DiscoverViewModel(FakePlaceRepository(), FakePreferencesStore(), handle)
+        first.onSortChange(PlaceSort.UNESCO)
+
+        val restored = DiscoverViewModel(FakePlaceRepository(), FakePreferencesStore(), handle)
+        assertEquals(PlaceSort.UNESCO, restored.sort.value)
     }
 }

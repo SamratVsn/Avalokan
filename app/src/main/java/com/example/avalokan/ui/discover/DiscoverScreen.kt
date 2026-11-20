@@ -70,20 +70,21 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
 import com.example.avalokan.domain.model.Place
+import com.example.avalokan.domain.model.PlaceSort
 import com.example.avalokan.ui.common.ContentState
 import com.example.avalokan.ui.common.KeyboardBackHandling
 import com.example.avalokan.ui.common.dismissKeyboardOnScroll
 import com.example.avalokan.ui.common.dismissKeyboardOnTap
 import com.example.avalokan.ui.common.rememberKeyboardDismisser
 import com.example.avalokan.ui.components.DiscoverLoadingState
+import com.example.avalokan.ui.components.PlaceComparisonCard
+import com.example.avalokan.ui.components.PlaceSortControl
 import com.example.avalokan.ui.components.StateMessage
 import com.example.avalokan.ui.common.heritageFilterHelpRes
 import com.example.avalokan.ui.common.heritageFilterLabel
-import com.example.avalokan.ui.common.placeBadgeLabel
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
 import com.example.avalokan.ui.theme.Spacing
@@ -98,6 +99,7 @@ fun DiscoverScreen(
 ) {
     val query by viewModel.query.collectAsState()
     val selectedChip by viewModel.selectedCategory.collectAsState()
+    val sort by viewModel.sort.collectAsState()
     val sites by viewModel.sites.collectAsState()
     val contentState by viewModel.contentState.collectAsState()
     val savedIds by viewModel.savedIds.collectAsState()
@@ -131,6 +133,8 @@ fun DiscoverScreen(
                 dismissKeyboard()
                 viewModel.onCategorySelect(index)
             },
+            sort = sort,
+            onSortChange = viewModel::onSortChange,
             sites = sites,
             contentState = contentState,
             savedIds = savedIds,
@@ -167,6 +171,8 @@ private fun DiscoverContent(
     filters: List<String>,
     selected: Int,
     onSelect: (Int) -> Unit,
+    sort: PlaceSort,
+    onSortChange: (PlaceSort) -> Unit,
     sites: List<Place>,
     contentState: ContentState<List<Place>>,
     savedIds: Set<String>,
@@ -212,6 +218,8 @@ private fun DiscoverContent(
         Suggestions(
             filters = filters, selected = selected,
             onSelect = onSelect,
+            sort = sort,
+            onSortChange = onSortChange,
             query = query,
             sites = sites,
             contentState = contentState,
@@ -294,6 +302,8 @@ private fun Suggestions(
     filters: List<String>,
     selected: Int,
     onSelect: (Int) -> Unit,
+    sort: PlaceSort,
+    onSortChange: (PlaceSort) -> Unit,
     query: String,
     sites: List<Place>,
     contentState: ContentState<List<Place>>,
@@ -360,6 +370,14 @@ private fun Suggestions(
                 modifier = Modifier.padding(horizontal = 24.dp)
             )
         }
+        if (contentState is ContentState.Content) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
+                PlaceSortControl(sort = sort, onSortChange = onSortChange)
+            }
+        }
         when (contentState) {
             ContentState.Loading -> DiscoverLoadingState()
 
@@ -390,11 +408,11 @@ private fun Suggestions(
                 ) {
                     ResultCount(count = sites.size, query = query)
                     sites.forEach { site ->
-                        SearchPlaceCard(
+                        PlaceComparisonCard(
                             place = site,
                             isSaved = savedIds.contains(site.id),
                             onSaveClick = { onToggleSave(site.id) },
-                            onCardClick = { onPlaceClick(site.id) }
+                            onClick = { onPlaceClick(site.id) }
                         )
                     }
                 }
@@ -477,41 +495,14 @@ private fun PopularNow(
             modifier = Modifier.padding(top = 4.dp)
         )
         places.forEach { place ->
-            SearchPlaceCard(
+            PlaceComparisonCard(
                 place = place,
                 isSaved = savedIds.contains(place.id),
                 onSaveClick = { onToggleSave(place.id) },
-                onCardClick = { onPlaceClick(place.id) }
+                onClick = { onPlaceClick(place.id) }
             )
         }
     }
-}
-
-@Composable
-private fun SearchPlaceCard(
-    place: Place,
-    isSaved: Boolean = false,
-    onSaveClick: () -> Unit = {},
-    onCardClick: () -> Unit = {}
-) {
-    val classificationBadge = placeBadgeLabel(place)
-    com.example.avalokan.ui.components.HeritageCard(
-        title = place.name,
-        subtitle = place.meta.ifBlank { stringResource(R.string.no_location) }.uppercase(),
-        subtitleStyle = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
-        badge = classificationBadge,
-        rating = place.sourcedRating,
-        ratingSource = place.sourceLabel.ifBlank { place.sourceUrl },
-        description = place.description.ifBlank { stringResource(R.string.no_description) },
-        imageHeight = 180.dp,
-        imageCorner = 28.dp,
-        imageUrl = place.imageUrl,
-        showSave = true,
-        isSaved = isSaved,
-        onSaveClick = onSaveClick,
-        onCardClick = onCardClick,
-        cardContainer = true
-    )
 }
 
 @Preview(name = "Discover — Light")
@@ -548,6 +539,8 @@ private fun DiscoverPreview(){
             filters = DiscoverCategories,
             selected = 0,
             onSelect = {},
+            sort = PlaceSort.RECOMMENDED,
+            onSortChange = {},
             sites = previewPlaces,
             contentState = ContentState.Content(previewPlaces),
             savedIds = emptySet(),

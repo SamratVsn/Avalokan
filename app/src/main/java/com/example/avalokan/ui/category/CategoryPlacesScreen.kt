@@ -54,15 +54,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
 import com.example.avalokan.domain.model.Place
+import com.example.avalokan.domain.model.PlaceSort
 import com.example.avalokan.ui.common.ContentState
-import com.example.avalokan.ui.common.placeBadgeLabel
+import com.example.avalokan.ui.common.placeCategoryDefinitionText
 import com.example.avalokan.ui.common.placeCategoryTitle
 import com.example.avalokan.ui.components.DiscoverLoadingState
-import com.example.avalokan.ui.components.HeritageCard
+import com.example.avalokan.ui.components.PlaceComparisonCard
+import com.example.avalokan.ui.components.PlaceSortControl
 import com.example.avalokan.ui.components.StateMessage
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.Spacing
@@ -78,6 +79,7 @@ fun CategoryPlacesScreen(
     val contentState by viewModel.contentState.collectAsState()
     val savedIds by viewModel.savedIds.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
+    val sort by viewModel.sort.collectAsState()
 
     CategoryPlacesContent(
         title = placeCategoryTitle(viewModel.category),
@@ -86,6 +88,8 @@ fun CategoryPlacesScreen(
         contentState = contentState,
         savedIds = savedIds,
         isRefreshing = isRefreshing,
+        sort = sort,
+        onSortChange = viewModel::onSortChange,
         onBackClick = onBackClick,
         onPlaceClick = onPlaceClick,
         onToggleSave = viewModel::toggleSave,
@@ -103,6 +107,8 @@ private fun CategoryPlacesContent(
     contentState: ContentState<List<Place>>,
     savedIds: Set<String>,
     isRefreshing: Boolean,
+    sort: PlaceSort,
+    onSortChange: (PlaceSort) -> Unit,
     onBackClick: () -> Unit,
     onPlaceClick: (String) -> Unit,
     onToggleSave: (String) -> Unit,
@@ -156,6 +162,29 @@ private fun CategoryPlacesContent(
             }
         }
         Spacer(Modifier.height(12.dp))
+        val definition = placeCategoryDefinitionText(category)
+        if (!definition.isNullOrBlank()) {
+            Text(
+                text = definition,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = Spacing.sidePadding)
+            )
+            Spacer(Modifier.height(8.dp))
+        }
+        // Same control, options and persistence as Discover. It only appears
+        // when there is something to order, so an empty category keeps its
+        // single call to action.
+        if (places.isNotEmpty()) {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(horizontal = Spacing.sidePadding),
+                horizontalArrangement = Arrangement.End
+            ) {
+                PlaceSortControl(sort = sort, onSortChange = onSortChange)
+            }
+            Spacer(Modifier.height(8.dp))
+        }
         PullToRefreshBox(
             isRefreshing = isRefreshing,
             onRefresh = onRefresh,
@@ -195,11 +224,11 @@ private fun CategoryPlacesContent(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         items(places, key = { it.id }) { place ->
-                            CategoryPlaceCard(
+                            PlaceComparisonCard(
                                 place = place,
                                 isSaved = savedIds.contains(place.id),
-                                onToggleSave = { onToggleSave(place.id) },
-                                onPlaceClick = { onPlaceClick(place.id) }
+                                onSaveClick = { onToggleSave(place.id) },
+                                onClick = { onPlaceClick(place.id) }
                             )
                         }
                     }
@@ -209,11 +238,11 @@ private fun CategoryPlacesContent(
                         icon = Icons.Default.ExploreOff,
                         title = stringResource(
                             R.string.nothing_in_category_title,
-                            category.ifBlank { title }
+                            title
                         ),
                         message = stringResource(
                             R.string.nothing_in_category_message,
-                            category.ifBlank { title }
+                            title
                         ),
                         actionLabel = stringResource(R.string.browse_all_places),
                         onAction = onBrowseAllClick
@@ -222,32 +251,6 @@ private fun CategoryPlacesContent(
             }
         }
     }
-}
-
-@Composable
-private fun CategoryPlaceCard(
-    place: Place,
-    isSaved: Boolean,
-    onToggleSave: () -> Unit,
-    onPlaceClick: () -> Unit
-) {
-    HeritageCard(
-        title = place.name,
-        subtitle = place.meta.ifBlank { stringResource(R.string.no_location) }.uppercase(),
-        subtitleStyle = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
-        badge = placeBadgeLabel(place),
-        rating = place.sourcedRating,
-        ratingSource = place.sourceLabel.ifBlank { place.sourceUrl },
-        description = place.description.ifBlank { stringResource(R.string.no_description) },
-        imageHeight = 180.dp,
-        imageCorner = 28.dp,
-        imageUrl = place.imageUrl,
-        showSave = true,
-        isSaved = isSaved,
-        onSaveClick = onToggleSave,
-        onCardClick = onPlaceClick,
-        cardContainer = true
-    )
 }
 
 @Preview
@@ -261,6 +264,8 @@ private fun CategoryPlacesPreview() {
             contentState = ContentState.Empty,
             savedIds = emptySet(),
             isRefreshing = false,
+            sort = PlaceSort.RECOMMENDED,
+            onSortChange = {},
             onBackClick = {},
             onPlaceClick = {},
             onToggleSave = {},

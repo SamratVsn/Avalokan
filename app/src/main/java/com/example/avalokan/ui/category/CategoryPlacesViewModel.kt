@@ -26,6 +26,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.avalokan.data.local.PreferencesStore
 import com.example.avalokan.domain.model.Place
+import com.example.avalokan.domain.model.PlaceSort
+import com.example.avalokan.domain.model.sortedFor
 import com.example.avalokan.domain.repository.PlaceRepository
 import com.example.avalokan.ui.common.ContentState
 import com.example.avalokan.ui.common.asListContentState
@@ -36,8 +38,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -55,10 +57,21 @@ import javax.inject.Inject
 class CategoryPlacesViewModel @Inject constructor(
     private val placeRepository: PlaceRepository,
     private val userPreferences: PreferencesStore,
-    savedStateHandle: SavedStateHandle,
+    private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     val category: String =
         savedStateHandle.get<String>(NavDestination.CategoryPlaces.ARG).orEmpty()
+
+    /** Same comparison order as Discover; persisted while the entry survives. */
+    private val _sort = MutableStateFlow(
+        PlaceSort.fromName(savedStateHandle.get<String>(SORT_KEY))
+    )
+    val sort: StateFlow<PlaceSort> = _sort.asStateFlow()
+
+    fun onSortChange(value: PlaceSort) {
+        _sort.value = value
+        savedStateHandle[SORT_KEY] = value.name
+    }
 
     /**
      * Bumping this restarts the repository stream. The initial value starts the
@@ -74,12 +87,13 @@ class CategoryPlacesViewModel @Inject constructor(
             ContentState.Loading
         )
 
-    val places: StateFlow<List<Place>> = contentState
-        .map { state ->
-            state.dataOrNull.orEmpty().filter {
+    val places: StateFlow<List<Place>> = combine(contentState, _sort) { state, sort ->
+        state.dataOrNull.orEmpty()
+            .filter {
                 category.isNotBlank() && it.category.equals(category, ignoreCase = true)
             }
-        }
+            .sortedFor(sort)
+    }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val savedIds: StateFlow<Set<String>> = userPreferences.savedPlaceIds
@@ -112,5 +126,9 @@ class CategoryPlacesViewModel @Inject constructor(
         val current = savedIds.value.toMutableSet()
         if (!current.add(placeId)) current.remove(placeId)
         viewModelScope.launch { userPreferences.setSavedPlaceIds(current) }
+    }
+
+    private companion object {
+        const val SORT_KEY = "category_places_sort"
     }
 }

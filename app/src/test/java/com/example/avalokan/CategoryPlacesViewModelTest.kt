@@ -23,6 +23,8 @@ package com.example.avalokan
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
+import com.example.avalokan.domain.model.Place
+import com.example.avalokan.domain.model.PlaceSort
 import com.example.avalokan.ui.category.CategoryPlacesViewModel
 import com.example.avalokan.ui.common.ContentState
 import com.example.avalokan.ui.navigation.NavDestination
@@ -140,5 +142,61 @@ class CategoryPlacesViewModelTest {
             assertTrue(awaitItem() is ContentState.Error)
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    @Test
+    fun `sort only reorders the category's own places`() = runTest {
+        val places = listOf(
+            Place(
+                id = "zeta",
+                name = "Zeta Temple",
+                description = "",
+                category = "Historical",
+                district = "Bhaktapur"
+            ),
+            Place(
+                id = "alpha",
+                name = "Alpha Palace",
+                description = "",
+                category = "Historical",
+                district = "Kathmandu"
+            ),
+            Place(
+                id = "cultural",
+                name = "Cultural Place",
+                description = "",
+                category = "Cultural"
+            )
+        )
+        val vm = viewModel("Historical", FakePlaceRepository(places))
+        vm.places.test {
+            skipItems(1)
+            assertEquals(listOf("zeta", "alpha"), awaitItem().map { it.id })
+            vm.onSortChange(PlaceSort.NAME)
+            assertEquals(listOf("alpha", "zeta"), awaitItem().map { it.id })
+            vm.onSortChange(PlaceSort.REGION)
+            assertEquals(listOf("zeta", "alpha"), awaitItem().map { it.id })
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `sort survives a new view model sharing the same saved state`() = runTest {
+        val handle = SavedStateHandle(
+            mapOf(NavDestination.CategoryPlaces.ARG to "Historical")
+        )
+        val first = CategoryPlacesViewModel(
+            FakePlaceRepository(),
+            FakePreferencesStore(),
+            handle
+        )
+        first.onSortChange(PlaceSort.NAME)
+
+        val restored = CategoryPlacesViewModel(
+            FakePlaceRepository(),
+            FakePreferencesStore(),
+            handle
+        )
+        assertEquals(PlaceSort.NAME, restored.sort.value)
     }
 }

@@ -172,7 +172,23 @@ data class Place(
         return result.distinct().take(limit)
     }
 
-    private val isUnescoListed: Boolean
+    /** District and province, in that order, when either is recorded. */
+    val regionLabel: String
+        get() = listOf(district, province)
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .distinct()
+            .joinToString(" • ")
+
+    /**
+     * The short line a comparison card shows. Significance is editorial context
+     * written for exactly this purpose; description is the fallback for older
+     * documents that predate the field.
+     */
+    val comparisonLine: String
+        get() = significance.trim().ifBlank { description.trim() }
+
+    val isUnescoListed: Boolean
         get() = unescoStatus.contains("world heritage", ignoreCase = true) ||
             tags.any { it.contains("UNESCO", ignoreCase = true) }
 }

@@ -21,11 +21,14 @@
 
 package com.example.avalokan.ui.discover
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.avalokan.data.local.PreferencesStore
 import com.example.avalokan.domain.classification.HeritageGroup
 import com.example.avalokan.domain.model.Place
+import com.example.avalokan.domain.model.PlaceSort
+import com.example.avalokan.domain.model.sortedFor
 import com.example.avalokan.domain.repository.PlaceRepository
 import com.example.avalokan.ui.common.ContentState
 import com.example.avalokan.ui.common.asListContentState
@@ -49,13 +52,28 @@ val DiscoverCategories: List<String> =
 @HiltViewModel
 class DiscoverViewModel @Inject constructor(
     private val placeRepository: PlaceRepository,
-    private val userPreferences: PreferencesStore
+    private val userPreferences: PreferencesStore,
+    private val savedStateHandle: SavedStateHandle = SavedStateHandle()
 ) : ViewModel() {
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query.asStateFlow()
 
     private val _selectedCategory = MutableStateFlow(0)
     val selectedCategory: StateFlow<Int> = _selectedCategory.asStateFlow()
+
+    /**
+     * Comparison order, kept in [SavedStateHandle] so it survives configuration
+     * changes and process death. "Recommended" is always available as a reset.
+     */
+    private val _sort = MutableStateFlow(
+        PlaceSort.fromName(savedStateHandle.get<String>(SORT_KEY))
+    )
+    val sort: StateFlow<PlaceSort> = _sort.asStateFlow()
+
+    fun onSortChange(value: PlaceSort) {
+        _sort.value = value
+        savedStateHandle[SORT_KEY] = value.name
+    }
 
     /**
      * Bumping this restarts the repository stream. The initial value starts the
@@ -93,20 +111,22 @@ class DiscoverViewModel @Inject constructor(
     private val discoverState: StateFlow<DiscoverState> = combine(
         contentState,
         _query,
-        _selectedCategory
-    ) { content, query, selected ->
+        _selectedCategory,
+        _sort
+    ) { content, query, selected, sort ->
         val remote = content.dataOrNull.orEmpty()
         val categoryKey = DiscoverCategories.getOrElse(selected) { "All" }
         val typologyGroup = HeritageGroup.fromKey(categoryKey)
         DiscoverState(
-            // Ranked: name matches first, then location, classification and
-            // description. sortedBy is stable, so curated order is kept within
-            // each tier (and for a blank query, where every rank is equal).
+            // Search relevance decides membership order first; the chosen sort
+            // then reorders the matches. sortedBy is stable, so curated order is
+            // kept within each relevance tier when "Recommended" is active.
             sites = remote
                 .filter { site -> site.matches(typologyGroup) }
                 .mapNotNull { site -> site.searchRank(query)?.let { rank -> site to rank } }
                 .sortedBy { (_, rank) -> rank }
-                .map { (site, _) -> site },
+                .map { (site, _) -> site }
+                .sortedFor(sort),
             availableCategories = DiscoverCategories.filter { filter ->
                 val group = HeritageGroup.fromKey(filter)
                 filter == "All" || remote.any { it.matches(group) }
@@ -184,5 +204,9 @@ class DiscoverViewModel @Inject constructor(
         } else true
         viewModelScope.launch { userPreferences.setSavedPlaceIds(current) }
         return nowSaved
+    }
+
+    private companion object {
+        const val SORT_KEY = "discover_sort"
     }
 }
