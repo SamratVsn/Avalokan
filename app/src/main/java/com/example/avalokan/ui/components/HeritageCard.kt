@@ -21,7 +21,6 @@
 
 package com.example.avalokan.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,7 +37,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
-import androidx.compose.material.icons.filled.Landscape
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -49,14 +47,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.example.avalokan.R
 import com.example.avalokan.ui.theme.BadgeShape
 
@@ -72,6 +69,8 @@ fun HeritageCard(
     descriptionLines: Int = 3,
     subtitleStyle: TextStyle? = null,
     imageUrl: String? = null,
+    imageCaption: String? = null,
+    imageCredit: String? = null,
     cardWidth: Dp? = null,
     imageHeight: Dp = 110.dp,
     imageCorner: Dp = 20.dp,
@@ -83,7 +82,11 @@ fun HeritageCard(
     modifier: Modifier = Modifier
 ) {
     val widthMod = if (cardWidth != null) Modifier.width(cardWidth) else Modifier
-    val clickMod = if (onCardClick != null) Modifier.clickable(onClick = onCardClick) else Modifier
+    val clickMod = if (onCardClick != null) {
+        Modifier.clickable(role = Role.Button, onClick = onCardClick)
+    } else {
+        Modifier
+    }
     // Unsourced ratings are hidden rather than presented as a quality signal.
     val shownRating = rating?.takeIf { it.isNotBlank() && !ratingSource.isNullOrBlank() }
     if (cardContainer) {
@@ -95,10 +98,12 @@ fun HeritageCard(
             )
         ) {
             Column {
-                HeritageImage(
+                HeritageImageBlock(
                     imageHeight = imageHeight,
                     title = title,
                     imageUrl = imageUrl,
+                    imageCaption = imageCaption,
+                    imageCredit = imageCredit,
                     showSave = showSave,
                     isSaved = isSaved,
                     onSaveClick = onSaveClick
@@ -125,10 +130,12 @@ fun HeritageCard(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Card(shape = RoundedCornerShape(imageCorner)) {
-                HeritageImage(
+                HeritageImageBlock(
                     imageHeight = imageHeight,
                     title = title,
                     imageUrl = imageUrl,
+                    imageCaption = imageCaption,
+                    imageCredit = imageCredit,
                     showSave = showSave,
                     isSaved = isSaved,
                     onSaveClick = onSaveClick
@@ -148,42 +155,33 @@ fun HeritageCard(
 }
 
 @Composable
-private fun HeritageImage(
+private fun HeritageImageBlock(
     imageHeight: Dp,
     title: String,
     imageUrl: String?,
+    imageCaption: String?,
+    imageCredit: String?,
     showSave: Boolean,
     isSaved: Boolean,
     onSaveClick: (() -> Unit)?
 ) {
-    // AsyncImage fills this exact container when the Data layer supplies a URL.
-    Box(
-        modifier = Modifier.fillMaxWidth().height(imageHeight)
-            .background(MaterialTheme.colorScheme.surfaceVariant),
-        contentAlignment = Alignment.Center
-    ) {
-        if (imageUrl != null) {
-            AsyncImage(
-                model = imageUrl,
-                contentDescription = title,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
-        } else {
-            Icon(
-                Icons.Default.Landscape,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+    // The container reserves the image height before Coil resolves, so the card
+    // never grows or jumps when the photo arrives.
+    Box(modifier = Modifier.fillMaxWidth().height(imageHeight)) {
+        HeritageImage(
+            imageUrl = imageUrl,
+            contentDescription = title,
+            caption = imageCaption,
+            credit = imageCredit,
+            modifier = Modifier.fillMaxSize()
+        )
         if (showSave && onSaveClick != null) {
             PhotoOverlayIconButton(
                 icon = if (isSaved) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                contentDescription = if (isSaved) {
-                    "Remove $title from collection"
-                } else {
-                    "Save $title to collection"
-                },
+                contentDescription = stringResource(
+                    if (isSaved) R.string.remove_saved_place else R.string.save_place,
+                    title
+                ),
                 onClick = onSaveClick,
                 modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
                 buttonSize = 28.dp,

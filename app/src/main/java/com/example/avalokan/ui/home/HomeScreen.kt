@@ -38,7 +38,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -50,7 +49,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -61,7 +59,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.pluralStringResource
@@ -79,6 +76,8 @@ import com.example.avalokan.ui.common.ContentState
 import com.example.avalokan.ui.common.dataOrNull
 import com.example.avalokan.ui.common.placeBadgeLabel
 import com.example.avalokan.ui.common.placeCategoryTitle
+import com.example.avalokan.ui.components.CircleIconButton
+import com.example.avalokan.ui.components.HeritageImage
 import com.example.avalokan.ui.components.HomeLoadingState
 import com.example.avalokan.ui.components.SkeletonBlock
 import com.example.avalokan.ui.components.StateMessage
@@ -224,23 +223,16 @@ private fun TopIcons(modifier: Modifier = Modifier) {
                 color = MaterialTheme.colorScheme.primary
             )
         }
-        IconButton(
+        CircleIconButton(
+            icon = Icons.Default.Notifications,
+            contentDescription = stringResource(R.string.notifications),
             onClick = { /* TODO: notifications */ },
-            modifier = Modifier
-                .size(36.dp)
-                .shadow(4.dp, CircleShape)
-                .background(
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    shape = CircleShape
-                )
-        ) {
-            Icon(
-                imageVector = Icons.Default.Notifications,
-                contentDescription = stringResource(R.string.notifications),
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(16.dp)
-            )
-        }
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.primary,
+            containerSize = 36.dp,
+            iconSize = 16.dp,
+            elevation = 4.dp
+        )
     }
 }
 
@@ -258,28 +250,13 @@ private fun StoryCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Box(modifier = Modifier.fillMaxWidth().height(300.dp)) {
-            // Hero image from the story stream; gradient placeholder until it loads.
-            Box(
+            // Reserved hero space: the image crossfades over a neutral surface,
+            // so the card never changes size while the story loads.
+            HeritageImage(
+                imageUrl = story?.imageUrl,
+                contentDescription = story?.title,
                 modifier = Modifier.fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(
-                                MaterialTheme.colorScheme.primary,
-                                MaterialTheme.colorScheme.primaryContainer
-                            )
-                        )
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                if (story?.imageUrl != null) {
-                    coil.compose.AsyncImage(
-                        model = story.imageUrl,
-                        contentDescription = story.title,
-                        contentScale = androidx.compose.ui.layout.ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-            }
+            )
             // Dark scrim so badge/title/button stay legible over any future photo
             Box(
                 modifier = Modifier.fillMaxSize()

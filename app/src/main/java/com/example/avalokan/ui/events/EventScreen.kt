@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -40,8 +41,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.EventBusy
-import androidx.compose.material.icons.filled.Landscape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -58,7 +59,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -67,7 +67,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
 import com.example.avalokan.domain.classification.EventKind
@@ -85,6 +84,8 @@ import com.example.avalokan.ui.common.eventPriceValue
 import com.example.avalokan.ui.common.openUrlInBrowser
 import com.example.avalokan.ui.common.scopeLabelRes
 import com.example.avalokan.ui.components.EventsLoadingState
+import com.example.avalokan.ui.components.HeritageImage
+import com.example.avalokan.ui.components.HeritageImageRatio
 import com.example.avalokan.ui.components.StateMessage
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
@@ -94,8 +95,6 @@ import com.example.avalokan.ui.theme.PrimaryGreenDark
 import com.example.avalokan.ui.theme.SageSoft
 import com.example.avalokan.ui.theme.Spacing
 import com.example.avalokan.ui.theme.StandardCardShape
-import com.example.avalokan.ui.theme.Terracotta
-import com.example.avalokan.ui.theme.TextOnDark
 
 @Composable
 fun EventScreen(
@@ -258,37 +257,28 @@ private fun FeaturedEvent(
             colors = CardDefaults.cardColors(containerColor = Color.Transparent)
         ) {
             Column {
-                // Image container; AsyncImage fills it when the event has a URL.
+                // Reserved image space; Coil crossfades the photo in place.
                 Box(
-                    modifier = Modifier.fillMaxWidth().height(180.dp)
-                        .background(SageSoft)
+                    modifier = Modifier.fillMaxWidth()
+                        .aspectRatio(HeritageImageRatio.CARD)
                         .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (event.imageUrl != null) {
-                        AsyncImage(
-                            model = event.imageUrl,
-                            contentDescription = event.title,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    } else {
-                        Icon(
-                            Icons.Default.Landscape,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(32.dp)
-                        )
-                    }
+                    HeritageImage(
+                        imageUrl = event.imageUrl,
+                        contentDescription = event.title,
+                        fallbackIcon = Icons.Default.CalendarMonth,
+                        modifier = Modifier.fillMaxSize()
+                    )
                     Surface(
                         modifier = Modifier.align(Alignment.TopStart).padding(12.dp),
                         shape = BadgeShape,
-                        color = Terracotta
+                        color = MaterialTheme.colorScheme.tertiary
                     ) {
                         Text(
                             text = "COMING SOON",
                             style = MaterialTheme.typography.labelSmall,
-                            color = TextOnDark,
+                            color = MaterialTheme.colorScheme.onTertiary,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         )
                     }
@@ -424,26 +414,12 @@ private fun EventCards(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Card(shape = StandardCardShape, modifier = Modifier.size(56.dp)) {
-                Box(
-                    modifier = Modifier.fillMaxSize().background(SageSoft),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (event.imageUrl != null) {
-                        AsyncImage(
-                            model = event.imageUrl,
-                            contentDescription = event.title,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    } else {
-                        Icon(
-                            Icons.Default.Landscape,
-                            null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
+                HeritageImage(
+                    imageUrl = event.imageUrl,
+                    contentDescription = event.title,
+                    fallbackIcon = Icons.Default.CalendarMonth,
+                    modifier = Modifier.fillMaxSize()
+                )
             }
             Column(
                 modifier = Modifier.weight(1f),

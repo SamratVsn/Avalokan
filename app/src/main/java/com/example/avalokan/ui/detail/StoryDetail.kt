@@ -91,6 +91,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import com.example.avalokan.R
 import com.example.avalokan.domain.model.Story
+import com.example.avalokan.ui.components.HeritageImage
 import com.example.avalokan.ui.components.PhotoOverlayIconButton
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.Spacing
@@ -169,30 +170,15 @@ private fun StoryDetailContent(
                 contentPadding = PaddingValues(bottom = 32.dp)
             ) {
                 item {
-                    // 350dp hero with back overlay (AsyncImage when the story has one)
+                    // Reserved hero space; the image crossfades over a neutral
+                    // surface and falls back to a deliberate icon.
                     Box(modifier = Modifier.fillMaxWidth().height(350.dp)) {
-                        Box(
+                        HeritageImage(
+                            imageUrl = story.imageUrl,
+                            contentDescription = shareTitle,
+                            fallbackIcon = Icons.Default.Person,
                             modifier = Modifier.fillMaxSize()
-                                .background(MaterialTheme.colorScheme.surfaceVariant),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            val heroImage = story.imageUrl
-                            if (heroImage != null) {
-                                coil.compose.AsyncImage(
-                                    model = heroImage,
-                                    contentDescription = shareTitle,
-                                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize()
-                                )
-                            } else {
-                                Icon(
-                                    Icons.Default.Person,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(48.dp)
-                                )
-                            }
-                        }
+                        )
                     }
                 }
                 item {
