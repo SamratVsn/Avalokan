@@ -35,12 +35,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ExploreOff
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -61,6 +59,7 @@ import com.example.avalokan.domain.model.PlaceSort
 import com.example.avalokan.ui.common.ContentState
 import com.example.avalokan.ui.common.placeCategoryDefinitionText
 import com.example.avalokan.ui.common.placeCategoryTitle
+import com.example.avalokan.ui.components.CircleIconButton
 import com.example.avalokan.ui.components.DiscoverLoadingState
 import com.example.avalokan.ui.components.PlaceComparisonCard
 import com.example.avalokan.ui.components.PlaceSortControl
@@ -127,21 +126,13 @@ private fun CategoryPlacesContent(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            IconButton(
+            CircleIconButton(
+                icon = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = stringResource(R.string.back),
                 onClick = onBackClick,
-                modifier = Modifier.size(36.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = CircleShape
-                    )
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.back),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(16.dp)
-                )
-            }
+                containerSize = 36.dp,
+                iconSize = 16.dp
+            )
             Column {
                 Text(
                     text = title,

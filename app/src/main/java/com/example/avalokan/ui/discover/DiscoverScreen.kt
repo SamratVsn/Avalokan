@@ -266,8 +266,7 @@ private fun SearchField(
         trailingIcon = {
             if (query.isNotEmpty()) {
                 IconButton(
-                    onClick = { onQuery("") },
-                    modifier = Modifier.size(36.dp)
+                    onClick = { onQuery("") }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,

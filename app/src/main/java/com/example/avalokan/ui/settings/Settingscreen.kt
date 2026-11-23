@@ -43,7 +43,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -65,7 +64,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -97,6 +95,7 @@ import com.example.avalokan.ui.theme.DangerBg
 import com.example.avalokan.ui.theme.DangerRed
 import com.example.avalokan.ui.theme.NeutralBg
 import com.example.avalokan.ui.theme.PrimaryGreen
+import com.example.avalokan.ui.components.CircleIconButton
 import com.example.avalokan.ui.theme.SageSoft
 import com.example.avalokan.ui.theme.SandContainer
 import com.example.avalokan.ui.theme.Spacing
@@ -203,21 +202,13 @@ private fun SettingsContent(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            IconButton(
+            CircleIconButton(
+                icon = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = stringResource(R.string.back),
                 onClick = onBackClick,
-                modifier = Modifier.size(36.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = CircleShape
-                    )
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(16.dp)
-                )
-            }
+                containerSize = 36.dp,
+                iconSize = 16.dp
+            )
             Text(
                 text = stringResource(R.string.settings),
                 style = MaterialTheme.typography.titleMedium,

@@ -244,7 +244,10 @@ private fun HeritageTexts(
                 Spacer(Modifier.weight(1f, fill = false))
                 Icon(
                     Icons.Default.Star,
-                    contentDescription = "Rated $rating out of 5",
+                    contentDescription = stringResource(
+                        R.string.rating_content_description,
+                        rating
+                    ),
                     tint = MaterialTheme.colorScheme.tertiary,
                     modifier = Modifier.size(14.dp)
                 )

@@ -96,7 +96,7 @@ fun <T> DetailBody(
 fun BoxScope.DetailBackButton(onBackClick: () -> Unit) {
     PhotoOverlayIconButton(
         icon = Icons.AutoMirrored.Filled.ArrowBack,
-        contentDescription = "Back",
+        contentDescription = stringResource(R.string.back),
         onClick = onBackClick,
         modifier = Modifier.align(Alignment.TopStart)
             .detailBackButtonPadding()

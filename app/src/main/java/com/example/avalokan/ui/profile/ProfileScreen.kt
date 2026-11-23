@@ -54,7 +54,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -66,7 +65,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -74,10 +72,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
 import com.example.avalokan.R
 import com.example.avalokan.domain.model.Event
 import com.example.avalokan.domain.model.Place
+import com.example.avalokan.ui.components.CircleIconButton
+import com.example.avalokan.ui.components.HeritageAvatar
+import com.example.avalokan.ui.components.HeritageImage
 import com.example.avalokan.ui.components.PlaceComparisonCard
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.Spacing
@@ -170,21 +170,13 @@ private fun ProfileContent(
                 style = MaterialTheme.typography.headlineMedium.copy(fontSize = 24.sp),
                 fontWeight = FontWeight.Bold
             )
-            IconButton(
+            CircleIconButton(
+                icon = Icons.Default.Settings,
+                contentDescription = stringResource(R.string.settings),
                 onClick = onSettingsClick,
-                modifier = Modifier.size(40.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = CircleShape
-                    )
-            ) {
-                Icon(
-                    Icons.Default.Settings,
-                    contentDescription = stringResource(R.string.settings),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
+                containerSize = 40.dp,
+                iconSize = 18.dp
+            )
         }
         UserSection(
             userName = userName,
@@ -258,25 +250,13 @@ private fun UserSection(
                 shadowElevation = 4.dp,
                 border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
             ) {
-                if (avatarUri != null) {
-                    AsyncImage(
-                        model = avatarUri,
-                        contentDescription = stringResource(R.string.profile_photo),
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.size(72.dp).clip(CircleShape)
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier.size(72.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = userName.firstOrNull()?.uppercase() ?: "G",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
+                HeritageAvatar(
+                    imageUrl = avatarUri,
+                    fallbackText = userName.firstOrNull()?.uppercase() ?: "G",
+                    contentDescription = stringResource(R.string.profile_photo),
+                    modifier = Modifier.size(72.dp),
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
             }
             Spacer(Modifier.height(12.dp))
             Text(
@@ -469,24 +449,15 @@ private fun FavoriteEventRow(event: Event, onClick: () -> Unit) {
             Box(
                 modifier = Modifier
                     .size(56.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                    .clip(RoundedCornerShape(16.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                if (event.imageUrl != null) {
-                    AsyncImage(
-                        model = event.imageUrl,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else {
-                    Icon(
-                        Icons.Default.CalendarMonth,
-                        null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                HeritageImage(
+                    imageUrl = event.imageUrl,
+                    contentDescription = event.title,
+                    fallbackIcon = Icons.Default.CalendarMonth,
+                    modifier = Modifier.fillMaxSize()
+                )
             }
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(

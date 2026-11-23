@@ -49,7 +49,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -65,17 +64,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
 import com.example.avalokan.R
 import com.example.avalokan.ui.common.KeyboardBackHandling
 import com.example.avalokan.ui.common.dismissKeyboardOnTap
 import com.example.avalokan.ui.common.rememberKeyboardDismisser
+import com.example.avalokan.ui.components.CircleIconButton
+import com.example.avalokan.ui.components.HeritageAvatar
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.Spacing
 import com.example.avalokan.ui.theme.StandardButtonShape
@@ -147,24 +146,16 @@ private fun EditProfileContent(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            IconButton(
+            CircleIconButton(
+                icon = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = stringResource(R.string.back),
                 onClick = {
                     dismissKeyboard()
                     onBackClick()
                 },
-                modifier = Modifier.size(36.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = CircleShape
-                    )
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(16.dp)
-                )
-            }
+                containerSize = 36.dp,
+                iconSize = 16.dp
+            )
             Text(
                 text = stringResource(R.string.editProfile),
                 style = MaterialTheme.typography.titleMedium,
@@ -177,29 +168,12 @@ private fun EditProfileContent(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Box(contentAlignment = Alignment.BottomEnd) {
-                if (avatarUri != null) {
-                    AsyncImage(
-                        model = avatarUri,
-                        contentDescription = "Profile photo",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.size(96.dp).clip(CircleShape)
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier.size(96.dp)
-                            .background(
-                                MaterialTheme.colorScheme.primaryContainer,
-                                CircleShape
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = userName.firstOrNull()?.uppercase() ?: "G",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-                }
+                HeritageAvatar(
+                    imageUrl = avatarUri,
+                    fallbackText = userName.firstOrNull()?.uppercase() ?: "G",
+                    contentDescription = stringResource(R.string.profile_photo),
+                    modifier = Modifier.size(96.dp)
+                )
                 androidx.compose.material3.Surface(
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.primary,
@@ -208,7 +182,7 @@ private fun EditProfileContent(
                 ) {
                     Icon(
                         Icons.Default.Edit,
-                        contentDescription = "Change profile photo",
+                        contentDescription = stringResource(R.string.change_profile_photo),
                         modifier = Modifier.padding(6.dp).size(14.dp)
                     )
                 }

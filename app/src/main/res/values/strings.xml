@@ -61,6 +61,9 @@
     <string name="browse_events">Browse events</string>
     <string name="discover_places">Discover places</string>
     <string name="back">Back</string>
+    <string name="share">Share</string>
+    <string name="change_profile_photo">Change profile photo</string>
+    <string name="rating_content_description">Rated %1$s out of 5</string>
 
     <!-- Category listing -->
     <string name="category_historical">Historical Gems</string>

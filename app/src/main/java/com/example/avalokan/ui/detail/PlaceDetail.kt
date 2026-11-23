@@ -54,7 +54,6 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material.icons.filled.Directions
-import androidx.compose.material.icons.filled.Landscape
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Schedule
@@ -84,7 +83,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -92,13 +90,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
 import com.example.avalokan.R
 import com.example.avalokan.domain.classification.PlaceBadge
 import com.example.avalokan.domain.model.Place
 import com.example.avalokan.domain.model.Story
 import com.example.avalokan.ui.common.dataOrNull
 import com.example.avalokan.ui.common.placeBadgeLabelRes
+import com.example.avalokan.ui.components.HeritageImage
 import com.example.avalokan.ui.components.PhotoOverlayIconButton
 import com.example.avalokan.ui.theme.AvalokanTheme
 import com.example.avalokan.ui.theme.BadgeShape
@@ -350,27 +348,11 @@ private fun PlaceDetailContent(
             ) {
                 item {
                     Box(modifier = Modifier.fillMaxWidth().height(300.dp)) {
-                        Box(
+                        HeritageImage(
+                            imageUrl = place.imageUrl,
+                            contentDescription = place.name,
                             modifier = Modifier.fillMaxSize()
-                                .background(MaterialTheme.colorScheme.surfaceVariant),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (place.imageUrl != null) {
-                                AsyncImage(
-                                    model = place.imageUrl,
-                                    contentDescription = place.name,
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize()
-                                )
-                            } else {
-                                Icon(
-                                    Icons.Default.Landscape,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(48.dp)
-                                )
-                            }
-                        }
+                        )
                     }
                 }
 
@@ -751,24 +733,15 @@ private fun RelatedStoryCard(story: Story, onClick: () -> Unit) {
         ) {
             Box(
                 modifier = Modifier.size(76.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                    .clip(RoundedCornerShape(16.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                if (story.imageUrl != null) {
-                    AsyncImage(
-                        model = story.imageUrl,
-                        contentDescription = story.title,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else {
-                    Icon(
-                        Icons.Default.AutoStories,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                HeritageImage(
+                    imageUrl = story.imageUrl,
+                    contentDescription = story.title,
+                    fallbackIcon = Icons.Default.AutoStories,
+                    modifier = Modifier.fillMaxSize()
+                )
             }
             Column(
                 modifier = Modifier.weight(1f),
@@ -811,24 +784,14 @@ private fun RelatedPlaceCard(place: Place, onClick: () -> Unit) {
     ) {
         Column {
             Box(
-                modifier = Modifier.fillMaxWidth().height(112.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                modifier = Modifier.fillMaxWidth().height(112.dp),
                 contentAlignment = Alignment.Center
             ) {
-                if (place.imageUrl != null) {
-                    AsyncImage(
-                        model = place.imageUrl,
-                        contentDescription = place.name,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else {
-                    Icon(
-                        Icons.Default.Landscape,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                HeritageImage(
+                    imageUrl = place.imageUrl,
+                    contentDescription = place.name,
+                    modifier = Modifier.fillMaxSize()
+                )
             }
             Column(
                 modifier = Modifier.padding(12.dp),

@@ -33,17 +33,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.ExploreOff
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -66,6 +62,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.avalokan.R
 import com.example.avalokan.domain.model.Place
 import com.example.avalokan.ui.common.ContentState
+import com.example.avalokan.ui.components.CircleIconButton
 import com.example.avalokan.ui.components.DiscoverLoadingState
 import com.example.avalokan.ui.components.PlaceComparisonCard
 import com.example.avalokan.ui.components.StateMessage
@@ -134,21 +131,13 @@ private fun SavedPlacesContent(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                IconButton(
+                CircleIconButton(
+                    icon = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.back),
                     onClick = onBackClick,
-                    modifier = Modifier.size(36.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.surfaceVariant,
-                            shape = CircleShape
-                        )
-                ) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.back),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
+                    containerSize = 36.dp,
+                    iconSize = 16.dp
+                )
                 Column {
                     Text(
                         text = stringResource(R.string.savedPlaces),

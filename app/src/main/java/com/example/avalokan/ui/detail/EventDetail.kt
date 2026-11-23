@@ -92,6 +92,7 @@ import com.example.avalokan.ui.common.openUrlInBrowser
 import com.example.avalokan.ui.common.participationLabelRes
 import com.example.avalokan.ui.common.priceLabelRes
 import com.example.avalokan.ui.common.scopeLabelRes
+import com.example.avalokan.ui.components.HeritageImage
 import com.example.avalokan.ui.components.PhotoOverlayIconButton
 import com.example.avalokan.ui.theme.AvalokanTheme
 import kotlinx.coroutines.launch
@@ -245,27 +246,12 @@ private fun EventDetailContent(
                 item {
                     // 350dp hero; the white sheet below slides 30dp over it.
                     Box(modifier = Modifier.fillMaxWidth().height(350.dp)) {
-                        Box(
+                        HeritageImage(
+                            imageUrl = event.imageUrl,
+                            contentDescription = title,
+                            fallbackIcon = Icons.Default.CalendarMonth,
                             modifier = Modifier.fillMaxSize()
-                                .background(MaterialTheme.colorScheme.surfaceVariant),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (event.imageUrl != null) {
-                                coil.compose.AsyncImage(
-                                    model = event.imageUrl,
-                                    contentDescription = title,
-                                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize()
-                                )
-                            } else {
-                                Icon(
-                                    Icons.Default.CalendarMonth,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(48.dp)
-                                )
-                            }
-                        }
+                        )
                         Row(
                             modifier = Modifier.fillMaxWidth()
                                 .statusBarsPadding()
@@ -275,7 +261,7 @@ private fun EventDetailContent(
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 PhotoOverlayIconButton(
                                     icon = Icons.Default.Share,
-                                    contentDescription = "Share",
+                                    contentDescription = stringResource(R.string.share),
                                     onClick = onShareClick
                                 )
                                 PhotoOverlayIconButton(
@@ -376,7 +362,7 @@ private fun EventDetailContent(
             }
             PhotoOverlayIconButton(
                 icon = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
+                contentDescription = stringResource(R.string.back),
                 onClick = onBackClick,
                 modifier = Modifier.align(Alignment.TopStart)
                     .detailBackButtonPadding()
