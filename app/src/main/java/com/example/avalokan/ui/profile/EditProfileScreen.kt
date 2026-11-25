@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.imePadding
@@ -188,7 +189,7 @@ private fun EditProfileContent(
                 }
             }
             Text(
-                text = "Tap the badge to change your photo",
+                text = stringResource(R.string.edit_profile_photo_hint),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -196,7 +197,7 @@ private fun EditProfileContent(
         OutlinedTextField(
             value = userName,
             onValueChange = onNameChange,
-            label = { Text(text = "Display name") },
+            label = { Text(text = stringResource(R.string.display_name)) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
             keyboardActions = KeyboardActions(
@@ -207,7 +208,7 @@ private fun EditProfileContent(
         OutlinedTextField(
             value = bioDraft,
             onValueChange = onBioChange,
-            label = { Text(text = "Bio") },
+            label = { Text(text = stringResource(R.string.bio)) },
             minLines = 3,
             maxLines = 5,
             modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.sidePadding)
@@ -224,9 +225,9 @@ private fun EditProfileContent(
             ),
             modifier = Modifier.fillMaxWidth()
                 .padding(horizontal = Spacing.sidePadding)
-                .height(48.dp)
+                .heightIn(min = 48.dp)
         ) {
-            Text(text = "Save")
+            Text(text = stringResource(R.string.save))
         }
     }
 }

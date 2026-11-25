@@ -38,6 +38,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -314,7 +315,7 @@ private fun PlaceDetailContent(
                     }
                     Button(
                         onClick = onSaveClick,
-                        modifier = Modifier.weight(1f).height(48.dp),
+                        modifier = Modifier.weight(1f).heightIn(min = 48.dp),
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = if (isSaved) {

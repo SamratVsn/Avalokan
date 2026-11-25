@@ -148,7 +148,9 @@ fun AvalokanBottomNavigation(
                     icon = {
                         Icon(
                             painter = painterResource(item.icon),
-                            contentDescription = stringResource(id = item.destination.titleRes),
+                            // The visible label already names this destination;
+                            // repeating it on the icon makes TalkBack say it twice.
+                            contentDescription = null,
                             modifier = Modifier.size(24.dp)
                         )
                     },

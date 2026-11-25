@@ -276,7 +276,7 @@ private fun FeaturedEvent(
                         color = MaterialTheme.colorScheme.tertiary
                     ) {
                         Text(
-                            text = "COMING SOON",
+                            text = stringResource(R.string.event_coming_soon).uppercase(),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onTertiary,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)

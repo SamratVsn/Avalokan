@@ -64,6 +64,11 @@
     <string name="share">Share</string>
     <string name="change_profile_photo">Change profile photo</string>
     <string name="rating_content_description">Rated %1$s out of 5</string>
+    <string name="event_coming_soon">Coming soon</string>
+    <string name="edit_profile_photo_hint">Tap the badge to change your photo</string>
+    <string name="display_name">Display name</string>
+    <string name="bio">Bio</string>
+    <string name="save">Save</string>
 
     <!-- Category listing -->
     <string name="category_historical">Historical Gems</string>

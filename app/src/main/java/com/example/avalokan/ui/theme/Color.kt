@@ -39,9 +39,10 @@ val SandDark = Color(0xFFD5BB8D)
 val Terracotta = Color(0xFFC86F4A)
 val TerracottaDark = Color(0xFF9E4C30)
 
-// Text
+// Text. Secondary text is deliberately darker than the old #66736A so it
+// clears 4.5:1 on every surface it lands on, including tinted containers.
 val TextPrimary = Color(0xFF24312B)
-val TextSecondary = Color(0xFF66736A)
+val TextSecondary = Color(0xFF5A675E)
 val TextOnDark = Color(0xFFF5F3ED)
 val TextMuted = Color(0xFF89948B)
 
@@ -61,7 +62,8 @@ val OnError = Color(0xFFFFFFFF)
 
 // Borders & Dividers
 val GreyBorder = Color(0xFFDFE2D8)
-val OutlineMuted = Color(0xFFB9C4B9)
+// Meets the 3:1 non-text contrast minimum against the light surfaces.
+val OutlineMuted = Color(0xFF7E8B80)
 
 // Brand containers
 val PrimaryContainer = Color(0xFFD8E8D9)

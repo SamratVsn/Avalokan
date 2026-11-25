@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.imePadding
@@ -209,7 +210,7 @@ private fun LoginContent(
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary
             ),
-            modifier = Modifier.fillMaxWidth().height(48.dp)
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
         ) {
             if (isLoading) {
                 CircularProgressIndicator(
@@ -232,7 +233,7 @@ private fun LoginContent(
             },
             enabled = !isLoading,
             shape = StandardButtonShape,
-            modifier = Modifier.fillMaxWidth().height(48.dp)
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
         ) {
             Icon(Icons.Default.Email, contentDescription = null)
             Spacer(Modifier.size(8.dp))

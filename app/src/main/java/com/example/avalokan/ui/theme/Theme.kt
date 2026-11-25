@@ -43,7 +43,7 @@ private val LightColorScheme = lightColorScheme(
     secondaryContainer = SecondaryContainer,
     onSecondaryContainer = TextPrimary,
 
-    tertiary = Terracotta,
+    tertiary = TerracottaDark,
     onTertiary = OnTertiary,
     tertiaryContainer = TerracottaContainer,
     onTertiaryContainer = TerracottaDark,
